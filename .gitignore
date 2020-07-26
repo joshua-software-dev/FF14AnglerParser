@@ -1,0 +1,8 @@
+.idea
+.idea/*
+ff14angler/__pycache__/
+ff14angler/__pycache__/*
+ff14angler/dataClasses/__pycache__/
+ff14angler/dataClasses/__pycache__/*
+ff14angler/fetch/__pycache__/
+ff14angler/fetch/__pycache__/*
