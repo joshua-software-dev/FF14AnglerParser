@@ -12,20 +12,20 @@ from bs4.element import Tag
 timestamp_regex = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
 
 
-@dataclass
+@dataclass(frozen=True)
 class Comment:
-    commenter: str = None
-    text_original: str = None
-    text_translated: str = None
-    timestamp: datetime = None
+    comment_author: str
+    comment_text_original: str
+    comment_text_translated: str
+    comment_timestamp: datetime
 
     def __json__(self):
         _temp = self.__dict__
-        _temp['timestamp'] = str(self.timestamp)
+        _temp['comment_timestamp'] = str(self.comment_timestamp)
         return _temp
 
     @staticmethod
-    def _parse_commenter(info: Tag) -> str:
+    def _parse_author(info: Tag) -> str:
         text = info.text.strip()
         match = timestamp_regex.search(text)
         return text.replace(match[0], '').strip()
@@ -52,16 +52,14 @@ class Comment:
     @classmethod
     def get_comment_from_soup(cls, soup: Tag) -> 'Comment':
         info: Tag = soup.find('span', {'class': 'comment_info'})
-
-        comment = cls()
-        comment.commenter = cls._parse_commenter(info)
-        comment.timestamp = cls._parse_timestamp(info)
-
+        comment_author = cls._parse_author(info)
+        comment_timestamp = cls._parse_timestamp(info)
         info.decompose()
         extracted = soup.extract()
-        comment.text_original = cls._parse_text_original(copy.copy(extracted))
-        comment.text_translated = cls._parse_text_translated(soup)
 
-        return comment
-
-
+        return cls(
+            comment_author=comment_author,
+            comment_text_original=cls._parse_text_original(copy.copy(extracted)),
+            comment_text_translated=cls._parse_text_translated(soup),
+            comment_timestamp=comment_timestamp
+        )

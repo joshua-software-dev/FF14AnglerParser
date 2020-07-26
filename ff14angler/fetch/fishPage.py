@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import time
+
 import lxml
 
 from typing import Dict, List
@@ -45,6 +47,7 @@ class FishPage:
                 comment_continue = driver.find_element_by_css_selector('div.comment_continue a')
                 comment_continue.click()
                 ActionChains(driver).move_to_element(form).perform()
+                time.sleep(1)
             except (NoSuchElementException, StaleElementReferenceException):
                 print('WARNING: Failed to click load more comments after element was found successfully.')
 
@@ -56,7 +59,7 @@ class FishPage:
     async def collect_fish_data(cls, driver: WebDriver, fish_list: Dict[int, str]) -> List[FishData]:
         fish_url_template = 'https://en.ff14angler.com/fish/{}'
         # temp overwrite to avoid spamming website before scraper is finished.
-        fish_list = {1: 'Malm Kelp'}  # TODO: Remove
+        fish_list = {1: 'Malm Kelp', 2: 'Crayfish'}  # TODO: Remove
 
         temp_fish_data_list: List[FishData] = []
 
@@ -64,7 +67,7 @@ class FishPage:
             driver.get(fish_url_template.format(fish_id))
 
             try:
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 60).until(
                     expected_conditions.presence_of_element_located(
                         (By.CLASS_NAME, 'fish_info')
                     )

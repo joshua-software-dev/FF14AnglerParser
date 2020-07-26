@@ -3,7 +3,7 @@
 import re
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -20,43 +20,58 @@ from .weatherPreferences import WeatherPreferences
 
 @dataclass
 class FishData:
-    angler_id: int = None
-    canvas_size: str = None
-    double_hooking_count: str = None
-    fish_item_category: str = None
-    fish_item_level: int = None
-    fish_name: str = None
-    fish_territory: str = None
-    icon_url: str = None
-    large_icon_url: str = None
-    lodestone_url: str = None
-    long_description: str = None
-    patch: str = None
-    short_description: str = None
-
-    fishing_holes: List[FishingHole] = None
-
-    hour_preferences: HourPreferences = None
-
-    weather_preferences: WeatherPreferences = None
-
-    bait_preferences: List[Bait] = None
-
-    comment_list: List[Comment] = None
-
-    desynthesis_list: List[DesynthesisChance] = None
-
-    recipe_list: List[Recipe] = None
-
-    leve_list: List[Leve] = None
+    fish_data_angler_comments: List[Comment]
+    fish_data_angler_id: int
+    fish_data_bait_preferences: List[Bait]
+    fish_data_canvas_size: str
+    fish_data_desynthesis_items: List[DesynthesisChance]
+    fish_data_double_hooking_count: str
+    fish_data_fishing_holes: List[FishingHole]
+    fish_data_hour_preferences: HourPreferences
+    fish_data_icon_url: str
+    fish_data_involved_leves: List[Leve]
+    fish_data_involved_recipes: List[Recipe]
+    fish_data_item_category: str
+    fish_data_large_icon_url: str
+    fish_data_level: int
+    fish_data_lodestone_url: str
+    fish_data_long_description: str
+    fish_data_name: str
+    fish_data_patch: str
+    fish_data_short_description: str
+    fish_data_territory: str
+    fish_data_weather_preferences: WeatherPreferences
 
     def __json__(self):
         return self.__dict__
 
     @staticmethod
+    def _parse_angler_comments(soup: BeautifulSoup) -> List[Comment]:
+        comment_container: Tag = soup.find('div', {'class': 'comment_list'})
+        comment_list_soup: List[Tag] = comment_container.find_all('div', {'class': 'comment'})
+
+        temp_comment_list: Set[Comment] = set()
+
+        for comment in comment_list_soup:
+
+            temp_comment_list.add(Comment.get_comment_from_soup(comment))
+
+        return [c for c in sorted(temp_comment_list, key=lambda x: x.comment_timestamp)]
+
+    @staticmethod
     def _parse_angler_id(data_row1: Tag) -> int:
         span_tag = data_row1.find('span', {'class': 'toggle_timetable'})
         return int(span_tag.attrs['data-fish'])
+
+    @staticmethod
+    def _parse_bait_preferences(soup: BeautifulSoup) -> List[Bait]:
+        temp_bait: List[Bait] = []
+
+        for tr in soup.find_all('tr', {'class': 'bait'}):  # type: Tag
+            bait = Bait.get_bait_from_soup(tr)
+            temp_bait.append(bait)
+
+        return temp_bait
 
     @staticmethod
     def _parse_canvas_size(data_row3: Tag) -> str:
@@ -65,62 +80,23 @@ class FishData:
         return a_tag.attrs['data-text']
 
     @staticmethod
+    def _parse_desynthesis_items(soup: BeautifulSoup) -> List[DesynthesisChance]:
+        """Not every fish has a desynthesis list."""
+        form = soup.find('form', {'name': 'desynthesized_delete'})
+        temp_desynthesis_list: List[DesynthesisChance] = []
+
+        if form:
+            if len(tbody := form.find_all('tbody')) > 1:
+                for tag in tbody[1].find_all('tr'):  # type: Tag
+                    temp_desynthesis_list.append(DesynthesisChance.get_desynthesis_chance_from_soup(tag))
+
+        return temp_desynthesis_list
+
+    @staticmethod
     def _parse_double_hooking_count(data_row3: Tag) -> str:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
         span_tag = div_tag.find('span', {'class': 'clear_icon icon_with_text'})
         return span_tag.attrs['data-text']
-
-    @staticmethod
-    def _parse_fish_item_category(data_row2: Tag) -> str:
-        span1, _, _ = data_row2.find_all('span')  # type: Tag, _, _
-        return span1.text.strip()
-
-    @staticmethod
-    def _parse_fish_item_level(data_row2: Tag) -> int:
-        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
-        item_level, _ = span2.text.strip().split()
-        return int(item_level)
-
-    @staticmethod
-    def _parse_fish_name(data_row1: Tag) -> str:
-        span_tag = data_row1.find('span', {'class': 'name'})
-        return span_tag.text.strip()
-
-    @staticmethod
-    def _parse_fish_territory(data_row2: Tag) -> str:
-        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
-        _, territory = span2.text.strip().split()
-        return territory
-
-    @staticmethod
-    def _parse_icon_url(data_row1: Tag) -> str:
-        div_tag = data_row1.find('div', {'class': 'clear_icon_l'})
-        img_tag = div_tag.find('img')
-        return img_tag.attrs['src']
-
-    @staticmethod
-    def _parse_lodestone_url(data_row2: Tag) -> str:
-        a_tag = data_row2.find('a', {'class', re.compile('lodestone')})
-        return a_tag.attrs['href']
-
-    @staticmethod
-    def _parse_long_description(data_row5: Tag) -> str:
-        for tag in data_row5.find_all('br'):
-            tag.replace_with('\n')
-
-        return data_row5.text.strip()
-
-    @staticmethod
-    def _parse_patch(data_row2: Tag) -> str:
-        _, _, span3 = data_row2.find_all('span')  # type: _, Tag, _
-        return span3.attrs['patch']
-
-    @staticmethod
-    def _parse_short_description(data_row3: Tag) -> str:
-        for tag in data_row3.find_all('br'):
-            tag.replace_with('\n')
-
-        return data_row3.text.strip()
 
     @staticmethod
     def _parse_fishing_holes(soup: BeautifulSoup) -> List[FishingHole]:
@@ -140,47 +116,27 @@ class FishData:
         return HourPreferences.get_hour_preferences_from_soup(soup)
 
     @staticmethod
-    def _parse_weather_preferences(soup: BeautifulSoup) -> WeatherPreferences:
-        return WeatherPreferences.get_weather_preferences_from_soup(soup)
+    def _parse_icon_url(data_row1: Tag) -> str:
+        div_tag = data_row1.find('div', {'class': 'clear_icon_l'})
+        img_tag = div_tag.find('img')
+        return img_tag.attrs['src']
 
     @staticmethod
-    def _parse_bait_preferences(soup: BeautifulSoup) -> List[Bait]:
-        temp_bait: List[Bait] = []
+    def _parse_involved_leves(soup: BeautifulSoup):
+        """Not every fish is used as a leve turn in."""
+        header = soup.find('h3', {'id': 'leve'})
+        temp_leve_list: List[Leve] = []
 
-        for tr in soup.find_all('tr', {'class': 'bait'}):  # type: Tag
-            bait = Bait.get_bait_from_soup(tr)
-            temp_bait.append(bait)
+        if header:
+            table: Tag = header.find_next('table', {'class': 'list'})
+            if table:
+                for tag in table.find_all('tr'):  # type: Tag
+                    temp_leve_list.append(Leve.get_leve_from_soup(tag))
 
-        return temp_bait
-
-    @staticmethod
-    def _parse_comment_list(soup: BeautifulSoup) -> List[Comment]:
-        comment_container: Tag = soup.find('div', {'class': 'comment_list'})
-        comment_list_soup: List[Tag] = comment_container.find_all('div', {'class': 'comment'})
-
-        temp_comment_list: List[Comment] = []
-
-        for comment in comment_list_soup:
-
-            temp_comment_list.append(Comment.get_comment_from_soup(comment))
-
-        return temp_comment_list
+        return temp_leve_list
 
     @staticmethod
-    def _parse_desynthesis_chance_from_soup(soup: BeautifulSoup) -> List[DesynthesisChance]:
-        """Not every fish has a desynthesis list."""
-        form = soup.find('form', {'name': 'desynthesized_delete'})
-        temp_desynthesis_list: List[DesynthesisChance] = []
-
-        if form:
-            if len(tbody := form.find_all('tbody')) > 1:
-                for tag in tbody[1].find_all('tr'):  # type: Tag
-                    temp_desynthesis_list.append(DesynthesisChance.get_desynthesis_chance_from_soup(tag))
-
-        return temp_desynthesis_list
-
-    @staticmethod
-    def _parse_recipe_ingredient_list(soup: BeautifulSoup):
+    def _parse_involved_recipes(soup: BeautifulSoup):
         """Not every fish is an ingredient in a recipe."""
         header = soup.find('h3', {'id': 'receipe'})
         temp_recipe_list: List[Recipe] = []
@@ -194,18 +150,60 @@ class FishData:
         return temp_recipe_list
 
     @staticmethod
-    def _parse_leve_turn_in_list(soup: BeautifulSoup):
-        """Not every fish is used as a leve turn in."""
-        header = soup.find('h3', {'id': 'leve'})
-        temp_leve_list: List[Leve] = []
+    def _parse_item_category(data_row2: Tag) -> str:
+        span1, _, _ = data_row2.find_all('span')  # type: Tag, _, _
+        return span1.text.strip()
 
-        if header:
-            table: Tag = header.find_next('table', {'class': 'list'})
-            if table:
-                for tag in table.find_all('tr'):  # type: Tag
-                    temp_leve_list.append(Leve.get_leve_from_soup(tag))
+    @staticmethod
+    def _parse_large_icon_url(data_row1: Tag) -> str:
+        div_tag = data_row1.find('div', {'class': 'clear_icon_l'})
+        img_tag = div_tag.find('img')
+        return img_tag.attrs['src'].replace('l.png', '.png')
 
-        return temp_leve_list
+    @staticmethod
+    def _parse_fish_level(data_row2: Tag) -> int:
+        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
+        item_level, _ = span2.text.strip().split()
+        return int(item_level)
+
+    @staticmethod
+    def _parse_lodestone_url(data_row2: Tag) -> str:
+        a_tag = data_row2.find('a', {'class', re.compile('lodestone')})
+        return a_tag.attrs['href']
+
+    @staticmethod
+    def _parse_long_description(data_row5: Tag) -> str:
+        for tag in data_row5.find_all('br'):
+            tag.replace_with('\n')
+
+        return data_row5.text.strip()
+
+    @staticmethod
+    def _parse_fish_name(data_row1: Tag) -> str:
+        span_tag = data_row1.find('span', {'class': 'name'})
+        return span_tag.text.strip()
+
+    @staticmethod
+    def _parse_fish_introduced_patch(data_row2: Tag) -> str:
+        _, _, span3 = data_row2.find_all('span')  # type: _, Tag, _
+        return span3.attrs['patch']
+
+    @staticmethod
+    def _parse_short_description(data_row3: Tag) -> str:
+        for tag in data_row3.find_all('br'):
+            tag.replace_with('\n')
+
+        return data_row3.text.strip()
+
+    @staticmethod
+    def _parse_fish_territory(data_row2: Tag) -> str:
+        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
+        _, territory = span2.text.strip().split()
+        return territory
+
+    @staticmethod
+    def _parse_weather_preferences(soup: BeautifulSoup) -> WeatherPreferences:
+        return WeatherPreferences.get_weather_preferences_from_soup(soup)
 
     @classmethod
     def get_fish_data_from_soup(cls, soup: BeautifulSoup) -> 'FishData':
@@ -216,35 +214,26 @@ class FishData:
 
         data_row1, data_row2, data_row3, _, data_row5 = fish_table.find_all('tr')  # type: Tag, Tag, Tag, _, Tag
 
-        fish_data = cls()
-        fish_data.angler_id = cls._parse_angler_id(data_row1)
-        fish_data.canvas_size = cls._parse_canvas_size(data_row3)
-        fish_data.double_hooking_count = cls._parse_double_hooking_count(data_row3)
-        fish_data.fish_item_category = cls._parse_fish_item_category(data_row2)
-        fish_data.fish_item_level = cls._parse_fish_item_level(data_row2)
-        fish_data.fish_name = cls._parse_fish_name(data_row1)
-        fish_data.fish_territory = cls._parse_fish_territory(data_row2)
-        fish_data.large_icon_url = cls._parse_icon_url(data_row1)
-        fish_data.icon_url = fish_data.large_icon_url.replace('l.png', '.png')
-        fish_data.lodestone_url = cls._parse_lodestone_url(data_row2)
-        fish_data.long_description = cls._parse_long_description(data_row5)
-        fish_data.patch = cls._parse_patch(data_row2)
-        fish_data.short_description = cls._parse_short_description(data_row3)
-
-        fish_data.fishing_holes = cls._parse_fishing_holes(soup)
-
-        fish_data.hour_preferences = cls._parse_hour_preferences(soup)
-
-        fish_data.weather_preferences = cls._parse_weather_preferences(soup)
-
-        fish_data.bait_preferences = cls._parse_bait_preferences(soup)
-
-        fish_data.comment_list = cls._parse_comment_list(soup)
-
-        fish_data.desynthesis_list = cls._parse_desynthesis_chance_from_soup(soup)
-
-        fish_data.recipe_list = cls._parse_recipe_ingredient_list(soup)
-
-        fish_data.leve_list = cls._parse_leve_turn_in_list(soup)
-
-        return fish_data
+        return cls(
+            fish_data_angler_comments=cls._parse_angler_comments(soup),
+            fish_data_angler_id=cls._parse_angler_id(data_row1),
+            fish_data_bait_preferences=cls._parse_bait_preferences(soup),
+            fish_data_canvas_size=cls._parse_canvas_size(data_row3),
+            fish_data_desynthesis_items=cls._parse_desynthesis_items(soup),
+            fish_data_double_hooking_count=cls._parse_double_hooking_count(data_row3),
+            fish_data_fishing_holes=cls._parse_fishing_holes(soup),
+            fish_data_hour_preferences=cls._parse_hour_preferences(soup),
+            fish_data_icon_url=cls._parse_large_icon_url(data_row1),
+            fish_data_involved_leves=cls._parse_involved_leves(soup),
+            fish_data_involved_recipes=cls._parse_involved_recipes(soup),
+            fish_data_item_category=cls._parse_item_category(data_row2),
+            fish_data_large_icon_url=cls._parse_icon_url(data_row1),
+            fish_data_level=cls._parse_fish_level(data_row2),
+            fish_data_lodestone_url=cls._parse_lodestone_url(data_row2),
+            fish_data_long_description=cls._parse_long_description(data_row5),
+            fish_data_name=cls._parse_fish_name(data_row1),
+            fish_data_patch=cls._parse_fish_introduced_patch(data_row2),
+            fish_data_short_description=cls._parse_short_description(data_row3),
+            fish_data_territory=cls._parse_fish_territory(data_row2),
+            fish_data_weather_preferences=cls._parse_weather_preferences(soup)
+        )

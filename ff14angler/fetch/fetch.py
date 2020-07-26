@@ -14,9 +14,13 @@ class Fetch:
 
     @staticmethod
     async def main(driver: WebDriver):
-        os.makedirs('angler', exist_ok=True)
         homepage_data = await HomePage.collect_homepage_data(driver)
-        fish_data_list = await FishPage.collect_fish_data(driver, homepage_data['fish'])
+        os.makedirs('data', exist_ok=True)
+        with open('data/home_page.json', 'w+') as fh:
+            json.dump(homepage_data, fh, cls=DunderSerializer, indent=4)
 
-        print(json.dumps(homepage_data, cls=DunderSerializer, indent=4))
-        print(json.dumps(fish_data_list, cls=DunderSerializer, indent=4))
+        fish_data_list = await FishPage.collect_fish_data(driver, homepage_data['fish'])
+        os.makedirs('data/fish_data', exist_ok=True)
+        for count, fish_data in enumerate(fish_data_list):
+            with open(f'data/fish_data/{count + 1}.json', 'w+') as fh:
+                json.dump(fish_data, fh, cls=DunderSerializer, indent=4)
