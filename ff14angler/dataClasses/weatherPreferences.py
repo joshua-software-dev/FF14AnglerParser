@@ -13,6 +13,11 @@ class WeatherPreferences:
     weathers: Dict[str, int] = None
     unique_catches_across_all_weathers: int = None
 
+    def __json__(self):
+        _temp = self.__dict__
+        _temp['weather_percentage'] = self.weather_percentage
+        return _temp
+
     @cached_property
     def weather_percentage(self) -> Dict[str, float]:
         return {k: v / self.unique_catches_across_all_weathers for k, v in self.weathers.items()}

@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 
+import json
 import os
-
-from pprint import pprint
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 
 from .fishPage import FishPage
 from .homePage import HomePage
+from ..dunderSerializer import DunderSerializer
 
 
 class Fetch:
@@ -18,5 +18,5 @@ class Fetch:
         homepage_data = await HomePage.collect_homepage_data(driver)
         fish_data_list = await FishPage.collect_fish_data(driver, homepage_data['fish'])
 
-        pprint(homepage_data)
-        pprint(fish_data_list)
+        print(json.dumps(homepage_data, cls=DunderSerializer, indent=4))
+        print(json.dumps(fish_data_list, cls=DunderSerializer, indent=4))

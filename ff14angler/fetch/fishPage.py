@@ -5,8 +5,9 @@ import lxml
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
@@ -15,6 +16,37 @@ from ..dataClasses.fishData import FishData
 
 
 class FishPage:
+
+    @staticmethod
+    async def load_all_comments(driver: WebDriver):
+        form = driver.find_element_by_css_selector('form.comment_form')
+        ActionChains(driver).move_to_element(form).perform()
+
+        try:
+            WebDriverWait(driver, 10).until(
+                expected_conditions.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'div.comment')
+                )
+            )
+        except TimeoutException:
+            return
+
+        while True:
+            try:
+                WebDriverWait(driver, 3).until(
+                    expected_conditions.presence_of_element_located(
+                        (By.CSS_SELECTOR, 'div.comment_continue a')
+                    )
+                )
+            except TimeoutException:
+                return
+
+            try:
+                comment_continue = driver.find_element_by_css_selector('div.comment_continue a')
+                comment_continue.click()
+                ActionChains(driver).move_to_element(form).perform()
+            except (NoSuchElementException, StaleElementReferenceException):
+                print('WARNING: Failed to click load more comments after element was found successfully.')
 
     @staticmethod
     async def parse_fish_data(html: str) -> FishData:
@@ -40,6 +72,7 @@ class FishPage:
             except TimeoutException:
                 raise
 
+            await cls.load_all_comments(driver)
             fish_data = await cls.parse_fish_data(driver.page_source)
             temp_fish_data_list.append(fish_data)
 

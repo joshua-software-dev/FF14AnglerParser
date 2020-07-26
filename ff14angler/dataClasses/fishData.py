@@ -9,8 +9,12 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from .bait import Bait
+from .comment import Comment
+from .desynthesisChance import DesynthesisChance
 from .fishingHole import FishingHole
 from .hourPreferences import HourPreferences
+from .leve import Leve
+from .recipe import Recipe
 from .weatherPreferences import WeatherPreferences
 
 
@@ -37,6 +41,17 @@ class FishData:
     weather_preferences: WeatherPreferences = None
 
     bait_preferences: List[Bait] = None
+
+    comment_list: List[Comment] = None
+
+    desynthesis_list: List[DesynthesisChance] = None
+
+    recipe_list: List[Recipe] = None
+
+    leve_list: List[Leve] = None
+
+    def __json__(self):
+        return self.__dict__
 
     @staticmethod
     def _parse_angler_id(data_row1: Tag) -> int:
@@ -138,9 +153,67 @@ class FishData:
 
         return temp_bait
 
+    @staticmethod
+    def _parse_comment_list(soup: BeautifulSoup) -> List[Comment]:
+        comment_container: Tag = soup.find('div', {'class': 'comment_list'})
+        comment_list_soup: List[Tag] = comment_container.find_all('div', {'class': 'comment'})
+
+        temp_comment_list: List[Comment] = []
+
+        for comment in comment_list_soup:
+
+            temp_comment_list.append(Comment.get_comment_from_soup(comment))
+
+        return temp_comment_list
+
+    @staticmethod
+    def _parse_desynthesis_chance_from_soup(soup: BeautifulSoup) -> List[DesynthesisChance]:
+        """Not every fish has a desynthesis list."""
+        form = soup.find('form', {'name': 'desynthesized_delete'})
+        temp_desynthesis_list: List[DesynthesisChance] = []
+
+        if form:
+            if len(tbody := form.find_all('tbody')) > 1:
+                for tag in tbody[1].find_all('tr'):  # type: Tag
+                    temp_desynthesis_list.append(DesynthesisChance.get_desynthesis_chance_from_soup(tag))
+
+        return temp_desynthesis_list
+
+    @staticmethod
+    def _parse_recipe_ingredient_list(soup: BeautifulSoup):
+        """Not every fish is an ingredient in a recipe."""
+        header = soup.find('h3', {'id': 'receipe'})
+        temp_recipe_list: List[Recipe] = []
+
+        if header:
+            table: Tag = header.find_next('table', {'class': 'list'})
+            if table:
+                for tag in table.find_all('tr'):  # type: Tag
+                    temp_recipe_list.append(Recipe.get_recipe_from_soup(tag))
+
+        return temp_recipe_list
+
+    @staticmethod
+    def _parse_leve_turn_in_list(soup: BeautifulSoup):
+        """Not every fish is used as a leve turn in."""
+        header = soup.find('h3', {'id': 'leve'})
+        temp_leve_list: List[Leve] = []
+
+        if header:
+            table: Tag = header.find_next('table', {'class': 'list'})
+            if table:
+                for tag in table.find_all('tr'):  # type: Tag
+                    temp_leve_list.append(Leve.get_leve_from_soup(tag))
+
+        return temp_leve_list
+
     @classmethod
     def get_fish_data_from_soup(cls, soup: BeautifulSoup) -> 'FishData':
         fish_table: Tag = soup.find('table', {'class': 'fish_info'})
+
+        if ranking := fish_table.find('span', {'class': 'ranklist note frame'}):
+            ranking.decompose()
+
         data_row1, data_row2, data_row3, _, data_row5 = fish_table.find_all('tr')  # type: Tag, Tag, Tag, _, Tag
 
         fish_data = cls()
@@ -165,5 +238,13 @@ class FishData:
         fish_data.weather_preferences = cls._parse_weather_preferences(soup)
 
         fish_data.bait_preferences = cls._parse_bait_preferences(soup)
+
+        fish_data.comment_list = cls._parse_comment_list(soup)
+
+        fish_data.desynthesis_list = cls._parse_desynthesis_chance_from_soup(soup)
+
+        fish_data.recipe_list = cls._parse_recipe_ingredient_list(soup)
+
+        fish_data.leve_list = cls._parse_leve_turn_in_list(soup)
 
         return fish_data

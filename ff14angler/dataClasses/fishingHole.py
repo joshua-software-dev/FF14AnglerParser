@@ -16,6 +16,9 @@ class FishingHole:
     fishing_hole_x: int = None
     fishing_hole_y: int = None
 
+    def __json__(self):
+        return self.__dict__
+
     @staticmethod
     def _parse_angler_area_id(td3: Tag) -> int:
         href = td3.find('a').attrs['href']

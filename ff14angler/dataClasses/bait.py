@@ -14,6 +14,9 @@ class Bait:
     lodestone_url: str = None
     name: str = None
 
+    def __json__(self):
+        return self.__dict__
+
     @classmethod
     def get_bait_from_soup(cls, soup: Tag) -> 'Bait':
         td1, td2, td3, td4 = soup.find_all('td')  # type: Tag, Tag, Tag, Tag

@@ -54,15 +54,6 @@ class HomePage:
 
         del spot_list[0]  # 0 = 'Select Location'
 
-        with open('angler/bait.json', 'w+') as fh:
-            json.dump(bait_list, fh)
-
-        with open('angler/fish.json', 'w+') as fh:
-            json.dump(fish_list, fh)
-
-        with open('angler/spot.json', 'w+') as fh:
-            json.dump(spot_list, fh)
-
         return {
             'bait': bait_list,
             'fish': fish_list,
