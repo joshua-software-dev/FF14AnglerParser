@@ -19,6 +19,7 @@ from ..dataClasses.fishData import FishData
 
 class FishPage:
 
+    # noinspection SpellCheckingInspection
     @staticmethod
     async def load_all_comments(driver: WebDriver):
         form = driver.find_element_by_css_selector('form.comment_form')
@@ -53,7 +54,7 @@ class FishPage:
 
     @staticmethod
     async def parse_fish_data(html: str) -> FishData:
-        return FishData.get_fish_data_from_soup(BeautifulSoup(html, lxml.__name__))
+        return await FishData.get_fish_data_from_soup(BeautifulSoup(html, lxml.__name__))
 
     @classmethod
     async def collect_fish_data(cls, driver: WebDriver, fish_list: Dict[int, str]) -> List[FishData]:
@@ -69,7 +70,7 @@ class FishPage:
             try:
                 WebDriverWait(driver, 60).until(
                     expected_conditions.presence_of_element_located(
-                        (By.CLASS_NAME, 'fish_info')
+                        (By.CSS_SELECTOR, 'form.comment_form')
                     )
                 )
             except TimeoutException:

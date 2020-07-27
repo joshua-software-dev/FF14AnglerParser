@@ -23,8 +23,9 @@ class WeatherPreferences:
         return {k: v / self.unique_catches_across_all_weathers for k, v in self.weathers.items()}
 
     @staticmethod
-    def _parse_weathers(weather_table: Tag) -> Dict[str, int]:
+    async def _parse_weathers(weather_table: Tag) -> Dict[str, int]:
         temp_weather: Dict[str, int] = dict()
+        # noinspection SpellCheckingInspection
         tbody: Tag = weather_table.find_all('tbody')[1]
 
         for tr in tbody.find_all('tr'):
@@ -38,15 +39,15 @@ class WeatherPreferences:
         return temp_weather
 
     @staticmethod
-    def _parse_unique_catches_across_all_weathers(weather_table: Tag) -> int:
+    async def _parse_unique_catches_across_all_weathers(weather_table: Tag) -> int:
         num_holder = weather_table.find('span', {'class': 'small'})
         return int(num_holder.find('b').text.strip())
 
     @classmethod
-    def get_weather_preferences_from_soup(cls, soup: BeautifulSoup) -> 'WeatherPreferences':
+    async def get_weather_preferences_from_soup(cls, soup: BeautifulSoup) -> 'WeatherPreferences':
         weather_table: Tag = soup.find('table', {'class': 'info_section chart_weather'})
 
         return cls(
-            weathers=cls._parse_weathers(weather_table),
-            unique_catches_across_all_weathers=cls._parse_unique_catches_across_all_weathers(weather_table)
+            weathers=await cls._parse_weathers(weather_table),
+            unique_catches_across_all_weathers=await cls._parse_unique_catches_across_all_weathers(weather_table)
         )

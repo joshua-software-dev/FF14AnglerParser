@@ -25,41 +25,41 @@ class Comment:
         return _temp
 
     @staticmethod
-    def _parse_author(info: Tag) -> str:
+    async def _parse_author(info: Tag) -> str:
         text = info.text.strip()
         match = timestamp_regex.search(text)
         return text.replace(match[0], '').strip()
 
     @staticmethod
-    def _parse_timestamp(info: Tag) -> datetime:
+    async def _parse_timestamp(info: Tag) -> datetime:
         match = timestamp_regex.search(info.text.strip())
         return datetime.strptime(match[0], '%Y-%m-%d %H:%M:%S')
 
     @staticmethod
-    def _parse_text_original(soup: Tag) -> str:
+    async def _parse_text_original(soup: Tag) -> str:
         for tag in soup.find_all('span', {'class': 'comment_translate'}):  # type: Tag
             tag.decompose()
 
         return soup.text.strip()
 
     @staticmethod
-    def _parse_text_translated(soup: Tag) -> str:
+    async def _parse_text_translated(soup: Tag) -> str:
         for tag in soup.find_all('span', {'class': 'comment_origin'}):  # type: Tag
             tag.decompose()
 
         return soup.text.strip()
 
     @classmethod
-    def get_comment_from_soup(cls, soup: Tag) -> 'Comment':
+    async def get_comment_from_soup(cls, soup: Tag) -> 'Comment':
         info: Tag = soup.find('span', {'class': 'comment_info'})
-        comment_author = cls._parse_author(info)
-        comment_timestamp = cls._parse_timestamp(info)
+        comment_author = await cls._parse_author(info)
+        comment_timestamp = await cls._parse_timestamp(info)
         info.decompose()
         extracted = soup.extract()
 
         return cls(
             comment_author=comment_author,
-            comment_text_original=cls._parse_text_original(copy.copy(extracted)),
-            comment_text_translated=cls._parse_text_translated(soup),
+            comment_text_original=await cls._parse_text_original(copy.copy(extracted)),
+            comment_text_translated=await cls._parse_text_translated(soup),
             comment_timestamp=comment_timestamp
         )

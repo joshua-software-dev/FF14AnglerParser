@@ -1,9 +1,13 @@
 .idea/
 .idea/*
+.mypy_cache/
+.mypy_cache/*
 ff14angler/__pycache__/
 ff14angler/__pycache__/*
 ff14angler/dataClasses/__pycache__/
 ff14angler/dataClasses/__pycache__/*
+ff14angler/dataClasses/fishData/__pycache__/
+ff14angler/dataClasses/fishData/__pycache__/*
 ff14angler/fetch/__pycache__/
 ff14angler/fetch/__pycache__/*
 data/

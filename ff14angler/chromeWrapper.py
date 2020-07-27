@@ -6,6 +6,7 @@ from selenium import webdriver
 
 
 class ChromeWrapper:
+    # noinspection SpellCheckingInspection
     """Selenium chromedriver wrapper so I stop making one off selenium setups."""
 
     def __init__(self, download_directory=False, headless=False, manual=False, maximized=True):
@@ -29,6 +30,7 @@ class ChromeWrapper:
         """Setup default chrome config options."""
         options = webdriver.ChromeOptions()
 
+        # noinspection SpellCheckingInspection
         config = {
             'profile.default_content_settings.popups': 0,
             'download.prompt_for_download': 'false',
@@ -49,6 +51,7 @@ class ChromeWrapper:
             options.add_argument('--start-maximized')
 
         options.add_argument('--disable-gpu')
+        # noinspection SpellCheckingInspection
         options.add_experimental_option('prefs', config)
 
         return options
