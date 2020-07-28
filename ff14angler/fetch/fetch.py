@@ -5,7 +5,7 @@ import os
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 
-from .fishPage import FishPage
+from .fishPage import FishPage, FishProvider
 from .homePage import HomePage
 from ..dunderSerializer import DunderSerializer
 
@@ -20,12 +20,12 @@ class Fetch:
         with open('data/home_page.json', 'w+') as fh:
             json.dump(homepage_data, fh, cls=DunderSerializer, indent=4)
 
-        fish_data_list = await FishPage.collect_fish_data(driver, homepage_data['fish'])
+        await FishPage.collect_fish_data(driver)
         os.makedirs('data/fish_data', exist_ok=True)
-        for count, fish_data in enumerate(fish_data_list):
-            with open(f'data/fish_data/{count + 1}.json', 'w+') as fh:
-                json.dump(fish_data, fh, cls=DunderSerializer, indent=4)
+        for fish_data in FishProvider.fish_holder.values():
+            with open(f'data/fish_data/{fish_data.fish_data_angler_fish_id}.json', 'w+') as fh:
+                json.dump(fish_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
 
         # Write again with updates to bait data
         with open('data/home_page.json', 'w+') as fh:
-            json.dump(homepage_data, fh, cls=DunderSerializer, indent=4)
+            json.dump(homepage_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)

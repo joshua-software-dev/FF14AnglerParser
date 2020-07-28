@@ -3,23 +3,27 @@
 import re
 
 from dataclasses import dataclass
-from typing import Optional
 
 from bs4.element import Tag
 
 from ...aiohttpWrapped import AiohttpWrapped
 
 
+number_regex = re.compile(r"[^\d]")
+
+
 @dataclass
 class Leve:
     leve_angler_fish_id: int
     leve_angler_fish_name: str
-    leve_level: int
+    leve_angler_name: str
+    leve_angler_name_jp: str
+    leve_angler_turn_in_count: int
     leve_name: str
-    leve_name_jp: str
-    leve_turn_in_count: int
-    leve_xivapi_item_id: int
-    leve_xivapi_item_name: str
+    leve_id: int
+    leve_item_id: int
+    leve_item_name: str
+    leve_level: int
 
     def __json__(self):
         return self.__dict__
@@ -33,28 +37,22 @@ class Leve:
 
     @classmethod
     async def get_leve_from_soup(cls, soup: Tag) -> 'Leve':
-        td1, td2, td3, td4, _ = soup.find_all('td')  # type: Tag, Tag, Tag, Tag, _
-        angler_fish_name = td3.text.strip()
-        item_id: Optional[int] = None
-        item_name: Optional[str] = None
+        td1, _, td3, td4, _ = soup.find_all('td')  # type: Tag, _, Tag, Tag, _
+        angler_leve_name_jp: str = td1.find('font').text.strip()
+        angler_leve_name: str = await cls._parse_leve_name(td1)
 
-        response = await AiohttpWrapped.xivapi_item_search(angler_fish_name)
-        for result in response['Results']:
-            if result['Name'].casefold() == angler_fish_name.casefold():
-                item_id = result['ID']
-                item_name = result['Name']
-                break
-
-        if item_id is None or item_name is None:
-            raise ValueError(f'Could not find xivapi item for item: {angler_fish_name}')
+        search_response = await AiohttpWrapped.xivapi_leve_search(angler_leve_name)
+        lookup_response = await AiohttpWrapped.xivapi_leve_lookup(search_response['ID'])
 
         return cls(
             leve_angler_fish_id=int(td3.find('a').attrs['href'].split('/')[-1]),
-            leve_angler_fish_name=angler_fish_name,
-            leve_level=td2.text.strip(),
-            leve_name_jp=td1.find('font').text.strip(),
-            leve_name=await cls._parse_leve_name(td1),
-            leve_turn_in_count=int(re.sub(pattern=r"[^0-9]", repl='', string=td4.text)),
-            leve_xivapi_item_id=item_id,
-            leve_xivapi_item_name=item_name
+            leve_angler_fish_name=td3.text.strip(),
+            leve_angler_name=angler_leve_name,
+            leve_angler_name_jp=angler_leve_name_jp,
+            leve_angler_turn_in_count=int(number_regex.sub(repl='', string=td4.text)),
+            leve_name=lookup_response['Name_en'],
+            leve_id=lookup_response['ID'],
+            leve_item_id=lookup_response['CraftLeve']['Item0']['ID'],
+            leve_item_name=lookup_response['CraftLeve']['Item0']['Name_en'],
+            leve_level=lookup_response['ClassJobLevel']
         )

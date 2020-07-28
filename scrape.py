@@ -1,3 +1,5 @@
 #! /usr/bin/env python3
 
-import ff14angler.__main__
+from ff14angler.__main__ import main
+
+main()

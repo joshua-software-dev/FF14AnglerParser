@@ -4,8 +4,6 @@ import time
 
 import lxml
 
-from typing import Dict, List
-
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -14,14 +12,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-from ..dataClasses.fishData import FishData
+from ..dataClasses.fishData import FishData, FishProvider
 
 
 class FishPage:
 
     # noinspection SpellCheckingInspection
     @staticmethod
-    async def load_all_comments(driver: WebDriver):
+    async def load_all_comments_on_fish_page(driver: WebDriver):
         form = driver.find_element_by_css_selector('form.comment_form')
         ActionChains(driver).move_to_element(form).perform()
 
@@ -54,18 +52,18 @@ class FishPage:
 
     @staticmethod
     async def parse_fish_data(html: str) -> FishData:
-        return await FishData.get_fish_data_from_soup(BeautifulSoup(html, lxml.__name__))
+        return await FishProvider.get_fish_data_from_fish_soup(BeautifulSoup(html, lxml.__name__))
 
     @classmethod
-    async def collect_fish_data(cls, driver: WebDriver, fish_list: Dict[int, str]) -> List[FishData]:
+    async def collect_fish_data(cls, driver: WebDriver):
         fish_url_template = 'https://en.ff14angler.com/fish/{}'
         # temp overwrite to avoid spamming website before scraper is finished.
         fish_list = {1: 'Malm Kelp', 2: 'Crayfish'}  # TODO: Remove
 
-        temp_fish_data_list: List[FishData] = []
-
         for fish_id, fish_name in fish_list.items():
-            driver.get(fish_url_template.format(fish_id))
+            angler_url: str = fish_url_template.format(fish_id)
+            print(f'Scraping page: {angler_url}')
+            driver.get(angler_url)
 
             try:
                 WebDriverWait(driver, 60).until(
@@ -76,8 +74,5 @@ class FishPage:
             except TimeoutException:
                 raise
 
-            await cls.load_all_comments(driver)
-            fish_data = await cls.parse_fish_data(driver.page_source)
-            temp_fish_data_list.append(fish_data)
-
-        return temp_fish_data_list
+            await cls.load_all_comments_on_fish_page(driver)
+            await cls.parse_fish_data(driver.page_source)
