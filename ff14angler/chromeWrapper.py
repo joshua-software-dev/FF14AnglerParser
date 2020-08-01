@@ -6,8 +6,7 @@ from selenium import webdriver
 
 
 class ChromeWrapper:
-    # noinspection SpellCheckingInspection
-    """Selenium chromedriver wrapper so I stop making one off selenium setups."""
+    """Selenium chrome driver wrapper so I stop making one off selenium setups."""
 
     def __init__(self, download_directory=False, headless=False, manual=False, maximized=True):
         """Init for ChromeWrapper."""

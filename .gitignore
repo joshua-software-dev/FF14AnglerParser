@@ -4,10 +4,14 @@
 .mypy_cache/*
 ff14angler/__pycache__/
 ff14angler/__pycache__/*
+ff14angler/constants/__pycache__/
+ff14angler/constants/__pycache__/*
 ff14angler/dataClasses/__pycache__/
 ff14angler/dataClasses/__pycache__/*
 ff14angler/dataClasses/bait/__pycache__/
 ff14angler/dataClasses/bait/__pycache__/*
+ff14angler/dataClasses/comment/__pycache__/
+ff14angler/dataClasses/comment/__pycache__/*
 ff14angler/dataClasses/fish/__pycache__/
 ff14angler/dataClasses/fish/__pycache__/*
 ff14angler/dataClasses/spot/__pycache__/

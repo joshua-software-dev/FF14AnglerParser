@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-import re
-
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
@@ -9,6 +7,7 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
 from ff14angler.dataClasses.comment.comment import Comment
 from ff14angler.dataClasses.fish.fishDesynthesisChance import FishDesynthesisChance
@@ -22,9 +21,6 @@ from ff14angler.dataClasses.spot.spot import Spot
 if TYPE_CHECKING:
     # Avoiding circular imports
     from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
-
-
-number_regex = re.compile(r"[^\d]")
 
 
 @dataclass
@@ -116,7 +112,7 @@ class Fish:
 
                 td1, _, td3 = tag.find_all('td')  # type: Tag, _, Tag
                 spot = await SpotProvider.get_spot_from_angler_spot(
-                    int(number_regex.sub(repl='', string=td1.find('a').attrs['href'])),
+                    int(non_number_replacement_regex.sub(repl='', string=td1.find('a').attrs['href'])),
                     td1.text.strip(),
                     angler_zone_name
                 )

@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-import re
-
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -9,18 +7,10 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.constants.data_corrections import angler_bait_name_corrections
+from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
 from ff14angler.dataClasses.comment.comment import Comment
-
-
-# noinspection SpellCheckingInspection
-name_corrections: Dict[str, str] = {
-    'fistful of northern krill': 'northern krill',
-    'pot of salmon roe': 'salmon roe',
-    'strip of jerked ovim': 'jerked ovim',
-    'box of baitbugs': 'baitbugs'
-}
-number_regex = re.compile(r"[^\d]")
 
 
 @dataclass
@@ -49,7 +39,7 @@ class Bait:
         if special_shops is not None:
             for shop_item_label, shop_list in special_shops.items():
                 shop_response = await AiohttpWrapped.xivapi_special_shop_lookup(shop_list[0])
-                shop_item_num: str = number_regex.sub(repl='', string=shop_item_label)
+                shop_item_num: str = non_number_replacement_regex.sub(repl='', string=shop_item_label)
                 shop_holder.add(
                     (
                         shop_response[f'ItemCost{shop_item_num}TargetID'],
@@ -85,7 +75,7 @@ class Bait:
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
             return await self.update_bait_with_assume_is_spearfishing_head(soup)
 
-        if corrected_name := name_corrections.get(self.bait_angler_name):
+        if corrected_name := angler_bait_name_corrections.get(self.bait_angler_name):
             search_name: str = corrected_name
         else:
             search_name: str = self.bait_angler_name

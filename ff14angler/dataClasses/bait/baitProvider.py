@@ -1,17 +1,13 @@
 #! /usr/bin/env python3
 
-import re
-
 from typing import Dict, List
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.bait import Bait
 from ff14angler.dataClasses.bait.baitPercentage import BaitPercentage
-
-
-non_number_match_regex = re.compile(r"[^\d]")
 
 
 class BaitProvider:
@@ -25,8 +21,8 @@ class BaitProvider:
     async def _parse_angler_bait_id(td2: Tag) -> int:
         a_tag = td2.find('a')
         if a_tag:
-            return int(non_number_match_regex.sub(repl='', string=a_tag.attrs['href']))
-        return int(non_number_match_regex.sub(repl='', string=td2.find('img').attrs['src']))
+            return int(non_number_replacement_regex.sub(repl='', string=a_tag.attrs['href']))
+        return int(non_number_replacement_regex.sub(repl='', string=td2.find('img').attrs['src']))
 
     @classmethod
     async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str) -> Bait:

@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import asyncio
-import re
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
@@ -11,6 +9,13 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.constants.data_corrections import angler_spot_name_corrections
+from ff14angler.constants.regex import (
+    angler_map_area_matcher_regex,
+    angler_map_x_coord_matcher_regex,
+    angler_map_y_coord_matcher_regex,
+    non_number_replacement_regex
+)
 from ff14angler.dataClasses.comment.comment import Comment
 from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
@@ -20,26 +25,19 @@ if TYPE_CHECKING:
     from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
 
-area_regex = re.compile(r"area=([0-9]+)&")
-number_regex = re.compile(r"[^\d]")
-x_coord_regex = re.compile(r"x=([0-9]+)&")
-y_coord_regex = re.compile(r"y=([0-9]+)")
-name_corrections = {'SuinoSato': 'Sui–no–Sato'}
-
-
 @dataclass
 class Spot:
-    # For some reason, `FishingSpot`s on xivapi use X and Z map coordinates and
-    # angler uses X and Y map coordinates. I believe they both map to the in
-    # game map's X and Z, but its possible angler's actually maps to some pixel
-    # coordinate value on their map images for where they should place the
-    # fishing hole.
     spot_angler_area_id: Optional[int] = None
     spot_angler_available_fish: List[FishId] = field(default_factory=list)
     spot_angler_comments: List[Comment] = field(default_factory=list)
     spot_angler_gathering_level: Optional[int] = None
     spot_angler_name: Optional[str] = None
     spot_angler_spot_id: Optional[int] = None
+    # For some reason, `FishingSpot`s on xivapi use X and Z map coordinates and
+    # angler uses X and Y map coordinates. I believe they both map to the in
+    # game map's X and Z, but its possible angler's actually maps to some pixel
+    # coordinate value on their map images for where they should place the
+    # fishing hole.
     spot_angler_x_coord: Optional[int] = None
     spot_angler_y_coord: Optional[int] = None
     spot_angler_zone_name: Optional[str] = None
@@ -60,7 +58,7 @@ class Spot:
 
         for tag in body.find_all('tr'):  # type: Tag
             _, td2, td3, _, _, td6 = tag.find_all('td')  # type: _, Tag, Tag, _, _ , Tag
-            fish_angler_id: int = int(number_regex.sub(repl='', string=td2.find('a').attrs['href']))
+            fish_angler_id: int = int(non_number_replacement_regex.sub(repl='', string=td2.find('a').attrs['href']))
             fish_angler_name: str = td2.text.strip()
             fish = await FishProvider.get_fish_from_angler_fish(fish_angler_id, fish_angler_name)
             temp_fish_list.append(fish.fish_angler_id)
@@ -73,30 +71,30 @@ class Spot:
 
     @staticmethod
     async def _parse_angler_area_id(soup: BeautifulSoup) -> int:
-        return int(area_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(angler_map_area_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
 
     @staticmethod
     async def _parse_angler_x_coord(soup: BeautifulSoup) -> int:
-        return int(x_coord_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(angler_map_x_coord_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
 
     @staticmethod
     async def _parse_angler_y_coord(soup: BeautifulSoup) -> int:
-        return int(y_coord_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(angler_map_y_coord_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
 
     @staticmethod
     async def _check_if_is_spearfishing_spot(soup: BeautifulSoup) -> bool:
         for tag in soup.find('table', {'id': 'effective_bait'}).find_all('tr'):  # type: Tag
             bait_span = tag.find('span', {'class': 'clear_icon'})
             if bait_span:
-                bait_id: str = number_regex.sub(repl='', string=bait_span.find('img').attrs['src'])
+                bait_id: str = non_number_replacement_regex.sub(repl='', string=bait_span.find('img').attrs['src'])
                 if bait_id in {'2001', '2002', '2003'}:
                     return True
 
         return False
 
     async def update_spot_with_assume_is_fishing_spot(self):
-        if name_corrections.get(self.spot_angler_name):
-            search_name: str = name_corrections.get(self.spot_angler_name)
+        if angler_spot_name_corrections.get(self.spot_angler_name):
+            search_name: str = angler_spot_name_corrections.get(self.spot_angler_name)
         else:
             search_name: str = self.spot_angler_name
 
@@ -150,8 +148,8 @@ class Spot:
         raise ValueError(f'Could not find GatheringPointBase for spot: {self}')
 
     async def update_spot_with_assume_is_spearfishing_spot(self):
-        if name_corrections.get(self.spot_angler_name):
-            search_name: str = name_corrections.get(self.spot_angler_name)
+        if angler_spot_name_corrections.get(self.spot_angler_name):
+            search_name: str = angler_spot_name_corrections.get(self.spot_angler_name)
         else:
             search_name: str = self.spot_angler_name
 
@@ -180,7 +178,7 @@ class Spot:
         self.spot_angler_available_fish = await self._parse_angler_available_fish(soup)
         self.spot_angler_comments = await self._parse_angler_comments(soup)
         self.spot_angler_gathering_level = int(
-            number_regex.sub(repl='', string=spot_info.find('span', {'class': 'level'}).text)
+            non_number_replacement_regex.sub(repl='', string=spot_info.find('span', {'class': 'level'}).text)
         )
         self.spot_angler_x_coord = await self._parse_angler_x_coord(spot_info)
         self.spot_angler_y_coord = await self._parse_angler_y_coord(spot_info)

@@ -1,16 +1,12 @@
 #! /usr/bin/env python3
 
-import re
-
 from dataclasses import dataclass
 from typing import Optional
 
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
-
-
-quantity_regex = re.compile(r"\((\s+)?\d+(\s+)?~(\s+)?\d+(\s+)?\)$")
+from ff14angler.constants.regex import desynthesis_quantity_matcher_regex
 
 
 @dataclass
@@ -27,7 +23,7 @@ class FishDesynthesisChance:
 
     @staticmethod
     async def _parse_angler_item_name(td2: Tag) -> str:
-        return quantity_regex.sub(repl='', string=td2.text.strip()).strip()
+        return desynthesis_quantity_matcher_regex.sub(repl='', string=td2.text.strip()).strip()
 
     @staticmethod
     async def _read_icon_url(icon: Optional[str]) -> Optional[str]:

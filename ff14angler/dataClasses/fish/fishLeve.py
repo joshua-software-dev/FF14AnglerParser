@@ -1,15 +1,11 @@
 #! /usr/bin/env python3
 
-import re
-
 from dataclasses import dataclass
 
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
-
-
-number_regex = re.compile(r"[^\d]")
+from ff14angler.constants.regex import non_number_replacement_regex
 
 
 @dataclass
@@ -50,7 +46,7 @@ class FishLeve:
                     leve_angler_fish_name=td3.text.strip(),
                     leve_angler_name=angler_leve_name,
                     leve_angler_name_jp=angler_leve_name_jp,
-                    leve_angler_turn_in_count=int(number_regex.sub(repl='', string=td4.text)),
+                    leve_angler_turn_in_count=int(non_number_replacement_regex.sub(repl='', string=td4.text)),
                     leve_name=lookup_response['Name_en'],
                     leve_id=lookup_response['ID'],
                     leve_item_id=lookup_response['CraftLeve']['Item0']['ID'],

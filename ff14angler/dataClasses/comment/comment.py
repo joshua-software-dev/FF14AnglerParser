@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import copy
-import re
 
 from dataclasses import dataclass
 from datetime import datetime
@@ -10,9 +9,7 @@ from typing import List, Set
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-
-timestamp_regex = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
-request_id_regex = re.compile(r"RID(\s+)?=(\s+)?(\d+);")
+from ff14angler.constants.regex import timestamp_matcher_regex, request_id_matcher_regex
 
 
 @dataclass(frozen=True)
@@ -30,12 +27,12 @@ class Comment:
     @staticmethod
     async def _parse_author(info: Tag) -> str:
         text = info.text.strip()
-        match = timestamp_regex.search(text)
+        match = timestamp_matcher_regex.search(text)
         return text.replace(match[0], '').strip()
 
     @staticmethod
     async def _parse_timestamp(info: Tag) -> datetime:
-        match = timestamp_regex.search(info.text.strip())
+        match = timestamp_matcher_regex.search(info.text.strip())
         return datetime.strptime(match[0], '%Y-%m-%d %H:%M:%S')
 
     @staticmethod
@@ -54,8 +51,8 @@ class Comment:
 
     @staticmethod
     async def _parse_rid_from_soup(soup: BeautifulSoup) -> int:
-        script_tag: Tag = soup.find('script', {'type': 'text/javascript'}, text=request_id_regex)
-        return int(request_id_regex.search(str(script_tag)).groups()[2])
+        script_tag: Tag = soup.find('script', {'type': 'text/javascript'}, text=request_id_matcher_regex)
+        return int(request_id_matcher_regex.search(str(script_tag)).groups()[2])
 
     @classmethod
     async def get_comment_from_comment_soup(cls, soup: Tag) -> 'Comment':
