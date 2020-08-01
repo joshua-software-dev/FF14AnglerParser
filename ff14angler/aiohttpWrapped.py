@@ -1,19 +1,22 @@
 #! /usr/bin/env python3
 
+import asyncio
 import urllib.parse
 
 import aiohttp
 
+from typing import List, Set, Tuple
+
 from asyncio_throttle import Throttler
 
-from .xivapi import XivApi
+from ff14angler.xivapi import XivApi
 
 
 # noinspection SpellCheckingInspection
 class AiohttpWrapped:
     _throttler = Throttler(
-        rate_limit=10,
-        period=2  # seconds
+        rate_limit=3,
+        period=3  # seconds
     )
 
     @classmethod
@@ -51,6 +54,71 @@ class AiohttpWrapped:
         return data
 
     @classmethod
+    async def xivapi_gathering_point_base_index(cls):
+        if result := XivApi.cached_responses['Search']['GatheringPointBase'].get('search'):
+            return result
+
+        temp_results = []
+        page_num: int = 1
+
+        while True:
+            response = await cls.get_json_at_url(f'https://xivapi.com/GatheringPointBase?limit=1000&page={page_num}')
+            page_num: int = response['Pagination']['Page']
+            max_pages: int = response['Pagination']['PageTotal']
+            temp_results += response['Results']
+
+            if page_num >= max_pages:
+                XivApi.cached_responses['Search']['GatheringPointBase']['search'] = temp_results
+                return temp_results
+
+            page_num += 1
+
+    @classmethod
+    async def xivapi_spearfishing_gathering_point_base_index(cls):
+        if result := XivApi.cached_responses['Search']['GatheringPointBase'].get('spear'):
+            return result
+
+        gathering_point_base_spearfishing_spots: List[Tuple[Set[int], int, int]] = []
+        index_response = await cls.xivapi_gathering_point_base_index()
+        index_lookup = await asyncio.gather(
+            *(cls.xivapi_gathering_point_base_lookup(gpb['ID']) for gpb in index_response)
+        )
+
+        for gpb_result in index_lookup:
+            try:
+                gpb_result['GatheringTypeTargetID']
+            except KeyError:
+                print(gpb_result)
+                raise
+
+            if gpb_result['GatheringTypeTargetID'] == 4:
+                spearfishing_ids: Set[int] = set()
+                for i in range(8):
+                    if (key := gpb_result.get(f'Item{i}')) not in [0, None]:
+                        spearfishing_ids.add(key)
+
+                if spearfishing_ids:
+                    gathering_point_base_spearfishing_spots.append(
+                        (
+                            spearfishing_ids,
+                            gpb_result['ID'],
+                            gpb_result['GatheringLevel'],
+                        )
+                    )
+
+        XivApi.cached_responses['Search']['GatheringPointBase']['spear'] = gathering_point_base_spearfishing_spots
+        return gathering_point_base_spearfishing_spots
+
+    @classmethod
+    async def xivapi_gathering_point_base_lookup(cls, gathering_point_base_id: int):
+        if result := XivApi.cached_responses['GatheringPointBase'].get(gathering_point_base_id):
+            return result
+
+        data = await cls.get_json_at_url(f'https://xivapi.com/GatheringPointBase/{gathering_point_base_id}')
+        XivApi.cached_responses['GatheringPointBase'][gathering_point_base_id] = data
+        return data
+
+    @classmethod
     async def xivapi_item_lookup(cls, item_id: int):
         if result := XivApi.cached_responses['Item'].get(item_id):
             return result
@@ -84,7 +152,7 @@ class AiohttpWrapped:
 
             page_num += 1
 
-        raise RuntimeError(f'Could not find applicable result for search term: {item_name}')
+        raise ValueError(f'Could not find applicable result for search term: {item_name}')
 
     @classmethod
     async def xivapi_leve_lookup(cls, leve_id: int):
@@ -113,14 +181,14 @@ class AiohttpWrapped:
             page_num = response['Pagination']['Page']
             max_pages = response['Pagination']['PageTotal']
 
+            XivApi.cached_responses['Search']['Leve'].setdefault(leve_name, [])
             for result in response['Results']:
                 if result['Name'].casefold() == leve_name.casefold():
-                    XivApi.cached_responses['Search']['Leve'][leve_name] = result
-                    return result
+                    XivApi.cached_responses['Search']['Leve'][leve_name].append(result)
 
             page_num += 1
 
-        raise RuntimeError(f'Could not find applicable result for search term: {leve_name}')
+        return XivApi.cached_responses['Search']['Leve'][leve_name]
 
     @classmethod
     async def xivapi_place_name_lookup(cls, place_id: int):
@@ -133,22 +201,27 @@ class AiohttpWrapped:
 
     @classmethod
     async def xivapi_place_name_search(cls, place_name: str):
-        if result := XivApi.cached_responses['Search']['PlaceName'].get(place_name):
+        if (result := XivApi.cached_responses['Search']['PlaceName'].get(place_name)) is not None:
             return result
 
-        XivApi.cached_responses['Search']['PlaceName'][place_name] = await cls.get_json_at_url(
+        response = await cls.get_json_at_url(
             f'https://xivapi.com/search?indexes=PlaceName&string={urllib.parse.quote(place_name)}'
         )
+
+        XivApi.cached_responses['Search']['PlaceName'].setdefault(place_name, [])
+        for result in response['Results']:
+            if result['Name'].casefold() == place_name.casefold():
+                XivApi.cached_responses['Search']['PlaceName'][place_name].append(result)
 
         return XivApi.cached_responses['Search']['PlaceName'][place_name]
 
     @classmethod
-    async def xivapi_special_shop_lookup(cls, special_shop_id: int):
-        if result := XivApi.cached_responses['SpecialShop'].get(special_shop_id):
+    async def xivapi_spearfishing_notebook_lookup(cls, spearfishing_notebook_id: int):
+        if result := XivApi.cached_responses['SpearfishingNotebook'].get(spearfishing_notebook_id):
             return result
 
-        data = await cls.get_json_at_url(f'https://xivapi.com/SpecialShop/{special_shop_id}')
-        XivApi.cached_responses['SpecialShop'][special_shop_id] = data
+        data = await cls.get_json_at_url(f'https://xivapi.com/SpearfishingNotebook/{spearfishing_notebook_id}')
+        XivApi.cached_responses['SpearfishingNotebook'][spearfishing_notebook_id] = data
         return data
 
     @classmethod
@@ -158,4 +231,13 @@ class AiohttpWrapped:
 
         data = await cls.get_json_at_url(f'https://xivapi.com/SpearfishingItem/{spearfishing_item_id}')
         XivApi.cached_responses['SpearfishingItem'][spearfishing_item_id] = data
+        return data
+
+    @classmethod
+    async def xivapi_special_shop_lookup(cls, special_shop_id: int):
+        if result := XivApi.cached_responses['SpecialShop'].get(special_shop_id):
+            return result
+
+        data = await cls.get_json_at_url(f'https://xivapi.com/SpecialShop/{special_shop_id}')
+        XivApi.cached_responses['SpecialShop'][special_shop_id] = data
         return data

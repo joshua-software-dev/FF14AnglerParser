@@ -5,11 +5,11 @@ from typing import Dict
 
 from bs4.element import Tag
 
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.aiohttpWrapped import AiohttpWrapped
 
 
 @dataclass
-class Recipe:
+class FishRecipe:
     recipe_angler_crafting_class: str
     recipe_angler_lodestone_url: str
     recipe_angler_name: str
@@ -37,7 +37,7 @@ class Recipe:
         return _lookup[td2.find('img').attrs['src']]
 
     @classmethod
-    async def get_recipe_from_soup(cls, soup: Tag) -> 'Recipe':
+    async def get_recipe_from_fish_soup(cls, soup: Tag) -> 'FishRecipe':
         _, td2, td3, td4 = soup.find_all('td')  # type: _, Tag, Tag, Tag
         angler_item_name = td3.text.strip()
 

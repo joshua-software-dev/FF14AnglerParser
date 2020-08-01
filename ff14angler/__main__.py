@@ -2,33 +2,33 @@
 
 import asyncio
 import json
+import pickle
 
-import umsgpack
-
-from .chromeWrapper import ChromeWrapper
-from .fetch.fetch import Fetch
-from .xivapi import XivApi
+from ff14angler.chromeWrapper import ChromeWrapper
+from ff14angler.dunderSerializer import DunderSerializer
+from ff14angler.fetch.fetch import Fetch
+from ff14angler.xivapi import XivApi
 
 
 def main():
     try:
-        with open('data/xivapi_cache.bin', 'rb') as fh:
+        with open('data/xivapi_cache.pickle', 'rb') as fh:
             print('Reading API cache into memory...')
-            XivApi.cached_responses.update(umsgpack.load(fh))
+            XivApi.cached_responses.update(pickle.load(fh))
     except FileNotFoundError:
         print('No API cache found.')
-        pass
 
     try:
         print('Starting Chrome...')
         with ChromeWrapper() as driver:
             print('Beginning scraping...')
-            asyncio.run(Fetch.main(driver))
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(Fetch.main(driver))
     finally:
         print('Writing binary API cache to disk...')
-        with open('data/xivapi_cache.bin', 'wb+') as fh:
-            umsgpack.dump(XivApi.cached_responses, fh)
+        with open('data/xivapi_cache.pickle', 'wb+') as fh:
+            pickle.dump(XivApi.cached_responses, fh)
 
         print('Writing text API cache to disk...')
         with open('data/xivapi_cache.json', 'w+') as fh:
-            json.dump(XivApi.cached_responses, fh, indent=4)
+            json.dump(XivApi.cached_responses, fh, cls=DunderSerializer, indent=4)

@@ -2,14 +2,14 @@
 
 from functools import cached_property
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 
 @dataclass
-class WeatherPreferences:
+class FishWeatherPreferences:
     weathers: Dict[str, int]
     unique_catches_across_all_weathers: int
 
@@ -44,8 +44,11 @@ class WeatherPreferences:
         return int(num_holder.find('b').text.strip())
 
     @classmethod
-    async def get_weather_preferences_from_soup(cls, soup: BeautifulSoup) -> 'WeatherPreferences':
+    async def get_weather_preferences_from_fish_soup(cls, soup: BeautifulSoup) -> Optional['FishWeatherPreferences']:
         weather_table: Tag = soup.find('table', {'class': 'info_section chart_weather'})
+
+        if not weather_table:
+            return None
 
         return cls(
             weathers=await cls._parse_weathers(weather_table),

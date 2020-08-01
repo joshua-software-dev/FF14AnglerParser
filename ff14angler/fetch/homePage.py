@@ -5,7 +5,7 @@ import time
 
 import lxml
 
-from typing import Any, Awaitable, Dict, Tuple, TypeVar
+from typing import Any, Awaitable, Dict, List, Tuple, TypeVar
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -15,8 +15,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-from ..dataClasses.baitData import BaitData, BaitProvider
-from ..dataClasses.fishData import FishData, FishProvider
+from ff14angler.dataClasses.bait.baitProvider import Bait, BaitProvider
+from ff14angler.dataClasses.fish.fishProvider import Fish, FishProvider
+from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
 
 T1 = TypeVar('T1')
@@ -31,68 +32,63 @@ class HomePage:
         return key, await value
 
     @classmethod
-    async def _parse_bait_list(cls, bait_parent: Tag):
-        temp_bait_holder: Dict[str, Awaitable[BaitData]] = dict()
+    async def _parse_bait_list(cls, bait_parent: Tag) -> Dict[int, Bait]:
+        temp_bait_list: List[Awaitable[Bait]] = []
 
         for tag in sorted(bait_parent.find_all('option'), key=lambda x: int(x.attrs['value'])):  # type: Tag
+            angler_bait_id: int = int(tag.attrs['value'])
             angler_bait_name: str = tag.text.strip()
 
-            # S,N,L Spearfishing heads
-            # Ha ha, SNL
-            if angler_bait_name not in {'Select Bait', 'Small', 'Normal', 'Large'}:
-                temp_bait_holder[angler_bait_name] = BaitProvider.get_bait_data_from_angler_name(angler_bait_name)
+            if angler_bait_name not in {'Select Bait'}:
+                temp_bait_list.append(BaitProvider.get_bait_from_angler_bait(angler_bait_id, angler_bait_name))
 
-        BaitProvider.bait_holder.update(
-            {
-                k: v for k, v in await asyncio.gather(
-                    *(cls._dict_awaiter(key, task) for key, task in temp_bait_holder.items())
-                )
-            }
-        )
+        await asyncio.gather(*temp_bait_list)
+        return BaitProvider.bait_holder
 
     @classmethod
     async def _parse_fish_list(cls, fish_parent: Tag):
-        temp_fish_holder: Dict[str, Awaitable[FishData]] = dict()
+        temp_fish_list: List[Awaitable[Fish]] = []
 
-        for tag in sorted(fish_parent.find_all('option'), key=lambda x: int(x.attrs['value'])):
-            angler_fish_name: str = tag.text.strip()
+        for tag in sorted(fish_parent.find_all('option'), key=lambda x: int(x.attrs['value'])):  # type: Tag
             angler_fish_id: int = int(tag.attrs['value'])
+            angler_fish_name: str = tag.text.strip()
 
             if angler_fish_name != 'Select Fish':
-                temp_fish_holder[angler_fish_name] = FishProvider.get_fish_data_from_angler_name(
-                    angler_fish_name,
-                    angler_fish_id
+                temp_fish_list.append(FishProvider.get_fish_from_angler_fish(angler_fish_id, angler_fish_name))
+
+        await asyncio.gather(*temp_fish_list)
+        return FishProvider.fish_holder
+
+    @classmethod
+    async def _parse_spot_list(cls, spot_parent: Tag):
+        temp_spot_list: List[Awaitable[Spot]] = []
+
+        # noinspection SpellCheckingInspection
+        for zone in spot_parent.find_all('optgroup'):  # type: Tag
+            for spot in zone.find_all('option'):  # type: Tag
+                spot_angler_id: int = int(spot.attrs['value'])
+                spot_angler_name: str = spot.text.strip()
+                spot_angler_zone_name: str = zone.attrs['label']
+
+                temp_spot_list.append(
+                    SpotProvider.get_spot_from_angler_spot(
+                        spot_angler_id,
+                        spot_angler_name,
+                        spot_angler_zone_name
+                    )
                 )
 
-        FishProvider.fish_holder.update(
-            {
-                k: v for k, v in await asyncio.gather(
-                    *(cls._dict_awaiter(key, task) for key, task in temp_fish_holder.items())
-                )
-            }
-        )
+        await asyncio.gather(*temp_spot_list)
+        return SpotProvider.spot_holder
 
     @classmethod
     async def parse_homepage_data(cls, html: str) -> Dict[str, Any]:
         soup = BeautifulSoup(html, lxml.__name__)
-        bait_parent: Tag = soup.find('select', {'name': 'bait'})
-        fish_parent: Tag = soup.find('select', {'name': 'fish'})
-        spot_parent: Tag = soup.find('select', {'name': 'spot'})
-
-        await cls._parse_bait_list(bait_parent)
-        await cls._parse_fish_list(fish_parent)
-
-        spot_list: Dict[int, str] = {
-            int(tag.attrs['value']): tag.text.strip() for tag in sorted(
-                spot_parent.find_all('option'),
-                key=lambda x: int(x.attrs['value'])
-            ) if tag.text.strip() != 'Select Location'
-        }
 
         return {
-            'bait': BaitProvider,
-            'fish': FishProvider,
-            'spot': spot_list
+            'bait': await cls._parse_bait_list(soup.find('select', {'name': 'bait'})),
+            'fish': await cls._parse_fish_list(soup.find('select', {'name': 'fish'})),
+            'spot': await cls._parse_spot_list(soup.find('select', {'name': 'spot'}))
         }
 
     @staticmethod
