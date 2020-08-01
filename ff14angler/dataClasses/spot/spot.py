@@ -17,7 +17,7 @@ from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 
 if TYPE_CHECKING:
     # Avoiding circular imports
-    from ..fish.fishProvider import FishProvider
+    from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
 
 area_regex = re.compile(r"area=([0-9]+)&")
@@ -52,7 +52,7 @@ class Spot:
     @staticmethod
     async def _parse_angler_available_fish(soup: BeautifulSoup):
         # Avoiding circular imports
-        from ..fish.fishProvider import FishProvider
+        from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
         temp_fish_list: List[FishId] = []
         form = soup.find('form', {'name': 'spot_delete'})
