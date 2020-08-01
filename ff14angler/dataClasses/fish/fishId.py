@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.aiohttpWrapped import AiohttpWrapped
 
 
 @dataclass

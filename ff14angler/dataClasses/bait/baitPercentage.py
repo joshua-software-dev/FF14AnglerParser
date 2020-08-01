@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from .bait import Bait
+from ff14angler.dataClasses.bait.bait import Bait
 
 
 @dataclass

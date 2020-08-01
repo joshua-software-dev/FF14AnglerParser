@@ -1,11 +1,8 @@
 #! /usr/bin/env python3
 
-import asyncio
+from typing import Dict
 
-from typing import Dict, FrozenSet, Set, Tuple
-
-from .spot import Spot
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.dataClasses.spot.spot import Spot
 
 
 class SpotProvider:

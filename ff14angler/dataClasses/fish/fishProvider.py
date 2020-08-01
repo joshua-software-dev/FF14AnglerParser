@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .fish import Fish
+from ff14angler.dataClasses.fish.fish import Fish
 
 
 class FishProvider:

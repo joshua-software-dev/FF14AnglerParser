@@ -5,15 +5,15 @@ import asyncio
 import re
 
 from dataclasses import dataclass, field
-from typing import Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .spotGatheringType import SpotGatheringType
-from ..comment import Comment
-from ..fish.fishId import FishId
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.dataClasses.comment.comment import Comment
+from ff14angler.dataClasses.fish.fishId import FishId
+from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 
 if TYPE_CHECKING:
     # Avoiding circular imports

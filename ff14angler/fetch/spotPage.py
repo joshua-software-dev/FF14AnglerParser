@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
+from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 
 
 class SpotPage:

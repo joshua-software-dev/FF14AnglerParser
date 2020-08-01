@@ -7,8 +7,8 @@ from typing import Dict, List
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .bait import Bait
-from .baitPercentage import BaitPercentage
+from ff14angler.dataClasses.bait.bait import Bait
+from ff14angler.dataClasses.bait.baitPercentage import BaitPercentage
 
 
 non_number_match_regex = re.compile(r"[^\d]")

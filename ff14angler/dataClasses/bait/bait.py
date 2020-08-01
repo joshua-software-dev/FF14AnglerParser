@@ -8,9 +8,9 @@ from typing import Dict, List, Optional, Set, Tuple
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .baitAltCurrency import BaitAltCurrency
-from ..comment import Comment
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
+from ff14angler.dataClasses.comment.comment import Comment
 
 
 # noinspection SpellCheckingInspection

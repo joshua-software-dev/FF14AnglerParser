@@ -8,20 +8,20 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .fishId import FishId
-from .fishDesynthesisChance import FishDesynthesisChance
-from .fishHourPreferences import FishHourPreferences
-from .fishLeve import FishLeve
-from .fishRecipe import FishRecipe
-from .fishWeatherPreferences import FishWeatherPreferences
-from ..bait.baitProvider import BaitPercentage, BaitProvider
-from ..spot.spotProvider import Spot, SpotProvider
-from ..comment import Comment
-from ...aiohttpWrapped import AiohttpWrapped
+from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
+from ff14angler.dataClasses.comment.comment import Comment
+from ff14angler.dataClasses.fish.fishDesynthesisChance import FishDesynthesisChance
+from ff14angler.dataClasses.fish.fishHourPreferences import FishHourPreferences
+from ff14angler.dataClasses.fish.fishId import FishId
+from ff14angler.dataClasses.fish.fishLeve import FishLeve
+from ff14angler.dataClasses.fish.fishRecipe import FishRecipe
+from ff14angler.dataClasses.fish.fishWeatherPreferences import FishWeatherPreferences
+from ff14angler.dataClasses.spot.spot import Spot
 
 if TYPE_CHECKING:
     # Avoiding circular imports
-    from ..spot.spotProvider import Spot, SpotProvider
+    from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
 
 number_regex = re.compile(r"[^\d]")
@@ -99,7 +99,7 @@ class Fish:
     @staticmethod
     async def _parse_angler_gathering_spots(soup: BeautifulSoup) -> List[Spot]:
         # Avoiding circular imports
-        from ..spot.spotProvider import Spot, SpotProvider
+        from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
         temp_fishing_spot_list: List[Spot] = []
 
