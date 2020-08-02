@@ -62,7 +62,7 @@ class Spot:
             fish_angler_id: int = int(non_number_replacement_regex.sub(repl='', string=td2.find('a').attrs['href']))
             fish_angler_name: str = td2.text.strip()
             fish = await FishProvider.get_fish_from_angler_fish(fish_angler_id, fish_angler_name)
-            temp_fish_list.append(fish.fish_angler_id)
+            temp_fish_list.append(fish.fish_id)
 
         return temp_fish_list
 
@@ -117,6 +117,7 @@ class Spot:
                 )
 
                 self.spot_gathering_level = spot_lookup_response['GatheringLevel']
+                # TODO: Replace string for type init with Enum class
                 self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type('rod', spot_lookup_response['ID'])
 
                 return
@@ -127,7 +128,7 @@ class Spot:
         item_lookups = await asyncio.gather(
             *(
                 AiohttpWrapped.xivapi_item_lookup(
-                    fish_id.xivapi_item_id
+                    fish_id.fish_xivapi_item_id
                 ) for fish_id in self.spot_angler_available_fish
             )
         )

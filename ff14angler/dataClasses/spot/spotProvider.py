@@ -3,6 +3,7 @@
 from typing import Dict
 
 from ff14angler.dataClasses.spot.spot import Spot
+from ff14angler.dataClasses.spot.spotId import SpotId
 
 
 class SpotProvider:
@@ -29,3 +30,8 @@ class SpotProvider:
         )
 
         return cls.spot_holder[spot_angler_id]
+
+    @classmethod
+    async def get_spot_id_from_angler_id(cls, spot_angler_id: int) -> SpotId:
+        spot = cls.spot_holder[spot_angler_id]
+        return SpotId(spot_angler_spot_id=spot.spot_angler_spot_id, spot_gathering_type=spot.spot_gathering_type)
