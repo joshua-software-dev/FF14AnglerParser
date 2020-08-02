@@ -4,7 +4,7 @@ import asyncio
 import json
 import pickle
 
-from ff14angler.chromeWrapper import ChromeWrapper
+from ff14angler.network.chromeWrapper import ChromeWrapper
 from ff14angler.dunderSerializer import DunderSerializer
 from ff14angler.fetch.fetch import Fetch
 from ff14angler.xivapi import XivApi

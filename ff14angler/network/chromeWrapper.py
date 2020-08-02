@@ -3,7 +3,7 @@
 import os
 
 from selenium import webdriver
-webdriver.FirefoxOptions()
+
 
 class ChromeWrapper:
     """Selenium chrome driver wrapper so I stop making one off selenium setups."""
