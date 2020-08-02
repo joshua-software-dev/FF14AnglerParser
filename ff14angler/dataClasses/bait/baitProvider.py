@@ -29,7 +29,10 @@ class BaitProvider:
         if result := cls.bait_holder.get(bait_angler_id):
             return result
 
-        cls.bait_holder[bait_angler_id] = Bait(bait_angler_id=bait_angler_id, bait_angler_name=bait_angler_name)
+        cls.bait_holder[bait_angler_id] = await Bait.get_bait_from_angler_bait(
+            bait_angler_id=bait_angler_id,
+            bait_angler_name=bait_angler_name
+        )
         return cls.bait_holder[bait_angler_id]
 
     @classmethod
@@ -41,6 +44,11 @@ class BaitProvider:
             angler_bait_id: int = await cls._parse_angler_bait_id(td2)
             angler_bait_name: str = td2.text.strip()
             bait = await cls.get_bait_from_angler_bait(angler_bait_id, angler_bait_name)
-            temp_bait_list.append(BaitPercentage(bait=bait, bait_percentage=td1.text.strip()))
+            temp_bait_list.append(
+                BaitPercentage(
+                    bait_id=bait.bait_id,
+                    bait_percentage=td1.text.strip()
+                )
+            )
 
         return temp_bait_list

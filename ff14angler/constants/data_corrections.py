@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from typing import Dict
+from typing import Dict, Set
 
 
 # noinspection SpellCheckingInspection
@@ -12,6 +12,8 @@ angler_bait_name_corrections: Dict[str, str] = {
     'strip of jerked ovim': 'jerked ovim',
     'box of baitbugs': 'baitbugs'
 }
+
+angler_bait_name_do_not_search: Set[str] = {'Small', 'Normal', 'Large'}
 
 # noinspection SpellCheckingInspection
 angler_desynthesis_item_name_corrections: Dict[str, str] = {

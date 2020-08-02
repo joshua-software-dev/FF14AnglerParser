@@ -9,13 +9,14 @@ from bs4.element import Tag
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_bait_name_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
+from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 
 
 @dataclass
 class Bait:
-    bait_angler_id: int
+    bait_id: BaitId
     bait_angler_name: str
 
     bait_alt_currency_prices: List[BaitAltCurrency] = field(default_factory=list)
@@ -25,7 +26,6 @@ class Bait:
     bait_gil_cost: Optional[int] = None
     bait_gil_sell_price: Optional[int] = None
     bait_icon_url: Optional[str] = None
-    bait_item_id: Optional[int] = None
     bait_item_level: Optional[int] = None
     bait_item_name: Optional[str] = None
 
@@ -63,6 +63,15 @@ class Bait:
             return lodestone_link.attrs['href']
         return None
 
+    @classmethod
+    async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str):
+        bait_id = await BaitId.get_bait_id_from_angler_bait(
+            bait_angler_id=bait_angler_id,
+            bait_angler_name=bait_angler_name
+        )
+
+        return cls(bait_id=bait_id, bait_angler_name=bait_angler_name)
+
     async def update_bait_with_assume_is_spearfishing_head(self):
         self.bait_item_name = f'{self.bait_angler_name} Gig Head'
 
@@ -87,7 +96,6 @@ class Bait:
         self.bait_gil_cost: Optional[int] = lookup_response['PriceMid']
         self.bait_gil_sell_price: Optional[int] = lookup_response['PriceLow']
         self.bait_icon_url: Optional[str] = f'https://xivapi.com{lookup_response["Icon"]}'
-        self.bait_item_id: Optional[int] = lookup_response['ID']
         self.bait_item_level: Optional[int] = lookup_response['LevelItem']
         self.bait_item_name: Optional[str] = lookup_response['Name_en']
 
