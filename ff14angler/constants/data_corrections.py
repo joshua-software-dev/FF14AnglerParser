@@ -13,8 +13,10 @@ angler_bait_name_corrections: Dict[str, str] = {
     'box of baitbugs': 'baitbugs'
 }
 
+# noinspection SpellCheckingInspection
 angler_desynthesis_item_name_corrections: Dict[str, str] = {
     'ドライハイエーテル': 'Dried Hi-Ether',
+    '達識のエクスマテリジャ': "Gatherer's Guerdon Materia VIII",
     'Waterproof Cotton': 'Waterproof Cotton Cloth'
 }
 
