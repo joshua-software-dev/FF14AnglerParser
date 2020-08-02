@@ -16,16 +16,16 @@ from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.fish.fishLeve import FishLeve
 from ff14angler.dataClasses.fish.fishRecipe import FishRecipe
 from ff14angler.dataClasses.fish.fishWeatherPreferences import FishWeatherPreferences
-from ff14angler.dataClasses.spot.spot import Spot
+from ff14angler.dataClasses.spot.spotId import SpotId
 
 if TYPE_CHECKING:
     # Avoiding circular imports
-    from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
+    from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 
 
 @dataclass
 class Fish:
-    fish_angler_id: FishId
+    fish_id: FishId
     fish_angler_name: str
 
     fish_angler_bait_preferences: List[BaitPercentage] = field(default_factory=list)
@@ -33,7 +33,7 @@ class Fish:
     fish_angler_comments: Optional[CommentSection] = None
     fish_angler_desynthesis_items: List[FishDesynthesisChance] = field(default_factory=list)
     fish_angler_double_hooking_count: Optional[str] = None
-    fish_angler_gathering_spots: List[Spot] = field(default_factory=list)
+    fish_angler_gathering_spots: List[SpotId] = field(default_factory=list)
     fish_angler_hour_preferences: Optional[FishHourPreferences] = None
     fish_angler_involved_leves: List[FishLeve] = field(default_factory=list)
     fish_angler_involved_recipes: List[FishRecipe] = field(default_factory=list)
@@ -89,30 +89,26 @@ class Fish:
         return '1'
 
     @staticmethod
-    async def _parse_angler_gathering_spots(soup: BeautifulSoup) -> List[Spot]:
+    async def _parse_angler_gathering_spots(soup: BeautifulSoup) -> List[SpotId]:
         # Avoiding circular imports
-        from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
+        from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 
-        temp_fishing_spot_list: List[Spot] = []
+        temp_fishing_spot_list: List[SpotId] = []
 
         spot_form = soup.find('form', {'name': 'spot_delete'})
         if spot_form:
-            angler_zone_name: str = ''
             # noinspection SpellCheckingInspection
             body = spot_form.find_all('tbody')[1]
 
             for tag in body.find_all('tr'):  # type: Tag
                 if not tag.find('a'):
-                    angler_zone_name = tag.text.strip()
                     continue
 
                 td1, _, td3 = tag.find_all('td')  # type: Tag, _, Tag
-                spot = await SpotProvider.get_spot_from_angler_spot(
-                    int(non_number_replacement_regex.sub(repl='', string=td1.find('a').attrs['href'])),
-                    td1.text.strip(),
-                    angler_zone_name
+                spot_angler_spot_id: int = int(
+                    non_number_replacement_regex.sub(repl='', string=td1.find('a').attrs['href'])
                 )
-                temp_fishing_spot_list.append(spot)
+                temp_fishing_spot_list.append(await SpotProvider.get_spot_id_from_angler_id(spot_angler_spot_id))
 
         return temp_fishing_spot_list
 
