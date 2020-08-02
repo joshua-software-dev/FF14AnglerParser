@@ -3,7 +3,7 @@
 import os
 
 from selenium import webdriver
-
+webdriver.FirefoxOptions()
 
 class ChromeWrapper:
     """Selenium chrome driver wrapper so I stop making one off selenium setups."""
@@ -14,6 +14,7 @@ class ChromeWrapper:
         self.get_chrome_install_location(manual)
 
         self.driver = webdriver.Chrome(chrome_options=self.options)
+        self.driver.find_elements_by_css_selector('li.selected div.layer-toggle')
         self.enable_download(download_directory)
 
     def __enter__(self):

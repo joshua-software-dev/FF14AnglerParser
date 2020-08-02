@@ -16,7 +16,7 @@ from ff14angler.constants.regex import (
     angler_map_y_coord_matcher_regex,
     non_number_replacement_regex
 )
-from ff14angler.dataClasses.comment.comment import Comment
+from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 class Spot:
     spot_angler_area_id: Optional[int] = None
     spot_angler_available_fish: List[FishId] = field(default_factory=list)
-    spot_angler_comments: List[Comment] = field(default_factory=list)
+    spot_angler_comments: Optional[CommentSection] = None
     spot_angler_gathering_level: Optional[int] = None
     spot_angler_name: Optional[str] = None
     spot_angler_spot_id: Optional[int] = None
@@ -54,6 +54,7 @@ class Spot:
 
         temp_fish_list: List[FishId] = []
         form = soup.find('form', {'name': 'spot_delete'})
+        # noinspection SpellCheckingInspection
         body = form.find_all('tbody')[1]
 
         for tag in body.find_all('tr'):  # type: Tag
@@ -66,20 +67,28 @@ class Spot:
         return temp_fish_list
 
     @staticmethod
-    async def _parse_angler_comments(soup: BeautifulSoup) -> List[Comment]:
-        return await Comment.get_comments_from_angler_comment_section_soup(soup)
-
-    @staticmethod
     async def _parse_angler_area_id(soup: BeautifulSoup) -> int:
-        return int(angler_map_area_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(
+            angler_map_area_matcher_regex.search(
+                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+            ).groups()[0]
+        )
 
     @staticmethod
     async def _parse_angler_x_coord(soup: BeautifulSoup) -> int:
-        return int(angler_map_x_coord_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(
+            angler_map_x_coord_matcher_regex.search(
+                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+            ).groups()[0]
+        )
 
     @staticmethod
     async def _parse_angler_y_coord(soup: BeautifulSoup) -> int:
-        return int(angler_map_y_coord_matcher_regex.search(soup.find('a', {'class': None, 'rel': None}).attrs['href']).groups()[0])
+        return int(
+            angler_map_y_coord_matcher_regex.search(
+                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+            ).groups()[0]
+        )
 
     @staticmethod
     async def _check_if_is_spearfishing_spot(soup: BeautifulSoup) -> bool:
@@ -176,7 +185,6 @@ class Spot:
 
         self.spot_angler_area_id = await self._parse_angler_area_id(spot_info)
         self.spot_angler_available_fish = await self._parse_angler_available_fish(soup)
-        self.spot_angler_comments = await self._parse_angler_comments(soup)
         self.spot_angler_gathering_level = int(
             non_number_replacement_regex.sub(repl='', string=spot_info.find('span', {'class': 'level'}).text)
         )
@@ -189,3 +197,6 @@ class Spot:
             await self.update_spot_with_assume_is_fishing_spot()
 
         return self
+
+    async def update_spot_with_comment_section(self, comment_section: CommentSection):
+        self.spot_angler_comments = comment_section

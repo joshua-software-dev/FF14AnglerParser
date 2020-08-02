@@ -10,7 +10,7 @@ from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_bait_name_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
-from ff14angler.dataClasses.comment.comment import Comment
+from ff14angler.dataClasses.comment.commentSection import CommentSection
 
 
 @dataclass
@@ -19,7 +19,7 @@ class Bait:
     bait_angler_name: str
 
     bait_alt_currency_prices: List[BaitAltCurrency] = field(default_factory=list)
-    bait_angler_comments: List[Comment] = field(default_factory=list)
+    bait_angler_comments: Optional[CommentSection] = None
     bait_angler_large_icon_url: Optional[str] = None
     bait_angler_lodestone_url: Optional[str] = None
     bait_gil_cost: Optional[int] = None
@@ -51,10 +51,6 @@ class Bait:
         return [BaitAltCurrency(*shop) for shop in shop_holder]
 
     @staticmethod
-    async def _parse_angler_comments(soup: BeautifulSoup) -> List[Comment]:
-        return await Comment.get_comments_from_angler_comment_section_soup(soup)
-
-    @staticmethod
     async def _parse_angler_large_icon_url(soup: BeautifulSoup) -> str:
         partial_url: str = soup.find('div', {'class': 'clear_icon_l'}).find('img').attrs['src']
         return f'https://en.ff14angler.com{partial_url}'
@@ -67,13 +63,12 @@ class Bait:
             return lodestone_link.attrs['href']
         return None
 
-    async def update_bait_with_assume_is_spearfishing_head(self, soup: BeautifulSoup):
-        self.bait_angler_comments = await self._parse_angler_comments(soup)
+    async def update_bait_with_assume_is_spearfishing_head(self):
         self.bait_item_name = f'{self.bait_angler_name} Gig Head'
 
     async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
-            return await self.update_bait_with_assume_is_spearfishing_head(soup)
+            return await self.update_bait_with_assume_is_spearfishing_head()
 
         if corrected_name := angler_bait_name_corrections.get(self.bait_angler_name):
             search_name: str = corrected_name
@@ -87,7 +82,6 @@ class Bait:
             lookup_response['GameContentLinks'].get('SpecialShop')
         )
 
-        self.bait_angler_comments = await self._parse_angler_comments(soup)
         self.bait_angler_large_icon_url = await self._parse_angler_large_icon_url(soup)
         self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(soup)
         self.bait_gil_cost: Optional[int] = lookup_response['PriceMid']
@@ -96,3 +90,6 @@ class Bait:
         self.bait_item_id: Optional[int] = lookup_response['ID']
         self.bait_item_level: Optional[int] = lookup_response['LevelItem']
         self.bait_item_name: Optional[str] = lookup_response['Name_en']
+
+    async def update_bait_with_comment_section(self, comment_section: CommentSection):
+        self.bait_angler_comments = comment_section

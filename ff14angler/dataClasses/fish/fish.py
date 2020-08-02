@@ -9,7 +9,7 @@ from bs4.element import Tag
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
-from ff14angler.dataClasses.comment.comment import Comment
+from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fishDesynthesisChance import FishDesynthesisChance
 from ff14angler.dataClasses.fish.fishHourPreferences import FishHourPreferences
 from ff14angler.dataClasses.fish.fishId import FishId
@@ -30,7 +30,7 @@ class Fish:
 
     fish_angler_bait_preferences: List[BaitPercentage] = field(default_factory=list)
     fish_angler_canvas_size: Optional[str] = None
-    fish_angler_comments: List[Comment] = field(default_factory=list)
+    fish_angler_comments: Optional[CommentSection] = None
     fish_angler_desynthesis_items: List[FishDesynthesisChance] = field(default_factory=list)
     fish_angler_double_hooking_count: Optional[str] = None
     fish_angler_gathering_spots: List[Spot] = field(default_factory=list)
@@ -64,10 +64,6 @@ class Fish:
             if a_tag:
                 return a_tag.get('data-text')
         return None
-
-    @staticmethod
-    async def _parse_angler_comments(soup: BeautifulSoup) -> List[Comment]:
-        return await Comment.get_comments_from_angler_comment_section_soup(soup)
 
     @staticmethod
     async def _parse_angler_desynthesis_items(soup: BeautifulSoup) -> List[FishDesynthesisChance]:
@@ -223,6 +219,15 @@ class Fish:
             except KeyError:
                 return None
 
+    @classmethod
+    async def get_fish_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str):
+        fish_id = await FishId.get_fish_id_from_angler_fish(
+            fish_angler_id=fish_angler_id,
+            fish_angler_name=fish_angler_name
+        )
+
+        return cls(fish_id, fish_angler_name)
+
     async def update_fish_with_fish_soup(self, soup: BeautifulSoup) -> 'Fish':
         search_response = await AiohttpWrapped.xivapi_item_search(self.fish_angler_name)
         item_lookup_response = await AiohttpWrapped.xivapi_item_lookup(search_response['ID'])
@@ -236,7 +241,6 @@ class Fish:
 
         self.fish_angler_bait_preferences += await self._parse_angler_bait_preferences(soup)
         self.fish_angler_canvas_size = await self._parse_angler_canvas_size(data_row3)
-        self.fish_angler_comments += await self._parse_angler_comments(soup)
         self.fish_angler_desynthesis_items += await self._parse_angler_desynthesis_items(soup)
         self.fish_angler_double_hooking_count = await self._parse_angler_double_hooking_count(data_row3)
         self.fish_angler_gathering_spots += await self._parse_angler_gathering_spots(soup)
@@ -257,11 +261,5 @@ class Fish:
 
         return self
 
-    @classmethod
-    async def get_fish_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str):
-        fish_id = await FishId.get_fish_id_from_angler_fish(
-            fish_angler_id=fish_angler_id,
-            fish_angler_name=fish_angler_name
-        )
-
-        return cls(fish_id, fish_angler_name)
+    async def update_fish_with_comment_section(self, comment_section: CommentSection):
+        self.fish_angler_comments = comment_section

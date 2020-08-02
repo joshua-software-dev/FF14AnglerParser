@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
+from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION
 from ff14angler.dataClasses.bait.baitProvider import Bait, BaitProvider
 from ff14angler.dataClasses.fish.fishProvider import Fish, FishProvider
 from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
@@ -108,7 +109,7 @@ class HomePage:
         driver.get(angler_url)
 
         try:
-            WebDriverWait(driver, 60).until(
+            WebDriverWait(driver, ANGLER_PAGE_LOAD_WAIT_DURATION).until(
                 expected_conditions.presence_of_element_located(
                     (By.ID, 'form_search')
                 )

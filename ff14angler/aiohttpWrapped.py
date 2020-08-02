@@ -22,17 +22,17 @@ class AiohttpWrapped:
     @classmethod
     async def get_json_at_url(cls, url: str):
         async with cls._throttler:
-            async with aiohttp.ClientSession() as session:  # type: aiohttp.ClientSession
+            async with aiohttp.ClientSession() as session:
                 print(f'Fetching URL: {url}')
-                async with session.get(url) as response:  # type: aiohttp.ClientResponse
+                async with session.get(url) as response:
                     return await response.json()
 
     @classmethod
     async def get_text_at_url(cls, url: str) -> str:
         async with cls._throttler:
-            async with aiohttp.ClientSession() as session:  # type: aiohttp.ClientSession
+            async with aiohttp.ClientSession() as session:
                 print(f'Fetching URL: {url}')
-                async with session.get(url) as response:  # type: aiohttp.ClientResponse
+                async with session.get(url) as response:
                     return await response.text()
 
     @classmethod

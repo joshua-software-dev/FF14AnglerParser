@@ -2,14 +2,16 @@
 
 import copy
 
+import lxml
+
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Set
+from typing import Any, Dict, List, Set
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from ff14angler.constants.regex import timestamp_matcher_regex, request_id_matcher_regex
+from ff14angler.constants.regex import timestamp_matcher_regex
 
 
 @dataclass(frozen=True)
@@ -49,10 +51,16 @@ class Comment:
 
         return soup.text.strip()
 
-    @staticmethod
-    async def _parse_rid_from_soup(soup: BeautifulSoup) -> int:
-        script_tag: Tag = soup.find('script', {'type': 'text/javascript'}, text=request_id_matcher_regex)
-        return int(request_id_matcher_regex.search(str(script_tag)).groups()[2])
+    @classmethod
+    async def get_comment_from_angler_comment_json(cls, comment_json: Dict[str, Any]):
+        comment_soup = BeautifulSoup(f'<html><div>{comment_json["comment"]}</div></html>', lxml.__name__)
+
+        return cls(
+            comment_author=comment_json['nickname'],
+            comment_text_original=await cls._parse_text_original(copy.copy(comment_soup)),
+            comment_text_translated=await cls._parse_text_translated(comment_soup),
+            comment_timestamp=datetime.strptime(comment_json['date'], '%Y-%m-%d %H:%M:%S')
+        )
 
     @classmethod
     async def get_comment_from_comment_soup(cls, soup: Tag) -> 'Comment':
