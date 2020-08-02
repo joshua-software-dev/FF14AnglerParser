@@ -45,12 +45,9 @@ class FishDesynthesisChance:
         td1, td2, td3 = soup.find_all('td')  # type: Tag, Tag, Tag
         angler_item_name: str = await cls._parse_angler_item_name(td2)
 
-        try:
-            response = await AiohttpWrapped.xivapi_item_search(
-                angler_desynthesis_item_name_corrections.get(angler_item_name) or angler_item_name
-            )
-        except ValueError:
-            response = dict()
+        response = await AiohttpWrapped.xivapi_item_search(
+            angler_desynthesis_item_name_corrections.get(angler_item_name) or angler_item_name
+        )
 
         # noinspection SpellCheckingInspection
         return cls(
