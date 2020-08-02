@@ -28,6 +28,7 @@ class Fish:
     fish_id: FishId
     fish_angler_name: str
 
+    fish_angler_aquarium_size: Optional[str] = None
     fish_angler_bait_preferences: List[BaitPercentage] = field(default_factory=list)
     fish_angler_canvas_size: Optional[str] = None
     fish_angler_comments: Optional[CommentSection] = None
@@ -53,6 +54,16 @@ class Fish:
         return self.__dict__
 
     @staticmethod
+    async def _parse_angler_aquarium_size(data_row3: Tag) -> Optional[str]:
+        div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
+        if div_tag:
+            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+                img_tag = tag.find('img')
+                if img_tag and 'aquarium' in img_tag.attrs.get('src', ''):
+                    return tag.attrs['data-text']
+        return None
+
+    @staticmethod
     async def _parse_angler_bait_preferences(soup: BeautifulSoup) -> List[BaitPercentage]:
         return await BaitProvider.get_bait_percentage_list_from_fish_soup(soup)
 
@@ -60,9 +71,10 @@ class Fish:
     async def _parse_angler_canvas_size(data_row3: Tag) -> Optional[str]:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
         if div_tag:
-            a_tag = div_tag.find('a', {'class': 'clear_icon icon_with_text'})
-            if a_tag:
-                return a_tag.get('data-text')
+            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+                img_tag = tag.find('img')
+                if img_tag and 'gyotaku' in img_tag.attrs.get('src', ''):
+                    return tag.attrs['data-text']
         return None
 
     @staticmethod
@@ -83,9 +95,11 @@ class Fish:
     @staticmethod
     async def _parse_angler_double_hooking_count(data_row3: Tag) -> str:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
-        span_tag = div_tag.find('span', {'class': 'clear_icon icon_with_text'})
-        if span_tag:
-            return span_tag.attrs.get('data-text')
+        if div_tag:
+            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+                img_tag = tag.find('img')
+                if img_tag and 'double_hooking' in img_tag.attrs.get('src', ''):
+                    return tag.attrs['data-text']
         return '1'
 
     @staticmethod
@@ -235,6 +249,7 @@ class Fish:
 
         data_row1, data_row2, data_row3 = fish_table.find_all('tr')[:3]  # type: Tag, Tag, Tag
 
+        self.fish_angler_aquarium_size = await self._parse_angler_aquarium_size(data_row3)
         self.fish_angler_bait_preferences += await self._parse_angler_bait_preferences(soup)
         self.fish_angler_canvas_size = await self._parse_angler_canvas_size(data_row3)
         self.fish_angler_desynthesis_items += await self._parse_angler_desynthesis_items(soup)
