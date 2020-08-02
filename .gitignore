@@ -6,6 +6,8 @@ ff14angler/__pycache__/
 ff14angler/__pycache__/*
 ff14angler/constants/__pycache__/
 ff14angler/constants/__pycache__/*
+ff14angler/network/__pycache__/
+ff14angler/network/__pycache__/*
 ff14angler/dataClasses/__pycache__/
 ff14angler/dataClasses/__pycache__/*
 ff14angler/dataClasses/bait/__pycache__/
