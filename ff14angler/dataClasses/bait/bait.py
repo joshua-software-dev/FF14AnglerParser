@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
-from ff14angler.constants.data_corrections import angler_bait_name_corrections
+from ff14angler.constants.data_corrections import angler_bait_lodestone_url_corrections, angler_bait_name_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
@@ -51,17 +51,22 @@ class Bait:
         return [BaitAltCurrency(*shop) for shop in shop_holder]
 
     @staticmethod
-    async def _parse_angler_large_icon_url(soup: BeautifulSoup) -> str:
+    async def _parse_angler_large_icon_url(soup: BeautifulSoup) -> Optional[str]:
         partial_url: str = soup.find('div', {'class': 'clear_icon_l'}).find('img').attrs['src']
+        if partial_url.endswith('0000.png'):
+            return None
         return f'https://en.ff14angler.com{partial_url}'
 
     @staticmethod
-    async def _parse_angler_lodestone_url(soup: BeautifulSoup) -> Optional[str]:
+    async def _parse_angler_lodestone_url(bait_id: BaitId, soup: BeautifulSoup) -> str:
         # noinspection SpellCheckingInspection
         lodestone_link: Tag = soup.find('a', {'class': 'lodestone eorzeadb_link'})
         if lodestone_link:
             return lodestone_link.attrs['href']
-        return None
+        elif angler_bait_lodestone_url_corrections.get(bait_id.bait_angler_bait_id):
+            return angler_bait_lodestone_url_corrections.get(bait_id.bait_angler_bait_id)
+
+        raise ValueError(f'Could not find lodestone link for bait: {bait_id}')
 
     @classmethod
     async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str):
@@ -92,7 +97,7 @@ class Bait:
         )
 
         self.bait_angler_large_icon_url = await self._parse_angler_large_icon_url(soup)
-        self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(soup)
+        self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(self.bait_id, soup)
         self.bait_gil_cost: Optional[int] = lookup_response['PriceMid']
         self.bait_gil_sell_price: Optional[int] = lookup_response['PriceLow']
         self.bait_icon_url: Optional[str] = f'https://xivapi.com{lookup_response["Icon"]}'

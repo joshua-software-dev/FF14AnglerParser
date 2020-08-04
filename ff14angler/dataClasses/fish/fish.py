@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
+from ff14angler.constants.data_corrections import angler_fish_lodestone_url_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
 from ff14angler.dataClasses.comment.commentSection import CommentSection
@@ -172,11 +173,16 @@ class Fish:
         return 'https://en.ff14angler.com{}'.format(img_tag.attrs['src'])
 
     @staticmethod
-    async def _parse_angler_lodestone_url(data_row2: Tag) -> Optional[str]:
+    async def _parse_angler_lodestone_url(fish_id: FishId, data_row2: Tag) -> Optional[str]:
         # noinspection SpellCheckingInspection
         a_tag = data_row2.find('a', {'class', 'lodestone eorzeadb_link'})
         if a_tag:
-            return a_tag.attrs['href']
+            url = a_tag.attrs['href']
+            if url.endswith('0000.png'):
+                return None
+            return url
+        elif angler_fish_lodestone_url_corrections.get(fish_id.fish_angler_fish_id):
+            return angler_fish_lodestone_url_corrections.get(fish_id.fish_angler_fish_id)
         return None
 
     @staticmethod
@@ -261,7 +267,7 @@ class Fish:
         self.fish_angler_involved_recipes += await self._parse_angler_involved_recipes(soup)
         self.fish_angler_item_category = await self._parse_angler_item_category(data_row2)
         self.fish_angler_large_icon_url = await self._parse_angler_large_icon_url(data_row1)
-        self.fish_angler_lodestone_url = await self._parse_angler_lodestone_url(data_row2)
+        self.fish_angler_lodestone_url = await self._parse_angler_lodestone_url(self.fish_id, data_row2)
         self.fish_angler_territory = await self._parse_angler_territory(data_row2)
         self.fish_angler_weather_preferences = await self._parse_angler_weather_preferences(soup)
         self.fish_icon_url = f'https://xivapi.com{item_lookup_response["Icon"]}'
