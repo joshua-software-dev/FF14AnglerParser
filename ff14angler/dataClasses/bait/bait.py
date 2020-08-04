@@ -7,7 +7,11 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
-from ff14angler.constants.data_corrections import angler_bait_lodestone_url_corrections, angler_bait_name_corrections
+from ff14angler.constants.data_corrections import (
+    angler_bait_lodestone_url_corrections,
+    angler_bait_missing_icon_urls,
+    angler_bait_name_corrections
+)
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
@@ -78,7 +82,9 @@ class Bait:
         return cls(bait_id=bait_id, bait_angler_name=bait_angler_name)
 
     async def update_bait_with_assume_is_spearfishing_head(self):
+        self.bait_icon_url = angler_bait_missing_icon_urls[self.bait_id.bait_angler_bait_id]
         self.bait_item_name = f'{self.bait_angler_name} Gig Head'
+        self.bait_item_level = 61
 
     async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:

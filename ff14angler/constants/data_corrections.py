@@ -9,6 +9,12 @@ angler_bait_lodestone_url_corrections: Dict[int, str] = {
     1082: 'https://na.finalfantasyxiv.com/lodestone/playguide/db/item/ba252ebbdd9/'
 }
 
+angler_bait_missing_icon_urls: Dict[int, str] = {
+    2001: 'https://ffxiv.gamerescape.com/w/images/8/8c/SmallGig_Icon.png',
+    2002: 'https://ffxiv.gamerescape.com/w/images/a/a1/NormalGig_Icon.png',
+    2003: 'https://ffxiv.gamerescape.com/w/images/4/4b/LargeGig_Icon.png'
+}
+
 # noinspection SpellCheckingInspection
 angler_bait_name_corrections: Dict[str, str] = {
     'fistful of northern krill': 'northern krill',
