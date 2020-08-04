@@ -2,8 +2,8 @@
 
 import asyncio
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Set, Tuple
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -17,19 +17,18 @@ from ff14angler.constants.regex import (
     non_number_replacement_regex
 )
 from ff14angler.dataClasses.comment.commentSection import CommentSection
-from ff14angler.dataClasses.fish.fishId import FishId
+from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
+from ff14angler.dataClasses.spot.spotCatchMetadata import SpotCatchMetadata
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
-
-if TYPE_CHECKING:
-    # Avoiding circular imports
-    from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
 
 @dataclass
 class Spot:
+
     spot_angler_area_id: Optional[int] = None
-    spot_angler_available_fish: List[FishId] = field(default_factory=list)
+    spot_angler_catch_metadata: Optional[SpotCatchMetadata] = None
     spot_angler_comments: Optional[CommentSection] = None
+    spot_angler_fishers_intuition_comment: Optional[str] = None
     spot_angler_gathering_level: Optional[int] = None
     spot_angler_name: Optional[str] = None
     spot_angler_spot_id: Optional[int] = None
@@ -48,45 +47,35 @@ class Spot:
         return self.__dict__
 
     @staticmethod
-    async def _parse_angler_available_fish(soup: BeautifulSoup):
-        # Avoiding circular imports
-        from ff14angler.dataClasses.fish.fishProvider import FishProvider
-
-        temp_fish_list: List[FishId] = []
-        form = soup.find('form', {'name': 'spot_delete'})
-        # noinspection SpellCheckingInspection
-        body = form.find_all('tbody')[1]
-
-        for tag in body.find_all('tr'):  # type: Tag
-            _, td2, td3, _, _, td6 = tag.find_all('td')  # type: _, Tag, Tag, _, _ , Tag
-            fish_angler_id: int = int(non_number_replacement_regex.sub(repl='', string=td2.find('a').attrs['href']))
-            fish_angler_name: str = td2.text.strip()
-            fish = await FishProvider.get_fish_from_angler_fish(fish_angler_id, fish_angler_name)
-            temp_fish_list.append(fish.fish_id)
-
-        return temp_fish_list
-
-    @staticmethod
-    async def _parse_angler_area_id(soup: BeautifulSoup) -> int:
+    async def _parse_angler_area_id(spot_info: Tag) -> int:
         return int(
             angler_map_area_matcher_regex.search(
-                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
             ).groups()[0]
         )
 
     @staticmethod
-    async def _parse_angler_x_coord(soup: BeautifulSoup) -> int:
+    async def _parse_angler_fishers_intuition_comment(spot_info: Tag) -> Optional[str]:
+        last_tr = spot_info.find_all('tr')[-1]
+        if last_tr:
+            for br_tag in last_tr.find_all('br'):  # type: Tag
+                br_tag.replace_with('\n')
+            return last_tr.text.strip() or None
+        return None
+
+    @staticmethod
+    async def _parse_angler_x_coord(spot_info: Tag) -> int:
         return int(
             angler_map_x_coord_matcher_regex.search(
-                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
             ).groups()[0]
         )
 
     @staticmethod
-    async def _parse_angler_y_coord(soup: BeautifulSoup) -> int:
+    async def _parse_angler_y_coord(spot_info: Tag) -> int:
         return int(
             angler_map_y_coord_matcher_regex.search(
-                soup.find('a', {'class': None, 'rel': None}).attrs['href']
+                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
             ).groups()[0]
         )
 
@@ -117,8 +106,10 @@ class Spot:
                 )
 
                 self.spot_gathering_level = spot_lookup_response['GatheringLevel']
-                # TODO: Replace string for type init with Enum class
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type('rod', spot_lookup_response['ID'])
+                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                    GatheringTypeEnum.RodFishing,
+                    spot_lookup_response['ID']
+                )
 
                 return
 
@@ -128,8 +119,8 @@ class Spot:
         item_lookups = await asyncio.gather(
             *(
                 AiohttpWrapped.xivapi_item_lookup(
-                    fish_id.fish_xivapi_item_id
-                ) for fish_id in self.spot_angler_available_fish
+                    fish_metadata.spot_fish_id.fish_xivapi_item_id
+                ) for fish_metadata in self.spot_angler_catch_metadata.spot_available_fish
             )
         )
 
@@ -152,7 +143,10 @@ class Spot:
             # If a gathering point base and this spot share 2 or more fish as being known to be caught there...
             if len(gpb_known_fish.intersection(spearfishing_ids)) >= 2:
                 self.spot_gathering_level = gpb_level
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type('teeming', gpb_id)
+                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                    GatheringTypeEnum.TeemingSpearFishing,
+                    gpb_id
+                )
                 return
 
         raise ValueError(f'Could not find GatheringPointBase for spot: {self}')
@@ -176,7 +170,10 @@ class Spot:
 
                 notebook_lookup = await AiohttpWrapped.xivapi_spearfishing_notebook_lookup(max(spearfishing_ids))
                 self.spot_gathering_level = notebook_lookup['GatheringLevel']
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type('spear', notebook_lookup['ID'])
+                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                    GatheringTypeEnum.SpearFishing,
+                    notebook_lookup['ID']
+                )
                 return
 
         return await self.update_spot_with_assume_is_teeming_spot()
@@ -185,7 +182,8 @@ class Spot:
         spot_info: Tag = soup.find('table', {'class': 'spot_info'})
 
         self.spot_angler_area_id = await self._parse_angler_area_id(spot_info)
-        self.spot_angler_available_fish = await self._parse_angler_available_fish(soup)
+        self.spot_angler_catch_metadata = await SpotCatchMetadata.get_spot_catch_metadata_from_spot_soup(soup)
+        self.spot_angler_fishers_intuition_comment = await self._parse_angler_fishers_intuition_comment(spot_info)
         self.spot_angler_gathering_level = int(
             non_number_replacement_regex.sub(repl='', string=spot_info.find('span', {'class': 'level'}).text)
         )

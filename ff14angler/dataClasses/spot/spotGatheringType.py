@@ -2,17 +2,9 @@
 
 from dataclasses import dataclass
 
-from typing import Optional, Union
+from typing import Optional
 
-
-gathering_type_index = {
-    0: 'FishingSpot',
-    1: 'GatheringPointBase',
-    2: 'SpearfishingNotebook',
-    'rod': 'FishingSpot',
-    'teeming': 'GatheringPointBase',
-    'spear': 'SpearfishingNotebook'
-}
+from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
 
 
 @dataclass
@@ -26,7 +18,7 @@ class SpotGatheringType:
     @classmethod
     def get_spot_gathering_type(
         cls,
-        gathering_type: Union[int, str],
+        gathering_type: GatheringTypeEnum,
         unique_id: Optional[int] = None
     ) -> 'SpotGatheringType':
-        return cls(gathering_type_index[gathering_type], unique_id)
+        return cls(gathering_type.value, unique_id)

@@ -23,12 +23,12 @@ class Fetch:
             json.dump(homepage_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
 
         await BaitPage.collect_bait_data(driver)
-        await FishPage.collect_fish_data(driver)
         await SpotPage.collect_spot_data(driver)
+        await FishPage.collect_fish_data(driver)
 
         print('Writing LARGE scraping results...')
         os.makedirs('data', exist_ok=True)
-        with open('data/home_page.json', 'w+') as fh:
+        with open('data/full_dump.json', 'w+') as fh:
             json.dump(homepage_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
 
         print('Writing bait page scraping results...')
@@ -37,14 +37,14 @@ class Fetch:
             with open(f'data/bait_data/{angler_bait_id}.json', 'w+') as fh:
                 json.dump(bait_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
 
-        print('Writing fish page scraping results...')
-        os.makedirs('data/fish_data', exist_ok=True)
-        for angler_fish_id, fish_data in homepage_data['fish'].items():  # type: int, 'Any'
-            with open(f'data/fish_data/{angler_fish_id}.json', 'w+') as fh:
-                json.dump(fish_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
-
         print('Writing spot page scraping results...')
         os.makedirs('data/spot_data', exist_ok=True)
         for angler_spot_id, spot_data in homepage_data['spot'].items():  # type: int, 'Any'
             with open(f'data/spot_data/{angler_spot_id}.json', 'w+') as fh:
                 json.dump(spot_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
+
+        print('Writing fish page scraping results...')
+        os.makedirs('data/fish_data', exist_ok=True)
+        for angler_fish_id, fish_data in homepage_data['fish'].items():  # type: int, 'Any'
+            with open(f'data/fish_data/{angler_fish_id}.json', 'w+') as fh:
+                json.dump(fish_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)

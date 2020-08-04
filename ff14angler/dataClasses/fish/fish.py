@@ -73,6 +73,7 @@ class Fish:
         if div_tag:
             for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
                 img_tag = tag.find('img')
+                # noinspection SpellCheckingInspection
                 if img_tag and 'gyotaku' in img_tag.attrs.get('src', ''):
                     return tag.attrs['data-text']
         return None
