@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -17,6 +17,10 @@ from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 
+if TYPE_CHECKING:
+    # Avoiding circular imports
+    from ff14angler.dataClasses.fish.fishProvider import FishProvider
+
 
 @dataclass
 class Bait:
@@ -25,6 +29,7 @@ class Bait:
 
     bait_alt_currency_prices: List[BaitAltCurrency] = field(default_factory=list)
     bait_angler_comments: Optional[CommentSection] = None
+    bait_angler_is_mooch_fish: bool = False
     bait_angler_large_icon_url: Optional[str] = None
     bait_angler_lodestone_url: Optional[str] = None
     bait_gil_cost: Optional[int] = None
@@ -86,10 +91,7 @@ class Bait:
         self.bait_item_name = f'{self.bait_angler_name} Gig Head'
         self.bait_item_level = 61
 
-    async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
-        if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
-            return await self.update_bait_with_assume_is_spearfishing_head()
-
+    async def update_bait_with_xivapi(self):
         if corrected_name := angler_bait_name_corrections.get(self.bait_angler_name):
             search_name: str = corrected_name
         else:
@@ -102,13 +104,39 @@ class Bait:
             lookup_response['GameContentLinks'].get('SpecialShop')
         )
 
-        self.bait_angler_large_icon_url = await self._parse_angler_large_icon_url(soup)
-        self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(self.bait_id, soup)
         self.bait_gil_cost: Optional[int] = lookup_response['PriceMid']
         self.bait_gil_sell_price: Optional[int] = lookup_response['PriceLow']
         self.bait_icon_url: Optional[str] = f'https://xivapi.com{lookup_response["Icon"]}'
         self.bait_item_level: Optional[int] = lookup_response['LevelItem']
         self.bait_item_name: Optional[str] = lookup_response['Name_en']
 
+    async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
+        if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
+            return await self.update_bait_with_assume_is_spearfishing_head()
+
+        self.bait_angler_large_icon_url = await self._parse_angler_large_icon_url(soup)
+        self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(self.bait_id, soup)
+        await self.update_bait_with_xivapi()
+
     async def update_bait_with_comment_section(self, comment_section: CommentSection):
         self.bait_angler_comments = comment_section
+
+    async def update_bait_with_assume_is_mooch_fish(self):
+        # Avoiding circular imports
+        from ff14angler.dataClasses.fish.fishProvider import FishProvider
+
+        self.bait_angler_is_mooch_fish = True
+
+        success: bool = False
+        for fish_id, fish in FishProvider.fish_holder.items():
+            if fish.fish_angler_name == self.bait_angler_name:
+                self.bait_angler_comments = await self.update_bait_with_comment_section(fish.fish_angler_comments)
+                self.bait_angler_large_icon_url = fish.fish_angler_large_icon_url
+                self.bait_angler_lodestone_url = fish.fish_angler_lodestone_url
+                success = True
+                break
+
+        if not success:
+            raise ValueError(f'Could not find fish with name: {self.bait_angler_name}')
+
+        await self.update_bait_with_xivapi()

@@ -98,7 +98,7 @@ class HomePage:
             soup = BeautifulSoup(driver.page_source, lxml.__name__)
             bait_parent: Tag = soup.find('select', {'name': 'bait'})
             fish_parent: Tag = soup.find('select', {'name': 'fish'})
-            if len(fish_parent.find_all('option')) > 100 and len(bait_parent.find_all('option')) > 50:
+            if len(bait_parent.find_all('option')) >= 86 and len(fish_parent.find_all('option')) >= 1144:
                 return
             time.sleep(1)
 

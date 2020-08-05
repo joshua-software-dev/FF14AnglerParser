@@ -39,7 +39,7 @@ class Spot:
     # fishing hole.
     spot_angler_x_coord: Optional[int] = None
     spot_angler_y_coord: Optional[int] = None
-    spot_angler_zone_name: Optional[str] = None
+    spot_angler_zone_name: Optional[str] = None  # TODO: Correct the scraping of this to be the correct value
     spot_gathering_level: Optional[int] = None
     spot_gathering_type: Optional[SpotGatheringType] = None
 
@@ -119,8 +119,8 @@ class Spot:
         item_lookups = await asyncio.gather(
             *(
                 AiohttpWrapped.xivapi_item_lookup(
-                    fish_metadata.spot_fish_id.fish_xivapi_item_id
-                ) for fish_metadata in self.spot_angler_catch_metadata.spot_available_fish
+                    fish_id.fish_xivapi_item_id
+                ) for fish_id in self.spot_angler_catch_metadata.spot_available_fish
             )
         )
 

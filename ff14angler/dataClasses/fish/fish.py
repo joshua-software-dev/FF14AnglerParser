@@ -16,6 +16,7 @@ from ff14angler.dataClasses.fish.fishHourPreferences import FishHourPreferences
 from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.fish.fishLeve import FishLeve
 from ff14angler.dataClasses.fish.fishRecipe import FishRecipe
+from ff14angler.dataClasses.fish.fishTugStrength import FishTugStrength
 from ff14angler.dataClasses.fish.fishWeatherPreferences import FishWeatherPreferences
 from ff14angler.dataClasses.spot.spotId import SpotId
 
@@ -43,6 +44,7 @@ class Fish:
     fish_angler_large_icon_url: Optional[str] = None
     fish_angler_lodestone_url: Optional[str] = None
     fish_angler_territory: Optional[str] = None
+    fish_angler_tug_strength: List[FishTugStrength] = field(default_factory=list)
     fish_angler_weather_preferences: Optional[FishWeatherPreferences] = None
     fish_icon_url: Optional[str] = None
     fish_introduced_patch: Optional[str] = None
@@ -281,3 +283,12 @@ class Fish:
 
     async def update_fish_with_comment_section(self, comment_section: CommentSection):
         self.fish_angler_comments = comment_section
+
+    async def update_fish_with_tug_strength(self, tug_strength: Dict[str, float]):
+        if len(self.fish_angler_tug_strength) == 0:
+            self.fish_angler_tug_strength += [
+                FishTugStrength(
+                    fish_tug_strength=int(strength_num),
+                    fish_tug_strength_percent=strength_percent
+                ) for strength_num, strength_percent in tug_strength.items()
+            ]

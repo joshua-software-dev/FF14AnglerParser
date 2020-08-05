@@ -13,13 +13,13 @@ from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitProvider import BaitProvider
 from ff14angler.dataClasses.fish.fishProvider import FishProvider
+from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotBaitMetadata import SpotBaitMetadata
-from ff14angler.dataClasses.spot.spotFishMetadata import SpotFishMetadata
 
 
 @dataclass
 class SpotCatchMetadata:
-    spot_available_fish: List[SpotFishMetadata] = field(default_factory=list)
+    spot_available_fish: List[FishId] = field(default_factory=list)
     spot_effective_bait: List[BaitId] = field(default_factory=list)
     spot_fish_caught_per_bait: List[SpotBaitMetadata] = field(default_factory=list)
 
@@ -27,8 +27,8 @@ class SpotCatchMetadata:
         return self.__dict__
 
     @staticmethod
-    async def _parse_angler_available_fish_from_spot_soup(soup: BeautifulSoup) -> List[SpotFishMetadata]:
-        temp_fish_list: List[SpotFishMetadata] = []
+    async def _parse_angler_available_fish_from_spot_soup(soup: BeautifulSoup) -> List[FishId]:
+        temp_fish_list: List[FishId] = []
         form = soup.find('form', {'name': 'spot_delete'})
         # noinspection SpellCheckingInspection
         body = form.find_all('tbody')[1]
@@ -45,12 +45,8 @@ class SpotCatchMetadata:
             else:
                 canvas_data: str = '{}'
 
-            temp_fish_list.append(
-                await SpotFishMetadata.get_spot_fish_metadata(
-                    fish.fish_id,
-                    json.loads(canvas_data)
-                )
-            )
+            temp_fish_list.append(fish.fish_id)
+            await fish.update_fish_with_tug_strength(json.loads(canvas_data))
 
         return temp_fish_list
 
@@ -69,8 +65,14 @@ class SpotCatchMetadata:
                         string=img_holder[0].find('img').attrs['src']
                     )
                 )
-                bait_angler_name: str = img_holder[0].attrs['title']
-                bait = await BaitProvider.get_bait_from_angler_bait(bait_angler_id, bait_angler_name)
+
+                try:
+                    bait = BaitProvider.bait_holder[bait_angler_id]
+                except KeyError:
+                    bait_angler_name: str = img_holder[0].attrs['title']
+                    bait = await BaitProvider.get_bait_from_angler_bait(bait_angler_id, bait_angler_name)
+                    await bait.update_bait_with_assume_is_mooch_fish()
+
                 temp_bait_map[bait.bait_id.bait_angler_bait_id] = bait.bait_id
 
         return temp_bait_map
@@ -81,6 +83,7 @@ class SpotCatchMetadata:
         spot_bait_metadata_map: Dict[int, SpotBaitMetadata],
         soup: BeautifulSoup
     ) -> List[SpotBaitMetadata]:
+        # noinspection SpellCheckingInspection
         for td in soup.find_all('td', {'class': 'hooktime'}):  # type: Tag
             bait_angler_id: int = int(
                 non_number_replacement_regex.sub(
@@ -91,10 +94,12 @@ class SpotCatchMetadata:
 
             bait = spot_bait_metadata_map[bait_angler_id]
 
+            # noinspection SpellCheckingInspection
             for a_tag in td.find_all('a', {'rsec': True}):  # type: Tag
                 fish_angler_id: int = int(non_number_replacement_regex.sub(repl='', string=a_tag.attrs['href']))
                 for fish_info in bait.spot_angler_bait_fish_catch_info:
                     if fish_info.spot_fish_id.fish_angler_fish_id == fish_angler_id:
+                        # noinspection SpellCheckingInspection
                         fish_info.spot_angler_fish_average_seconds_to_hook = int(a_tag.attrs['rsec'])
                         break
 
@@ -103,7 +108,7 @@ class SpotCatchMetadata:
     @classmethod
     async def _parse_spot_bait_metadata(
         cls,
-        available_fish: List[SpotFishMetadata],
+        available_fish: List[FishId],
         effective_bait: Dict[int, BaitId],
         soup: BeautifulSoup
     ) -> List[SpotBaitMetadata]:
@@ -133,7 +138,7 @@ class SpotCatchMetadata:
                         int(caught_count),
                         caught_percent,
                         int(caught_total),
-                        available_fish[cell_num - 1].spot_fish_id
+                        available_fish[cell_num - 1]
                     )
 
         return await cls._parse_spot_bait_metadata_average_time_to_catch(spot_bait_metadata_map, soup)
