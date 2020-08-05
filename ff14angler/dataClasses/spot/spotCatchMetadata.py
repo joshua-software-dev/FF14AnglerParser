@@ -1,15 +1,14 @@
 #! /usr/bin/env python3
 
-import re
 import json
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from ff14angler.constants.regex import non_number_replacement_regex
+from ff14angler.constants.regex import angler_bait_metadata_catch_count_regex, non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitProvider import BaitProvider
 from ff14angler.dataClasses.fish.fishProvider import FishProvider
@@ -105,6 +104,10 @@ class SpotCatchMetadata:
 
         return list(spot_bait_metadata_map.values())
 
+    @staticmethod
+    async def _parse_caught_count_caught_total(data: str) -> Tuple[str, str]:
+        return angler_bait_metadata_catch_count_regex.search(data).groups()
+
     @classmethod
     async def _parse_spot_bait_metadata(
         cls,
@@ -129,8 +132,8 @@ class SpotCatchMetadata:
                 if fish_rate:
                     if float(fish_rate.find('canvas').attrs['value']) <= 0:
                         continue
-                    data = fish_rate.attrs['title'].split()[-1]
-                    caught_count, caught_total = re.search(r"\((\d+)/(\d+)\)$", data).groups()  # type: str, str
+                    data: str = fish_rate.attrs['title'].split()[-1]
+                    caught_count, caught_total = await cls._parse_caught_count_caught_total(data)
                     caught_percent: str = data.replace(f'({caught_count}/{caught_total})', '').strip()
 
                     # noinspection PyUnboundLocalVariable
