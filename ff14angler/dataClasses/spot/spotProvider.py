@@ -24,7 +24,7 @@ class SpotProvider:
             return result
 
         cls.spot_holder[spot_angler_id] = Spot(
-            spot_angler_spot_id=spot_angler_id,
+            spot_id=SpotId(spot_angler_id),
             spot_angler_name=spot_angler_name,
             spot_angler_zone_name=spot_angler_zone_name
         )
@@ -34,4 +34,7 @@ class SpotProvider:
     @classmethod
     async def get_spot_id_from_angler_id(cls, spot_angler_id: int) -> SpotId:
         spot = cls.spot_holder[spot_angler_id]
-        return SpotId(spot_angler_spot_id=spot.spot_angler_spot_id, spot_gathering_type=spot.spot_gathering_type)
+        if not spot.spot_id:
+            raise ValueError('Spot is not yet initialized.')
+
+        return spot.spot_id

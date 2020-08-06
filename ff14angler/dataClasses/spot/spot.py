@@ -20,6 +20,7 @@ from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
 from ff14angler.dataClasses.spot.spotCatchMetadata import SpotCatchMetadata
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
+from ff14angler.dataClasses.spot.spotId import SpotId
 
 
 @dataclass
@@ -31,7 +32,7 @@ class Spot:
     spot_angler_fishers_intuition_comment: Optional[str] = None
     spot_angler_gathering_level: Optional[int] = None
     spot_angler_name: Optional[str] = None
-    spot_angler_spot_id: Optional[int] = None
+    spot_id: Optional[SpotId] = None
     # For some reason, `FishingSpot`s on xivapi use X and Z map coordinates and
     # angler uses X and Y map coordinates. I believe they both map to the in
     # game map's X and Z, but its possible angler's actually maps to some pixel
@@ -41,7 +42,6 @@ class Spot:
     spot_angler_y_coord: Optional[int] = None
     spot_angler_zone_name: Optional[str] = None  # TODO: Correct the scraping of this to be the correct value
     spot_gathering_level: Optional[int] = None
-    spot_gathering_type: Optional[SpotGatheringType] = None
 
     def __json__(self):
         return self.__dict__
@@ -106,7 +106,7 @@ class Spot:
                 )
 
                 self.spot_gathering_level = spot_lookup_response['GatheringLevel']
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
                     GatheringTypeEnum.RodFishing,
                     spot_lookup_response['ID']
                 )
@@ -143,7 +143,7 @@ class Spot:
             # If a gathering point base and this spot share 2 or more fish as being known to be caught there...
             if len(gpb_known_fish.intersection(spearfishing_ids)) >= 2:
                 self.spot_gathering_level = gpb_level
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
                     GatheringTypeEnum.TeemingSpearFishing,
                     gpb_id
                 )
@@ -170,7 +170,7 @@ class Spot:
 
                 notebook_lookup = await AiohttpWrapped.xivapi_spearfishing_notebook_lookup(max(spearfishing_ids))
                 self.spot_gathering_level = notebook_lookup['GatheringLevel']
-                self.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+                self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
                     GatheringTypeEnum.SpearFishing,
                     notebook_lookup['ID']
                 )
