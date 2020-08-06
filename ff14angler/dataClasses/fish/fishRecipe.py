@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from bs4.element import Tag
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from bs4.element import Tag
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.regex import non_number_replacement_regex
@@ -33,7 +33,10 @@ class FishLeve:
 
     @classmethod
     async def get_leve_from_soup(cls, soup: Tag) -> 'FishLeve':
-        td1, _, td3, td4, _ = soup.find_all('td')  # type: Tag, _, Tag, Tag, _
+        tds = soup.find_all('td')
+        td1: Tag = tds[0]
+        td3: Tag = tds[2]
+        td4: Tag = tds[3]
         angler_leve_name_jp: str = td1.find('font').text.strip()
         angler_leve_name: str = await cls._parse_leve_name(td1)
 

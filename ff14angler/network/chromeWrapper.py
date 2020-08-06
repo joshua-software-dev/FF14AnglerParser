@@ -2,7 +2,7 @@
 
 import os
 
-from selenium import webdriver
+from selenium import webdriver  # type: ignore
 
 
 class ChromeWrapper:

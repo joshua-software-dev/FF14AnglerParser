@@ -5,8 +5,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.constants.regex import angler_bait_metadata_catch_count_regex, non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
@@ -33,7 +33,10 @@ class SpotCatchMetadata:
         body = form.find_all('tbody')[1]
 
         for tag in body.find_all('tr'):  # type: Tag
-            _, td2, td3, td4, _, td6 = tag.find_all('td')  # type: _, Tag, Tag, Tag, _ , Tag
+            tds = tag.find_all('td')
+            td2: Tag = tds[1]
+            td4: Tag = tds[3]
+
             fish_angler_id: int = int(non_number_replacement_regex.sub(repl='', string=td2.find('a').attrs['href']))
             fish_angler_name: str = td2.text.strip()
             fish = await FishProvider.get_fish_from_angler_fish(fish_angler_id, fish_angler_name)
@@ -42,7 +45,7 @@ class SpotCatchMetadata:
             if tug_canvas:
                 canvas_data: str = tug_canvas.attrs['data-value']
             else:
-                canvas_data: str = '{}'
+                canvas_data = '{}'
 
             temp_fish_list.append(fish.fish_id)
             await fish.update_fish_with_tug_strength(json.loads(canvas_data))
@@ -105,8 +108,12 @@ class SpotCatchMetadata:
         return list(spot_bait_metadata_map.values())
 
     @staticmethod
-    async def _parse_caught_count_caught_total(data: str) -> Tuple[str, str]:
-        return angler_bait_metadata_catch_count_regex.search(data).groups()
+    async def _parse_caught_count_caught_total(data: str) -> Tuple[int, int]:
+        match = angler_bait_metadata_catch_count_regex.search(data)
+        if match:
+            caught_count, caught_total = match.groups()  # type: str, str
+            return int(caught_count), int(caught_total)
+        raise ValueError(f'Could not parse spot caught count total: {data}')
 
     @classmethod
     async def _parse_spot_bait_metadata(
@@ -138,9 +145,9 @@ class SpotCatchMetadata:
 
                     # noinspection PyUnboundLocalVariable
                     bait_metadata.update_spot_bait_metadata_with_spot_bait_fish_caught(
-                        int(caught_count),
+                        caught_count,
                         caught_percent,
-                        int(caught_total),
+                        caught_total,
                         available_fish[cell_num - 1]
                     )
 

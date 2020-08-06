@@ -5,8 +5,8 @@ import asyncio
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_spot_name_corrections
@@ -48,11 +48,10 @@ class Spot:
 
     @staticmethod
     async def _parse_angler_area_id(spot_info: Tag) -> int:
-        return int(
-            angler_map_area_matcher_regex.search(
-                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
-            ).groups()[0]
-        )
+        match = angler_map_area_matcher_regex.search(spot_info.find('a', {'class': None, 'rel': None}).attrs['href'])
+        if match:
+            return int(match.groups()[0])
+        raise ValueError(f'Could not parse area from spot_info: {spot_info}')
 
     @staticmethod
     async def _parse_angler_fishers_intuition_comment(spot_info: Tag) -> Optional[str]:
@@ -65,19 +64,21 @@ class Spot:
 
     @staticmethod
     async def _parse_angler_x_coord(spot_info: Tag) -> int:
-        return int(
-            angler_map_x_coord_matcher_regex.search(
-                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
-            ).groups()[0]
+        match = angler_map_x_coord_matcher_regex.search(
+            spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
         )
+        if match:
+            return int(match.groups()[0])
+        raise ValueError(f'Could not parse x coordinate from spot_info: {spot_info}')
 
     @staticmethod
     async def _parse_angler_y_coord(spot_info: Tag) -> int:
-        return int(
-            angler_map_y_coord_matcher_regex.search(
-                spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
-            ).groups()[0]
+        match = angler_map_y_coord_matcher_regex.search(
+            spot_info.find('a', {'class': None, 'rel': None}).attrs['href']
         )
+        if match:
+            return int(match.groups()[0])
+        raise ValueError(f'Could not parse y coordinate from spot_info: {spot_info}')
 
     @staticmethod
     async def _check_if_is_spearfishing_spot(soup: BeautifulSoup) -> bool:
@@ -116,6 +117,9 @@ class Spot:
         raise ValueError(f'Could not find fishing spot for spot: {self}')
 
     async def _lookup_spearfishing_ids_for_available_fish(self) -> Set[int]:
+        if self.spot_angler_catch_metadata is None:
+            raise ValueError(f'Cannot lookup available fish is spot_angler_catch_metadata is None: {self}')
+
         item_lookups = await asyncio.gather(
             *(
                 AiohttpWrapped.xivapi_item_lookup(

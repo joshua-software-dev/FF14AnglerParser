@@ -4,8 +4,8 @@ from functools import cached_property
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 
 @dataclass
@@ -31,7 +31,7 @@ class FishHourPreferences:
             if hour_div:
                 hour_catches: int = int(hour_div.attrs['title'].split('/')[0])
             else:
-                hour_catches: int = 0
+                hour_catches = 0
             hour_label: int = int(hour.find('label').text.strip())
             temp_hours[hour_label] = hour_catches
 

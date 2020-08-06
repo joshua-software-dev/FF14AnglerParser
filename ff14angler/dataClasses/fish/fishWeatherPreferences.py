@@ -4,8 +4,8 @@ from functools import cached_property
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 
 @dataclass

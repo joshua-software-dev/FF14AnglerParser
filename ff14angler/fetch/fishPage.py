@@ -3,14 +3,14 @@
 import asyncio
 import urllib.parse
 
-import lxml
+import lxml  # type: ignore
 
-from bs4 import BeautifulSoup
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from bs4 import BeautifulSoup  # type: ignore
+from selenium.common.exceptions import TimeoutException  # type: ignore
+from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
+from selenium.webdriver.common.by import By  # type: ignore
+from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
+from selenium.webdriver.support import expected_conditions  # type: ignore
 
 from ff14angler.constants.values import (
     ANGLER_BASE_URL,

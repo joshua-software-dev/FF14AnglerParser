@@ -3,8 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import (
@@ -73,7 +73,7 @@ class Bait:
         if lodestone_link:
             return lodestone_link.attrs['href']
         elif angler_bait_lodestone_url_corrections.get(bait_id.bait_angler_bait_id):
-            return angler_bait_lodestone_url_corrections.get(bait_id.bait_angler_bait_id)
+            return angler_bait_lodestone_url_corrections[bait_id.bait_angler_bait_id]
 
         raise ValueError(f'Could not find lodestone link for bait: {bait_id}')
 

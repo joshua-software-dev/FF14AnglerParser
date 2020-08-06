@@ -2,8 +2,8 @@
 
 from typing import Dict, List
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.bait import Bait

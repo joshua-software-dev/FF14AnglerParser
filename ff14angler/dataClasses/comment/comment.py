@@ -2,14 +2,14 @@
 
 import copy
 
-import lxml
+import lxml  # type: ignore
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Set
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.constants.regex import timestamp_matcher_regex
 
@@ -30,12 +30,16 @@ class Comment:
     async def _parse_author(info: Tag) -> str:
         text = info.text.strip()
         match = timestamp_matcher_regex.search(text)
-        return text.replace(match[0], '').strip()
+        if match:
+            return text.replace(match[0], '').strip()
+        raise ValueError(f'Could not parse author from comment: {info}')
 
     @staticmethod
     async def _parse_timestamp(info: Tag) -> datetime:
         match = timestamp_matcher_regex.search(info.text.strip())
-        return datetime.strptime(match[0], '%Y-%m-%d %H:%M:%S')
+        if match:
+            return datetime.strptime(match[0], '%Y-%m-%d %H:%M:%S')
+        raise ValueError(f'Could not parse timestamp from comment: {info}')
 
     @staticmethod
     async def _parse_text_original(soup: Tag) -> str:

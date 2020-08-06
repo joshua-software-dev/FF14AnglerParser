@@ -3,8 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_fish_lodestone_url_corrections
@@ -165,7 +165,7 @@ class Fish:
 
     @staticmethod
     async def _parse_angler_item_category(data_row2: Tag) -> str:
-        span1, _, _ = data_row2.find_all('span')  # type: Tag, _, _
+        span1: Tag = data_row2.find_all('span')[0]
         return span1.text.strip()
 
     @staticmethod
@@ -189,7 +189,7 @@ class Fish:
 
     @staticmethod
     async def _parse_angler_territory(data_row2: Tag) -> Optional[str]:
-        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
+        span2: Tag = data_row2.find_all('span')[1]
         territory = ' '.join(span2.text.strip().split()[1:])
         if territory:
             return territory
@@ -211,13 +211,13 @@ class Fish:
 
     async def _lookup_fish_introduced_patch(self, data_row2: Tag, item_lookup_response: Dict[str, Any]) -> str:
         try:
-            return item_lookup_response['GamePatch']['Version']  # type: str
+            return item_lookup_response['GamePatch']['Version']
         except KeyError:
             return await self._parse_fish_introduced_patch(data_row2)
 
     @staticmethod
     async def _parse_item_level(data_row2: Tag) -> int:
-        _, span2, _ = data_row2.find_all('span')  # type: _, Tag, _
+        span2: Tag = data_row2.find_all('span')[1]
         return int(span2.text.strip().split()[0])
 
     @staticmethod
@@ -228,13 +228,13 @@ class Fish:
             fish_lookup_response = await AiohttpWrapped.xivapi_fish_parameter_lookup(
                 game_content_links['FishParameter']['Item'][0]
             )
-            return fish_lookup_response['Text_en']  # type: str
+            return fish_lookup_response['Text_en']
         except KeyError:
             try:
                 fish_lookup_response = await AiohttpWrapped.xivapi_spearfishing_item_lookup(
                     game_content_links['SpearfishingItem']['Item'][0]
                 )
-                return fish_lookup_response['Description_en']  # type: str
+                return fish_lookup_response['Description_en']
             except KeyError:
                 return None
 

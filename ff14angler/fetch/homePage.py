@@ -3,17 +3,17 @@
 import asyncio
 import time
 
-import lxml
+import lxml  # type: ignore
 
-from typing import Any, Awaitable, Dict, List, Tuple, TypeVar
+from typing import Awaitable, Dict, Iterable, List, Tuple, TypeVar, TypedDict
 
-from bs4 import BeautifulSoup
-from bs4.element import Tag
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from bs4 import BeautifulSoup  # type: ignore
+from bs4.element import Tag  # type: ignore
+from selenium.common.exceptions import TimeoutException  # type: ignore
+from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
+from selenium.webdriver.common.by import By  # type: ignore
+from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
+from selenium.webdriver.support import expected_conditions  # type: ignore
 
 from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION
 from ff14angler.dataClasses.bait.baitProvider import Bait, BaitProvider
@@ -23,6 +23,7 @@ from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
 T1 = TypeVar('T1')
 T2 = TypeVar('T2')
+HomePageData = TypedDict('HomePageData', {'bait': Dict[int, Bait], 'fish': Dict[int, Fish], 'spot': Dict[int, Spot]})
 
 
 class HomePage:
@@ -47,7 +48,7 @@ class HomePage:
         return BaitProvider.bait_holder
 
     @classmethod
-    async def _parse_fish_list(cls, fish_parent: Tag):
+    async def _parse_fish_list(cls, fish_parent: Tag) -> Dict[int, Fish]:
         temp_fish_list: List[Awaitable[Fish]] = []
 
         for tag in sorted(fish_parent.find_all('option'), key=lambda x: int(x.attrs['value'])):  # type: Tag
@@ -61,15 +62,18 @@ class HomePage:
         return FishProvider.fish_holder
 
     @classmethod
-    async def _parse_spot_list(cls, spot_parent: Tag):
+    async def _parse_spot_list(cls, spot_parent: Tag) -> Dict[int, Spot]:
         temp_spot_list: List[Awaitable[Spot]] = []
 
         # noinspection SpellCheckingInspection
         for zone in spot_parent.find_all('optgroup'):  # type: Tag
-            for spot in zone.find_all('option'):  # type: Tag
+            spots: Iterable[Tag] = zone.find_all('option')
+            if not spots:
+                spot_angler_zone_name: str = zone.attrs['label']
+
+            for spot in spots:
                 spot_angler_id: int = int(spot.attrs['value'])
                 spot_angler_name: str = spot.text.strip()
-                spot_angler_zone_name: str = zone.attrs['label']
 
                 temp_spot_list.append(
                     SpotProvider.get_spot_from_angler_spot(
@@ -83,7 +87,7 @@ class HomePage:
         return SpotProvider.spot_holder
 
     @classmethod
-    async def parse_homepage_data(cls, html: str) -> Dict[str, Any]:
+    async def parse_homepage_data(cls, html: str) -> HomePageData:
         soup = BeautifulSoup(html, lxml.__name__)
 
         return {
@@ -103,7 +107,7 @@ class HomePage:
             time.sleep(1)
 
     @classmethod
-    async def collect_homepage_data(cls, driver: WebDriver) -> Dict[str, Dict[int, str]]:
+    async def collect_homepage_data(cls, driver: WebDriver) -> HomePageData:
         angler_url: str = 'https://en.ff14angler.com/'
         print(f'Scraping page: {angler_url}')
         driver.get(angler_url)

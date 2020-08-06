@@ -3,14 +3,14 @@
 import json
 import urllib.parse
 
-import lxml
+import lxml  # type: ignore
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 
-from bs4 import BeautifulSoup
-from selenium.webdriver.chrome.webdriver import WebDriver
+from bs4 import BeautifulSoup  # type: ignore
+from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.constants.values import ANGLER_BASE_URL
@@ -41,7 +41,7 @@ class CommentSection:
 
     @classmethod
     async def _get_request_metadata_from_web_driver(cls, driver: WebDriver) -> Tuple[int, int, int, int]:
-        response: List[int, str, str, str] = driver.execute_script(comment_metadata_javascript)
+        response: Tuple[int, str, str, str] = driver.execute_script(comment_metadata_javascript)
         request_id: int = response[0]
         type_id: int = int(response[1])
         item_id: int = int(response[2])
