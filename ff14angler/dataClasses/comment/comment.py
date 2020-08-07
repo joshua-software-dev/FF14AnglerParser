@@ -60,7 +60,10 @@ class Comment:
         comment_soup = BeautifulSoup(f'<html><div>{comment_json["comment"]}</div></html>', lxml.__name__)
 
         return cls(
-            comment_author=comment_json['nickname'],
+            comment_author=BeautifulSoup(
+                f'<html><div class="escape_name">{comment_json["nickname"]}</div></html>',
+                lxml.__name__
+            ).find('div', {'class': 'escape_name'}).text.strip(),
             comment_text_original=await cls._parse_text_original(copy.copy(comment_soup)),
             comment_text_translated=await cls._parse_text_translated(comment_soup),
             comment_timestamp=datetime.strptime(comment_json['date'], '%Y-%m-%d %H:%M:%S')
