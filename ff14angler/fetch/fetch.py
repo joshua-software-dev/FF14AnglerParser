@@ -5,7 +5,8 @@ import os
 
 from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
-from ff14angler.dunderSerializer import DunderSerializer
+from ff14angler.export.dunderSerializer import DunderSerializer
+from ff14angler.export.exportTables import ExportTables
 from ff14angler.fetch.baitPage import BaitPage
 from ff14angler.fetch.fishPage import FishPage
 from ff14angler.fetch.homePage import HomePage
@@ -26,6 +27,11 @@ class Fetch:
         os.makedirs('data', exist_ok=True)
         with open('data/full_dump.json', 'w+') as fh:
             json.dump(homepage_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
+
+        print('Writing table form scraping results...')
+        os.makedirs('data/table_data')
+        with open('data/full_dump.json') as fh:
+            await ExportTables.output_data_for_database(json.load(fh))
 
         print('Writing bait page scraping results...')
         os.makedirs('data/bait_data', exist_ok=True)

@@ -40,7 +40,7 @@ class Spot:
     # fishing hole.
     spot_angler_x_coord: Optional[int] = None
     spot_angler_y_coord: Optional[int] = None
-    spot_angler_zone_name: Optional[str] = None  # TODO: Correct the scraping of this to be the correct value
+    spot_angler_zone_name: Optional[str] = None
     spot_gathering_level: Optional[int] = None
 
     def __json__(self):
