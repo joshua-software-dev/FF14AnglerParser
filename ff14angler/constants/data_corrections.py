@@ -10,9 +10,9 @@ angler_bait_lodestone_url_corrections: Dict[int, str] = {
 }
 
 angler_bait_missing_icon_urls: Dict[int, str] = {
-    2001: 'https://ffxiv.gamerescape.com/w/images/8/8c/SmallGig_Icon.png',
-    2002: 'https://ffxiv.gamerescape.com/w/images/a/a1/NormalGig_Icon.png',
-    2003: 'https://ffxiv.gamerescape.com/w/images/4/4b/LargeGig_Icon.png'
+    2001: 'https://xivapi.com/i/060000/060671.png',
+    2002: 'https://xivapi.com/i/060000/060672.png',
+    2003: 'https://xivapi.com/i/060000/060673.png'
 }
 
 # noinspection SpellCheckingInspection
@@ -33,6 +33,7 @@ angler_desynthesis_item_name_corrections: Dict[str, str] = {
 }
 
 angler_fish_lodestone_url_corrections: Dict[int, str] = {
+    3086: 'https://na.finalfantasyxiv.com/lodestone/playguide/db/item/564719300e5',
     3299: 'https://na.finalfantasyxiv.com/lodestone/playguide/db/item/77c295edae2/',
     3300: 'https://na.finalfantasyxiv.com/lodestone/playguide/db/item/a3de98862e0/'
 }

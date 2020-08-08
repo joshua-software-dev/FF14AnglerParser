@@ -25,7 +25,6 @@ from ff14angler.dataClasses.spot.spotId import SpotId
 
 @dataclass
 class Spot:
-
     spot_angler_area_id: Optional[int] = None
     spot_angler_catch_metadata: Optional[SpotCatchMetadata] = None
     spot_angler_comments: Optional[CommentSection] = None

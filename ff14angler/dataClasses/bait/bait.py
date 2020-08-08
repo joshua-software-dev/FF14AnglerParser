@@ -12,6 +12,7 @@ from ff14angler.constants.data_corrections import (
     angler_bait_missing_icon_urls,
     angler_bait_name_corrections
 )
+from ff14angler.constants.values import ANGLER_SPEARFISHING_BAIT_ITEM_ID, ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
@@ -86,7 +87,8 @@ class Bait:
     async def update_bait_with_assume_is_spearfishing_head(self):
         self.bait_icon_url = angler_bait_missing_icon_urls[self.bait_id.bait_angler_bait_id]
         self.bait_item_name = f'{self.bait_angler_name} Gig Head'
-        self.bait_item_level = 61
+        self.bait_item_level = ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
+        self.bait_id.bait_xivapi_item_id = ANGLER_SPEARFISHING_BAIT_ITEM_ID
 
     async def update_bait_with_xivapi(self):
         if corrected_name := angler_bait_name_corrections.get(self.bait_angler_name):
@@ -111,7 +113,6 @@ class Bait:
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
             return await self.update_bait_with_assume_is_spearfishing_head()
 
-        self.bait_angler_large_icon_url = await self._parse_angler_large_icon_url(soup)
         self.bait_angler_lodestone_url = await self._parse_angler_lodestone_url(self.bait_id, soup)
         await self.update_bait_with_xivapi()
 

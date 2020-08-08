@@ -12,21 +12,10 @@ from typing import Any, Dict, List, Tuple
 from bs4 import BeautifulSoup  # type: ignore
 from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
+from ff14angler.constants.javascript import comment_metadata_javascript
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.constants.values import ANGLER_BASE_URL
 from ff14angler.dataClasses.comment.comment import Comment
-
-
-comment_metadata_javascript = """\
-comment_element = document.querySelector('.comment_list');
-comment_type = comment_element.attributes[1].value;
-comment_item = comment_element.attributes[2].value;
-for (const small_tag of document.querySelectorAll('.small')) {
-    if (small_tag.previousElementSibling.innerText == 'Comments')
-    {
-        return [RID, comment_type, comment_item, small_tag.innerText];
-    }
-}"""
 
 
 @dataclass
