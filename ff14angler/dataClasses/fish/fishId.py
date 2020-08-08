@@ -10,9 +10,6 @@ class FishId:
     fish_angler_fish_id: int
     fish_xivapi_item_id: int
 
-    def __json__(self):
-        return self.__dict__
-
     @classmethod
     async def get_fish_id_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str):
         search_response = await AiohttpWrapped.xivapi_item_search(fish_angler_name)

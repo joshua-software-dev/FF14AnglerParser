@@ -13,11 +13,6 @@ class FishHourPreferences:
     hours: Dict[int, int]
     unique_catches_across_all_hours: int
 
-    def __json__(self):
-        _temp = self.__dict__
-        _temp['hours_percentage'] = self.hours_percentage
-        return _temp
-
     @cached_property
     def hours_percentage(self) -> Dict[int, float]:
         return {k: v / self.unique_catches_across_all_hours for k, v in self.hours.items()}

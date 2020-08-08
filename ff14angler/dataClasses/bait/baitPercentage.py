@@ -9,6 +9,3 @@ from ff14angler.dataClasses.bait.baitId import BaitId
 class BaitPercentage:
     bait_id: BaitId
     bait_percentage: str
-
-    def __json__(self):
-        return self.__dict__

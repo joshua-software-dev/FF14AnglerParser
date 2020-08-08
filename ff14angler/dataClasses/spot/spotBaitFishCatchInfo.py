@@ -13,6 +13,3 @@ class SpotBaitFishCatchInfo:
     spot_fish_id: FishId
 
     spot_angler_fish_average_seconds_to_hook: Optional[int] = None
-
-    def __json__(self):
-        return self.__dict__

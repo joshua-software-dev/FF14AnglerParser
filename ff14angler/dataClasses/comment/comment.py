@@ -21,11 +21,6 @@ class Comment:
     comment_text_translated: str
     comment_timestamp: datetime
 
-    def __json__(self):
-        _temp = self.__dict__
-        _temp['comment_timestamp'] = str(self.comment_timestamp)
-        return _temp
-
     @staticmethod
     async def _parse_author(info: Tag) -> str:
         text = info.text.strip()

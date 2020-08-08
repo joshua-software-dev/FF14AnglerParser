@@ -21,9 +21,6 @@ class FishLeve:
     leve_item_name: str
     leve_level: int
 
-    def __json__(self):
-        return self.__dict__
-
     @staticmethod
     async def _parse_leve_name(td1: Tag) -> str:
         td1.find('font').decompose()

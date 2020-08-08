@@ -38,9 +38,6 @@ class Bait:
     bait_item_level: Optional[int] = None
     bait_item_name: Optional[str] = None
 
-    def __json__(self):
-        return self.__dict__
-
     @staticmethod
     async def _get_alt_currency_prices(special_shops: Optional[Dict[str, List[int]]]) -> List[BaitAltCurrency]:
         shop_holder: Set[Tuple[int, str, int]] = set()

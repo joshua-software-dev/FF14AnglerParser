@@ -13,9 +13,6 @@ class BaitId:
     bait_angler_bait_id: int
     bait_xivapi_item_id: Optional[int]
 
-    def __json__(self):
-        return self.__dict__
-
     @classmethod
     async def get_bait_id_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str):
         if bait_angler_name in angler_bait_name_do_not_search:

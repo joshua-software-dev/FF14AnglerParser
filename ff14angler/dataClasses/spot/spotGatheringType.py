@@ -12,9 +12,6 @@ class SpotGatheringType:
     gathering_type: str
     gathering_type_unique_id: Optional[int] = None
 
-    def __json__(self):
-        return self.__dict__
-
     @classmethod
     def get_spot_gathering_type(
         cls,

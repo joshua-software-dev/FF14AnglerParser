@@ -53,9 +53,6 @@ class Fish:
     fish_long_description: Optional[str] = None
     fish_short_description: Optional[str] = None
 
-    def __json__(self):
-        return self.__dict__
-
     @staticmethod
     async def _parse_angler_aquarium_size(data_row3: Tag) -> Optional[str]:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})

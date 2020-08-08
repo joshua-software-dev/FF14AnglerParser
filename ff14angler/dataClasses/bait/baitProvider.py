@@ -13,10 +13,6 @@ from ff14angler.dataClasses.bait.baitPercentage import BaitPercentage
 class BaitProvider:
     bait_holder: Dict[int, Bait] = dict()
 
-    @classmethod
-    def __json__(cls):
-        return cls.bait_holder
-
     @staticmethod
     async def _parse_angler_bait_id(td2: Tag) -> int:
         a_tag = td2.find('a')

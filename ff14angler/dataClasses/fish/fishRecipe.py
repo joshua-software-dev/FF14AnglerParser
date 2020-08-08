@@ -17,8 +17,6 @@ class FishRecipe:
     recipe_item_id: int
     recipe_name: str
 
-    def __json__(self):
-        return self.__dict__
 
     @staticmethod
     async def _parse_crafting_class(td2: Tag) -> str:

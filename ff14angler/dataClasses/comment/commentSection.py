@@ -34,11 +34,6 @@ class CommentSection:
     comments: List[Comment]
     comment_fetch_timestamp: datetime
 
-    def __json__(self):
-        temp = self.__dict__.copy()
-        temp['comment_fetch_timestamp'] = self.comment_fetch_timestamp.isoformat()
-        return temp
-
     @classmethod
     async def _get_request_metadata_from_web_driver(cls, driver: WebDriver) -> Tuple[int, int, int, int]:
         response: Tuple[int, str, str, str] = driver.execute_script(comment_metadata_javascript)

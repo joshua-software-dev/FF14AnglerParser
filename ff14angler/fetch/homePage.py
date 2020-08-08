@@ -5,7 +5,7 @@ import time
 
 import lxml  # type: ignore
 
-from typing import Awaitable, Dict, Iterable, List, Tuple, TypeVar, TypedDict
+from typing import Awaitable, Dict, Iterable, List, Tuple, TypeVar
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
@@ -16,6 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
 from selenium.webdriver.support import expected_conditions  # type: ignore
 
 from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION
+from ff14angler.constants.typeshed import HomePageData
 from ff14angler.dataClasses.bait.baitProvider import Bait, BaitProvider
 from ff14angler.dataClasses.fish.fishProvider import Fish, FishProvider
 from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
@@ -23,7 +24,6 @@ from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
 T1 = TypeVar('T1')
 T2 = TypeVar('T2')
-HomePageData = TypedDict('HomePageData', {'bait': Dict[int, Bait], 'fish': Dict[int, Fish], 'spot': Dict[int, Spot]})
 
 
 class HomePage:

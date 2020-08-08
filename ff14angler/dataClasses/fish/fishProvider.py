@@ -9,10 +9,6 @@ class FishProvider:
     fish_holder: Dict[int, Fish] = dict()
 
     @classmethod
-    def __json__(cls):
-        return cls.fish_holder
-
-    @classmethod
     async def get_fish_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str) -> Fish:
         if result := cls.fish_holder.get(fish_angler_id):
             return result

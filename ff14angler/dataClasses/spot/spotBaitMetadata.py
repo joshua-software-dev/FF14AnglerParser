@@ -15,9 +15,6 @@ class SpotBaitMetadata:
     spot_angler_bait_fish_catch_info: List[SpotBaitFishCatchInfo] = field(default_factory=list)
     spot_angler_bait_total_fish_caught: Optional[int] = None
 
-    def __json__(self):
-        return self.__dict__
-
     def update_spot_bait_metadata_with_spot_bait_fish_caught(
         self,
         caught_count: int,

@@ -10,10 +10,6 @@ class SpotProvider:
     spot_holder: Dict[int, Spot] = dict()
 
     @classmethod
-    def __json__(cls):
-        return cls.spot_holder
-
-    @classmethod
     async def get_spot_from_angler_spot(
         cls,
         spot_angler_id: int,

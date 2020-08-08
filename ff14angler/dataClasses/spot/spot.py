@@ -43,9 +43,6 @@ class Spot:
     spot_angler_zone_name: Optional[str] = None
     spot_gathering_level: Optional[int] = None
 
-    def __json__(self):
-        return self.__dict__
-
     @staticmethod
     async def _parse_angler_area_id(spot_info: Tag) -> int:
         match = angler_map_area_matcher_regex.search(spot_info.find('a', {'class': None, 'rel': None}).attrs['href'])

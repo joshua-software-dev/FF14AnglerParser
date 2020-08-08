@@ -10,6 +10,3 @@ from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 class SpotId:
     spot_angler_spot_id: int
     spot_gathering_type: Optional[SpotGatheringType] = None
-
-    def __json__(self):
-        return self.__dict__

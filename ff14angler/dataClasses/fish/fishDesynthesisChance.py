@@ -19,8 +19,6 @@ class FishDesynthesisChance:
     desynthesis_item_id: int
     desynthesis_item_name: str
 
-    def __json__(self):
-        return self.__dict__
 
     @staticmethod
     async def _parse_angler_item_name(td2: Tag) -> str:

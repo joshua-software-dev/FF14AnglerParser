@@ -22,9 +22,6 @@ class SpotCatchMetadata:
     spot_effective_bait: List[BaitId] = field(default_factory=list)
     spot_fish_caught_per_bait: List[SpotBaitMetadata] = field(default_factory=list)
 
-    def __json__(self):
-        return self.__dict__
-
     @staticmethod
     async def _parse_angler_available_fish_from_spot_soup(soup: BeautifulSoup) -> List[FishId]:
         temp_fish_list: List[FishId] = []
