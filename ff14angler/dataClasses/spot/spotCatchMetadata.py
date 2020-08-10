@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
 
+from ff14angler.constants.data_corrections import angler_bait_blacklisted_bait_id
 from ff14angler.constants.regex import angler_bait_metadata_catch_count_regex, non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitProvider import BaitProvider
@@ -91,7 +92,12 @@ class SpotCatchMetadata:
                 )
             )
 
-            bait = spot_bait_metadata_map[bait_angler_id]
+            try:
+                bait = spot_bait_metadata_map[bait_angler_id]
+            except KeyError:
+                if bait_angler_id in angler_bait_blacklisted_bait_id:
+                    continue
+                raise
 
             # noinspection SpellCheckingInspection
             for a_tag in td.find_all('a', {'rsec': True}):  # type: Tag
