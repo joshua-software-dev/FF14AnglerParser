@@ -16,9 +16,9 @@ from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
 from selenium.webdriver.support import expected_conditions  # type: ignore
 
 from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION
-from ff14angler.constants.typeshed import HomePageData
 from ff14angler.dataClasses.bait.baitProvider import Bait, BaitProvider
 from ff14angler.dataClasses.fish.fishProvider import Fish, FishProvider
+from ff14angler.dataClasses.scrapingData import ScrapingData
 from ff14angler.dataClasses.spot.spotProvider import Spot, SpotProvider
 
 
@@ -87,14 +87,14 @@ class HomePage:
         return SpotProvider.spot_holder
 
     @classmethod
-    async def parse_homepage_data(cls, html: str) -> HomePageData:
+    async def parse_homepage_data(cls, html: str) -> ScrapingData:
         soup = BeautifulSoup(html, lxml.__name__)
 
-        return {
-            'bait': await cls._parse_bait_list(soup.find('select', {'name': 'bait'})),
-            'fish': await cls._parse_fish_list(soup.find('select', {'name': 'fish'})),
-            'spot': await cls._parse_spot_list(soup.find('select', {'name': 'spot'}))
-        }
+        return ScrapingData(
+            bait=await cls._parse_bait_list(soup.find('select', {'name': 'bait'})),
+            fish=await cls._parse_fish_list(soup.find('select', {'name': 'fish'})),
+            spot=await cls._parse_spot_list(soup.find('select', {'name': 'spot'}))
+        )
 
     @staticmethod
     async def check_is_truly_loaded(driver: WebDriver):
@@ -107,7 +107,7 @@ class HomePage:
             time.sleep(1)
 
     @classmethod
-    async def collect_homepage_data(cls, driver: WebDriver) -> HomePageData:
+    async def collect_homepage_data(cls, driver: WebDriver) -> ScrapingData:
         angler_url: str = 'https://en.ff14angler.com/'
         print(f'Scraping page: {angler_url}')
         driver.get(angler_url)

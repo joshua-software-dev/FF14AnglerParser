@@ -76,7 +76,24 @@ class Bait:
         raise ValueError(f'Could not find lodestone link for bait: {bait_id}')
 
     @classmethod
-    async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str):
+    async def get_bait_from_export_json(cls, **kwargs) -> 'Bait':
+        return cls(
+            **{
+                **kwargs,
+                **{
+                    'bait_id': BaitId(**kwargs['bait_id']),
+                    'bait_alt_currency_prices': [
+                        BaitAltCurrency(**alt_price) for alt_price in kwargs['bait_alt_currency_prices']
+                    ],
+                    'bait_angler_comments': await CommentSection.get_comment_section_from_export_json(
+                        **kwargs['bait_angler_comments']
+                    ) if kwargs['bait_angler_comments'] is not None else None
+                }
+            }
+        )
+
+    @classmethod
+    async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str) -> 'Bait':
         bait_id = await BaitId.get_bait_id_from_angler_bait(
             bait_angler_id=bait_angler_id,
             bait_angler_name=bait_angler_name

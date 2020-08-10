@@ -42,6 +42,22 @@ class CommentSection:
         return cls(parsed_comment_list, datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc))
 
     @classmethod
+    async def get_comment_section_from_export_json(cls, **kwargs):
+        return cls(
+            comments=[
+                Comment(
+                    **{
+                        **c,
+                        **{
+                            'comment_timestamp': datetime.strptime(c['comment_timestamp'], '%Y-%m-%d %H:%M:%S')
+                        }
+                    }
+                ) for c in kwargs['comments']
+            ],
+            comment_fetch_timestamp=kwargs['comment_fetch_timestamp']
+        )
+
+    @classmethod
     async def get_comment_section_from_web_driver(cls, driver: WebDriver) -> 'CommentSection':
         offset: int = 0
         comment_list: List[Dict[str, Any]] = []

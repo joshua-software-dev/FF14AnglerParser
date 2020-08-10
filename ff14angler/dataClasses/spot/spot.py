@@ -87,6 +87,23 @@ class Spot:
 
         return False
 
+    @classmethod
+    async def get_spot_from_export_json(cls, **kwargs) -> 'Spot':
+        return cls(
+            **{
+                **kwargs,
+                **{
+                    'spot_angler_catch_metadata': await SpotCatchMetadata.get_spot_catch_metadata_from_export_json(
+                        **kwargs['spot_angler_catch_metadata']
+                    ),
+                    'spot_angler_comments': await CommentSection.get_comment_section_from_export_json(
+                        **kwargs['spot_angler_comments']
+                    ) if kwargs['spot_angler_comments'] is not None else None,
+                    'spot_id': await SpotId.get_spot_id_from_export_json(**kwargs['spot_id'])
+                }
+            }
+        )
+
     async def update_spot_with_assume_is_fishing_spot(self):
         if angler_spot_name_corrections.get(self.spot_angler_name):
             search_name: str = angler_spot_name_corrections.get(self.spot_angler_name)

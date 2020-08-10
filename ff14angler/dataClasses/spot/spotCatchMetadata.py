@@ -151,6 +151,18 @@ class SpotCatchMetadata:
         return await cls._parse_spot_bait_metadata_average_time_to_catch(spot_bait_metadata_map, soup)
 
     @classmethod
+    async def get_spot_catch_metadata_from_export_json(cls, **kwargs) -> 'SpotCatchMetadata':
+        return cls(
+            spot_available_fish=[FishId(**fish_id) for fish_id in kwargs['spot_available_fish']],
+            spot_effective_bait=[BaitId(**bait_id) for bait_id in kwargs['spot_effective_bait']],
+            spot_fish_caught_per_bait=[
+                await SpotBaitMetadata.get_spot_bait_metadata_from_export_json(
+                    **caught
+                ) for caught in kwargs['spot_fish_caught_per_bait']
+            ]
+        )
+
+    @classmethod
     async def get_spot_catch_metadata_from_spot_soup(cls, soup: BeautifulSoup):
         available_fish = await cls._parse_angler_available_fish_from_spot_soup(soup)
         effective_bait = await cls._parse_angler_effective_bait_from_spot_soup(soup)

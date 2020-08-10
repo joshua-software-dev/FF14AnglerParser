@@ -15,6 +15,18 @@ class SpotBaitMetadata:
     spot_angler_bait_fish_catch_info: List[SpotBaitFishCatchInfo] = field(default_factory=list)
     spot_angler_bait_total_fish_caught: Optional[int] = None
 
+    @classmethod
+    async def get_spot_bait_metadata_from_export_json(cls, **kwargs) -> 'SpotBaitMetadata':
+        return cls(
+            spot_bait_id=BaitId(**kwargs['spot_bait_id']),
+            spot_angler_bait_fish_catch_info=[
+                await SpotBaitFishCatchInfo.get_spot_bait_fish_catch_info_from_export_json(
+                    **info
+                ) for info in kwargs['spot_angler_bait_fish_catch_info']
+            ],
+            spot_angler_bait_total_fish_caught=kwargs['spot_angler_bait_total_fish_caught']
+        )
+
     def update_spot_bait_metadata_with_spot_bait_fish_caught(
         self,
         caught_count: int,

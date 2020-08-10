@@ -3,15 +3,15 @@
 import json
 import os
 
+from ff14angler.dataClasses.scrapingData import ScrapingData
 from ff14angler.export.dunderSerializer import DunderSerializer
 from ff14angler.export.tableExportData import TableExportData
-from ff14angler.constants.typeshed import HomePageData
 
 
 class TableExport:
 
     @staticmethod
-    async def export_bait_table(home_page_data: HomePageData):
+    async def export_bait_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'bait_angler_bait_id',
@@ -29,7 +29,7 @@ class TableExport:
             insert_statement='INSERT INTO `bait` VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
         )
 
-        for bait in home_page_data['bait'].values():
+        for bait in scraping_data.bait.values():
             export_data.data.append(
                 (
                     bait.bait_id.bait_angler_bait_id,
@@ -50,7 +50,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_table(home_page_data: HomePageData):
+    async def export_fish_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -73,7 +73,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish` VALUES ({});'.format(', '.join(['%s'] * 16))
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             export_data.data.append(
                 (
                     fish.fish_id.fish_angler_fish_id,
@@ -99,7 +99,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_table(home_page_data: HomePageData):
+    async def export_spot_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -116,7 +116,7 @@ class TableExport:
             insert_statement='INSERT INTO `spot` VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
+        for spot in scraping_data.spot.values():
             export_data.data.append(
                 (
                     spot.spot_id.spot_angler_spot_id,
@@ -136,7 +136,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_bait_comment_table(home_page_data: HomePageData):
+    async def export_bait_comment_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'bait_angler_bait_id',
@@ -167,7 +167,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_comment_table(home_page_data: HomePageData):
+    async def export_fish_comment_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -180,8 +180,8 @@ class TableExport:
             insert_statement='INSERT INTO `fish_comment` VALUES (%s, %s, %s, %s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
-            for comment in fish['fish_angler_comments']['comments']:
+        for fish in scraping_data.fish.values():
+            for comment in fish.fish_angler_comments.comments:
                 export_data.data.append(
                     (
                         fish.fish_id.fish_angler_fish_id,
@@ -197,7 +197,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_comment_table(home_page_data: HomePageData):
+    async def export_spot_comment_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -210,8 +210,8 @@ class TableExport:
             insert_statement='INSERT INTO `spot_comment` VALUES (%s, %s, %s, %s, %s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
-            for comment in spot['spot_angler_comments']['comments']:
+        for spot in scraping_data.spot.values():
+            for comment in spot.spot_angler_comments.comments:
                 export_data.data.append(
                     (
                         spot.spot_id.spot_angler_spot_id,
@@ -227,7 +227,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_bait_alt_currency_price_table(home_page_data: HomePageData):
+    async def export_bait_alt_currency_price_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'bait_angler_bait_id',
@@ -238,7 +238,7 @@ class TableExport:
             insert_statement='INSERT INTO `bait_alt_currency_price` VALUES (%s, %s, %s, %s);'
         )
 
-        for bait in home_page_data['bait'].values():
+        for bait in scraping_data.bait.values():
             for alt_currency in bait.bait_alt_currency_prices:
                 export_data.data.append(
                     (
@@ -253,7 +253,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_bait_preference_table(home_page_data: HomePageData):
+    async def export_fish_bait_preference_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -263,7 +263,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_bait_preference` VALUES (%s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for bait_pref in fish.fish_angler_bait_preferences:
                 export_data.data.append(
                     (
@@ -277,7 +277,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_caught_count(home_page_data: HomePageData):
+    async def export_fish_caught_count(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -287,7 +287,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_caught_count` VALUES (%s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             weather_preferences = fish.fish_angler_weather_preferences
             if weather_preferences:
                 weather_catch_count = weather_preferences.unique_catches_across_all_weathers
@@ -306,7 +306,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_caught_per_hour_table(home_page_data: HomePageData):
+    async def export_fish_caught_per_hour_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -316,7 +316,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_caught_per_hour` VALUES (%s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for hour_num, count in fish.fish_angler_hour_preferences.hours.items():
                 export_data.data.append(
                     (
@@ -330,7 +330,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_caught_per_weather_table(home_page_data: HomePageData):
+    async def export_fish_caught_per_weather_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -340,7 +340,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_caught_per_weather` VALUES (%s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             weather_preferences = fish.fish_angler_weather_preferences
             if weather_preferences:
                 for weather_name, count in weather_preferences.weathers.items():
@@ -356,7 +356,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_desynthesis_item_table(home_page_data: HomePageData):
+    async def export_fish_desynthesis_item_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -371,7 +371,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_desynthesis_item` VALUES (%s, %s, %s, %s, %s, %s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for item in fish.fish_angler_desynthesis_items:
                 export_data.data.append(
                     (
@@ -390,7 +390,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_involved_leve_table(home_page_data: HomePageData):
+    async def export_fish_involved_leve_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -404,7 +404,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_involved_leve` VALUES (%s, %s, %s, %s, %s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for leve in fish.fish_angler_involved_leves:
                 export_data.data.append(
                     (
@@ -422,7 +422,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_involved_recipe_table(home_page_data: HomePageData):
+    async def export_fish_involved_recipe_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -437,7 +437,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_involved_recipe` VALUES (%s, %s, %s, %s, %s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for recipe in fish.fish_angler_involved_recipes:
                 export_data.data.append(
                     (
@@ -456,7 +456,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_fish_tug_strength_table(home_page_data: HomePageData):
+    async def export_fish_tug_strength_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'fish_angler_fish_id',
@@ -466,7 +466,7 @@ class TableExport:
             insert_statement='INSERT INTO `fish_tug_strength` VALUES (%s, %s, %s);'
         )
 
-        for fish in home_page_data['fish'].values():
+        for fish in scraping_data.fish.values():
             for tug_strength in fish.fish_angler_tug_strength:
                 export_data.data.append(
                     (
@@ -480,7 +480,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_available_fish_table(home_page_data: HomePageData):
+    async def export_spot_available_fish_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -489,7 +489,7 @@ class TableExport:
             insert_statement='INSERT INTO `spot_available_fish` VALUES (%s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
+        for spot in scraping_data.spot.values():
             for fish_id in spot.spot_angler_catch_metadata.spot_available_fish:
                 export_data.data.append(
                     (
@@ -502,7 +502,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_bait_fish_catch_info_table(home_page_data: HomePageData):
+    async def export_spot_bait_fish_catch_info_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -515,7 +515,7 @@ class TableExport:
             insert_statement='INSERT INTO `spot_bait_fish_catch_info` VALUES (%s, %s, %s, %s, %s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
+        for spot in scraping_data.spot.values():
             for metadata in spot.spot_angler_catch_metadata.spot_fish_caught_per_bait:
                 for fish in metadata.spot_angler_bait_fish_catch_info:
                     export_data.data.append(
@@ -533,7 +533,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_bait_total_fish_caught_table(home_page_data: HomePageData):
+    async def export_spot_bait_total_fish_caught_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -543,7 +543,7 @@ class TableExport:
             insert_statement='INSERT INTO `spot_bait_total_fish_caught` VALUES (%s, %s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
+        for spot in scraping_data.spot.values():
             for metadata in spot.spot_angler_catch_metadata.spot_fish_caught_per_bait:
                 export_data.data.append(
                     (
@@ -557,7 +557,7 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @staticmethod
-    async def export_spot_effective_bait_table(home_page_data: HomePageData):
+    async def export_spot_effective_bait_table(scraping_data: ScrapingData):
         export_data = TableExportData(
             header=(
                 'spot_angler_spot_id',
@@ -566,7 +566,7 @@ class TableExport:
             insert_statement='INSERT INTO `spot_effective_bait` VALUES (%s, %s);'
         )
 
-        for spot in home_page_data['spot'].values():
+        for spot in scraping_data.spot.values():
             for bait_id in spot.spot_angler_catch_metadata.spot_effective_bait:
                 export_data.data.append(
                     (
@@ -579,24 +579,24 @@ class TableExport:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
 
     @classmethod
-    async def output_data_for_database(cls, home_page_data: HomePageData):
+    async def output_data_for_database(cls, scraping_data: ScrapingData):
         os.makedirs('data/table_data/', exist_ok=True)
-        await cls.export_bait_table(home_page_data)
-        await cls.export_fish_table(home_page_data)
-        await cls.export_spot_table(home_page_data)
-        await cls.export_bait_comment_table(home_page_data)
-        await cls.export_fish_comment_table(home_page_data)
-        await cls.export_spot_comment_table(home_page_data)
-        await cls.export_bait_alt_currency_price_table(home_page_data)
-        await cls.export_fish_bait_preference_table(home_page_data)
-        await cls.export_fish_caught_count(home_page_data)
-        await cls.export_fish_caught_per_hour_table(home_page_data)
-        await cls.export_fish_caught_per_weather_table(home_page_data)
-        await cls.export_fish_desynthesis_item_table(home_page_data)
-        await cls.export_fish_involved_leve_table(home_page_data)
-        await cls.export_fish_involved_recipe_table(home_page_data)
-        await cls.export_fish_tug_strength_table(home_page_data)
-        await cls.export_spot_available_fish_table(home_page_data)
-        await cls.export_spot_bait_fish_catch_info_table(home_page_data)
-        await cls.export_spot_bait_total_fish_caught_table(home_page_data)
-        await cls.export_spot_effective_bait_table(home_page_data)
+        await cls.export_bait_table(scraping_data)
+        await cls.export_fish_table(scraping_data)
+        await cls.export_spot_table(scraping_data)
+        await cls.export_bait_comment_table(scraping_data)
+        await cls.export_fish_comment_table(scraping_data)
+        await cls.export_spot_comment_table(scraping_data)
+        await cls.export_bait_alt_currency_price_table(scraping_data)
+        await cls.export_fish_bait_preference_table(scraping_data)
+        await cls.export_fish_caught_count(scraping_data)
+        await cls.export_fish_caught_per_hour_table(scraping_data)
+        await cls.export_fish_caught_per_weather_table(scraping_data)
+        await cls.export_fish_desynthesis_item_table(scraping_data)
+        await cls.export_fish_involved_leve_table(scraping_data)
+        await cls.export_fish_involved_recipe_table(scraping_data)
+        await cls.export_fish_tug_strength_table(scraping_data)
+        await cls.export_spot_available_fish_table(scraping_data)
+        await cls.export_spot_bait_fish_catch_info_table(scraping_data)
+        await cls.export_spot_bait_total_fish_caught_table(scraping_data)
+        await cls.export_spot_effective_bait_table(scraping_data)
