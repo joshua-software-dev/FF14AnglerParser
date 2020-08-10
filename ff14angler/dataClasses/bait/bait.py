@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import urllib.parse
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
@@ -12,7 +14,11 @@ from ff14angler.constants.data_corrections import (
     angler_bait_missing_icon_urls,
     angler_bait_name_corrections
 )
-from ff14angler.constants.values import ANGLER_SPEARFISHING_BAIT_ITEM_ID, ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
+from ff14angler.constants.values import (
+    ANGLER_API_BASE_URL,
+    ANGLER_SPEARFISHING_BAIT_ITEM_ID,
+    ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
+)
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
@@ -31,13 +37,13 @@ class Bait:
     bait_alt_currency_prices: List[BaitAltCurrency] = field(default_factory=list)
     bait_angler_comments: Optional[CommentSection] = None
     bait_angler_is_mooch_fish: bool = False
-    bait_angler_large_icon_url: Optional[str] = None
     bait_angler_lodestone_url: Optional[str] = None
     bait_gil_cost: Optional[int] = None
     bait_gil_sell_price: Optional[int] = None
     bait_icon_url: Optional[str] = None
     bait_item_level: Optional[int] = None
     bait_item_name: Optional[str] = None
+    bait_large_icon_url: Optional[str] = None
 
     @staticmethod
     async def _get_alt_currency_prices(special_shops: Optional[Dict[str, List[int]]]) -> List[BaitAltCurrency]:
@@ -120,11 +126,11 @@ class Bait:
             lookup_response['GameContentLinks'].get('SpecialShop')
         )
 
-        self.bait_gil_cost: Optional[int] = lookup_response['PriceMid']
-        self.bait_gil_sell_price: Optional[int] = lookup_response['PriceLow']
-        self.bait_icon_url: Optional[str] = f'https://xivapi.com{lookup_response["Icon"]}'
-        self.bait_item_level: Optional[int] = lookup_response['LevelItem']
-        self.bait_item_name: Optional[str] = lookup_response['Name_en']
+        self.bait_gil_cost = lookup_response['PriceMid']
+        self.bait_gil_sell_price = lookup_response['PriceLow']
+        self.bait_icon_url = urllib.parse.urljoin(ANGLER_API_BASE_URL, lookup_response['Icon'].lstrip('/'))
+        self.bait_item_level = lookup_response['LevelItem']
+        self.bait_item_name = lookup_response['Name_en']
 
     async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:
@@ -146,7 +152,7 @@ class Bait:
         for fish_id, fish in FishProvider.fish_holder.items():
             if fish.fish_angler_name == self.bait_angler_name:
                 self.bait_angler_comments = await self.update_bait_with_comment_section(fish.fish_angler_comments)
-                self.bait_angler_large_icon_url = fish.fish_angler_large_icon_url
+                self.bait_large_icon_url = fish.fish_large_icon_url
                 self.bait_angler_lodestone_url = fish.fish_angler_lodestone_url
                 success = True
                 break

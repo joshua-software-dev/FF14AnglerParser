@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import urllib.parse
+
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
@@ -9,6 +11,7 @@ from bs4.element import Tag  # type: ignore
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_fish_lodestone_url_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
+from ff14angler.constants.values import ANGLER_API_BASE_URL
 from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fishDesynthesisChance import FishDesynthesisChance
@@ -41,7 +44,6 @@ class Fish:
     fish_angler_involved_leves: List[FishLeve] = field(default_factory=list)
     fish_angler_involved_recipes: List[FishRecipe] = field(default_factory=list)
     fish_angler_item_category: Optional[str] = None
-    fish_angler_large_icon_url: Optional[str] = None
     fish_angler_lodestone_url: Optional[str] = None
     fish_angler_territory: Optional[str] = None
     fish_angler_tug_strength: List[FishTugStrength] = field(default_factory=list)
@@ -50,6 +52,7 @@ class Fish:
     fish_introduced_patch: Optional[str] = None
     fish_item_level: Optional[int] = None
     fish_item_name: Optional[str] = None
+    fish_large_icon_url: Optional[str] = None
     fish_long_description: Optional[str] = None
     fish_short_description: Optional[str] = None
 
@@ -299,11 +302,10 @@ class Fish:
         self.fish_angler_involved_leves += await self._parse_angler_involved_leves(soup)
         self.fish_angler_involved_recipes += await self._parse_angler_involved_recipes(soup)
         self.fish_angler_item_category = await self._parse_angler_item_category(data_row2)
-        self.fish_angler_large_icon_url = await self._parse_angler_large_icon_url(data_row1)
         self.fish_angler_lodestone_url = await self._parse_angler_lodestone_url(self.fish_id, data_row2)
         self.fish_angler_territory = await self._parse_angler_territory(data_row2)
         self.fish_angler_weather_preferences = await self._parse_angler_weather_preferences(soup)
-        self.fish_icon_url = f'https://xivapi.com{item_lookup_response["Icon"]}'
+        self.fish_icon_url = urllib.parse.urljoin(ANGLER_API_BASE_URL, item_lookup_response["Icon"].lstrip('/'))
         self.fish_introduced_patch = await self._lookup_fish_introduced_patch(data_row2, item_lookup_response)
         self.fish_item_level = await self._parse_item_level(data_row2)
         self.fish_item_name = item_lookup_response['Name_en']

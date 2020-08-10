@@ -37,7 +37,7 @@ class TableExport:
                     bait.bait_angler_name,
                     bait.bait_item_name,
                     bait.bait_icon_url,
-                    bait.bait_angler_large_icon_url,
+                    bait.bait_large_icon_url,
                     bait.bait_angler_lodestone_url,
                     bait.bait_item_level,
                     bait.bait_gil_cost,
@@ -81,7 +81,7 @@ class TableExport:
                     fish.fish_angler_name,
                     fish.fish_item_name,
                     fish.fish_icon_url,
-                    fish.fish_angler_large_icon_url,
+                    fish.fish_large_icon_url,
                     fish.fish_angler_lodestone_url,
                     fish.fish_item_level,
                     fish.fish_short_description,
@@ -149,9 +149,9 @@ class TableExport:
             insert_statement='INSERT INTO `bait_comment` VALUES (%s, %s, %s, %s, %s, %s);'
         )
 
-        for bait in home_page_data['bait'].values():
-            if bait['bait_angler_comments']:
-                for comment in bait['bait_angler_comments']['comments']:
+        for bait in scraping_data.bait.values():
+            if bait.bait_angler_comments:
+                for comment in bait.bait_angler_comments.comments:
                     export_data.data.append(
                         (
                             bait.bait_id.bait_angler_bait_id,
@@ -434,7 +434,7 @@ class TableExport:
                 'recipe_angler_lodestone_url',
                 'recipe_angler_crafting_class',
             ),
-            insert_statement='INSERT INTO `fish_involved_recipe` VALUES (%s, %s, %s, %s, %s, %s, %s);'
+            insert_statement='INSERT INTO `fish_involved_recipe` VALUES (%s, %s, %s, %s, %s, %s, %s, %s);'
         )
 
         for fish in scraping_data.fish.values():

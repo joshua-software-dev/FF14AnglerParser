@@ -17,12 +17,26 @@ from ff14angler.constants.values import (
     ANGLER_PAGE_LOAD_WAIT_DURATION,
     ANGLER_DELAY_BETWEEN_REQUESTS_DURATION
 )
+from ff14angler.dataClasses.bait.bait import Bait
 from ff14angler.dataClasses.bait.baitProvider import BaitProvider
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
+from ff14angler.fetch.lodestoneImageScraper import LodestoneImageScraper
 
 
 class BaitPage:
+
+    @staticmethod
+    async def update_bait_with_large_icon_url(bait: Bait, driver: WebDriver):
+        if bait.bait_angler_lodestone_url:
+            if bait.bait_icon_url is None:
+                raise ValueError(f'Missing icon url from xivapi: {bait}')
+
+            bait.bait_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                driver=driver,
+                short_icon_url=bait.bait_icon_url,
+                lodestone_url=bait.bait_angler_lodestone_url
+            )
 
     @classmethod
     async def collect_bait_data(cls, driver: WebDriver):
@@ -56,3 +70,4 @@ class BaitPage:
                         raise
 
             await bait.update_bait_with_bait_soup(BeautifulSoup(html, lxml.__name__))
+            await cls.update_bait_with_large_icon_url(bait, driver)

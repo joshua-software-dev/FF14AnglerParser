@@ -18,11 +18,51 @@ from ff14angler.constants.values import (
     ANGLER_DELAY_BETWEEN_REQUESTS_DURATION
 )
 from ff14angler.dataClasses.comment.commentSection import CommentSection
+from ff14angler.dataClasses.fish.fish import Fish
 from ff14angler.dataClasses.fish.fishProvider import FishProvider
+from ff14angler.fetch.lodestoneImageScraper import LodestoneImageScraper
 from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
 
 
 class FishPage:
+
+    @staticmethod
+    async def update_fish_with_large_icon_url(driver: WebDriver, fish: Fish):
+        if fish.fish_angler_lodestone_url:
+            if fish.fish_icon_url is None:
+                raise ValueError(f'Missing icon url from xivapi: {fish}')
+
+            fish.fish_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                driver=driver,
+                short_icon_url=fish.fish_icon_url,
+                lodestone_url=fish.fish_angler_lodestone_url
+            )
+
+    @staticmethod
+    async def update_fish_desynthesis_items_with_large_icon_url(driver: WebDriver, fish: Fish):
+        for desynthesis_item in fish.fish_angler_desynthesis_items:
+            if desynthesis_item.desynthesis_angler_lodestone_url:
+                if desynthesis_item.desynthesis_icon_url is None:
+                    raise ValueError(f'Missing icon url from xivapi: {desynthesis_item}')
+
+                desynthesis_item.desynthesis_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                    driver=driver,
+                    short_icon_url=desynthesis_item.desynthesis_icon_url,
+                    lodestone_url=desynthesis_item.desynthesis_angler_lodestone_url
+                )
+
+    @staticmethod
+    async def update_fish_involved_recipes_with_large_icon_url(driver: WebDriver, fish: Fish):
+        for recipe in fish.fish_angler_involved_recipes:
+            if recipe.recipe_angler_lodestone_url:
+                if recipe.recipe_icon_url is None:
+                    raise ValueError(f'Missing icon url from xivapi: {recipe}')
+
+                recipe.recipe_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                    driver=driver,
+                    short_icon_url=recipe.recipe_icon_url,
+                    lodestone_url=recipe.recipe_angler_lodestone_url
+                )
 
     @classmethod
     async def collect_fish_data(cls, driver: WebDriver):
@@ -56,3 +96,6 @@ class FishPage:
                         raise
 
             await fish.update_fish_with_fish_soup(BeautifulSoup(html, lxml.__name__))
+            await cls.update_fish_with_large_icon_url(driver, fish)
+            await cls.update_fish_desynthesis_items_with_large_icon_url(driver, fish)
+            await cls.update_fish_involved_recipes_with_large_icon_url(driver, fish)
