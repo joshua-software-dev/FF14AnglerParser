@@ -30,7 +30,7 @@ class Fetch:
             json.dump(scraping_data, fh, cls=DunderSerializer, indent=4, sort_keys=True)
 
         print('Writing table form scraping results...')
-        os.makedirs(os.path.join(EXPORT_DIRECTORY, 'table_data'))
+        os.makedirs(os.path.join(EXPORT_DIRECTORY, 'table_data'), exist_ok=True)
         await TableExport.output_data_for_database(scraping_data)
 
         print('Writing bait one entry per file scraping results...')
