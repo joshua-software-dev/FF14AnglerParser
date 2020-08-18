@@ -5,7 +5,7 @@ import urllib.parse
 
 import aiohttp
 
-from typing import List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 from asyncio_throttle import Throttler
 
@@ -25,6 +25,14 @@ class AiohttpWrapped:
             async with aiohttp.ClientSession() as session:
                 print(f'Fetching URL: {url}')
                 async with session.get(url) as response:
+                    return await response.json()
+
+    @classmethod
+    async def post_json_at_url(cls, url: str, item_name: str, json_obj: Dict[str, Any]):
+        async with cls._throttler:
+            async with aiohttp.ClientSession() as session:
+                print(f'Fetching URL: {url} : {item_name}')
+                async with session.post(url, json=json_obj) as response:
                     return await response.json()
 
     @classmethod
@@ -128,29 +136,35 @@ class AiohttpWrapped:
         return data
 
     @classmethod
-    async def _xivapi_item_search(cls, item_name: str, page_num: int):
-        return await cls.get_json_at_url(
-            f'https://xivapi.com/search?indexes=Item&page={page_num}&string={urllib.parse.quote(item_name)}'
-        )
-
-    @classmethod
     async def xivapi_item_search(cls, item_name: str):
         if result := XivApi.cached_responses['Search']['Item'].get(item_name):
             return result
 
-        page_num: int = 1
-        max_pages: int = 99
-        while page_num <= max_pages:
-            response = await cls._xivapi_item_search(item_name, page_num)
-            page_num = response['Pagination']['Page']
-            max_pages = response['Pagination']['PageTotal']
+        query: Dict[str, Any] = {
+            "columns": "ID,Name_en,Name_ja,Icon",
+            "indexes": "item",
+            "body": {
+                "query": {
+                    "multi_match": {
+                        "query": item_name,
+                        "fields": ["Name_en", "Name_ja"]
+                    }
+                }
+            }
+        }
 
-            for result in response['Results']:
-                if result['Name'].casefold() == item_name.casefold():
+        response = await cls.post_json_at_url('https://xivapi.com/search', item_name, query)
+        try:
+            response['Results']
+        except KeyError:
+            print(response)
+            raise
+
+        for result in response['Results']:
+            for name_language in ['Name_en', 'Name_ja']:
+                if result[name_language].casefold() == item_name.casefold():
                     XivApi.cached_responses['Search']['Item'][item_name] = result
                     return result
-
-            page_num += 1
 
         raise ValueError(f'Could not find applicable result for search term: {item_name}')
 
