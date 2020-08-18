@@ -53,5 +53,5 @@ class FishDesynthesisChance:
             desynthesis_angler_percentage=td1.text.strip(),
             desynthesis_icon_url=urllib.parse.urljoin(ANGLER_API_BASE_URL, response["Icon"].lstrip('/')),
             desynthesis_item_id=response['ID'],
-            desynthesis_item_name=response['Name']
+            desynthesis_item_name=response['Name_en']
         )

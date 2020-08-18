@@ -52,5 +52,5 @@ class FishRecipe:
             recipe_angler_name=angler_item_name,
             recipe_icon_url=urllib.parse.urljoin(ANGLER_API_BASE_URL, response["Icon"].lstrip('/')),
             recipe_item_id=response['ID'],
-            recipe_name=response['Name']
+            recipe_name=response['Name_en']
         )
