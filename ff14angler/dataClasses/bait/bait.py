@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import (
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
 
+@dataclass_json
 @dataclass
 class Bait:
     bait_id: BaitId
@@ -80,23 +82,6 @@ class Bait:
             return angler_bait_lodestone_url_corrections[bait_id.bait_angler_bait_id]
 
         raise ValueError(f'Could not find lodestone link for bait: {bait_id}')
-
-    @classmethod
-    async def get_bait_from_export_json(cls, **kwargs) -> 'Bait':
-        return cls(
-            **{
-                **kwargs,
-                **{
-                    'bait_id': BaitId(**kwargs['bait_id']),
-                    'bait_alt_currency_prices': [
-                        BaitAltCurrency(**alt_price) for alt_price in kwargs['bait_alt_currency_prices']
-                    ],
-                    'bait_angler_comments': await CommentSection.get_comment_section_from_export_json(
-                        **kwargs['bait_angler_comments']
-                    ) if kwargs['bait_angler_comments'] is not None else None
-                }
-            }
-        )
 
     @classmethod
     async def get_bait_from_angler_bait(cls, bait_angler_id: int, bait_angler_name: str) -> 'Bait':

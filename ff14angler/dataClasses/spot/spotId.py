@@ -3,17 +3,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from dataclasses_json import dataclass_json
+
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 
 
+@dataclass_json
 @dataclass
 class SpotId:
     spot_angler_spot_id: int
     spot_gathering_type: Optional[SpotGatheringType] = None
-
-    @classmethod
-    async def get_spot_id_from_export_json(cls, **kwargs):
-        return cls(
-            spot_angler_spot_id=kwargs['spot_angler_spot_id'],
-            spot_gathering_type=SpotGatheringType(**kwargs['spot_gathering_type'])
-        )

@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_spot_name_corrections
@@ -23,6 +24,7 @@ from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 from ff14angler.dataClasses.spot.spotId import SpotId
 
 
+@dataclass_json
 @dataclass
 class Spot:
     spot_angler_area_id: Optional[int] = None
@@ -86,23 +88,6 @@ class Spot:
                     return True
 
         return False
-
-    @classmethod
-    async def get_spot_from_export_json(cls, **kwargs) -> 'Spot':
-        return cls(
-            **{
-                **kwargs,
-                **{
-                    'spot_angler_catch_metadata': await SpotCatchMetadata.get_spot_catch_metadata_from_export_json(
-                        **kwargs['spot_angler_catch_metadata']
-                    ),
-                    'spot_angler_comments': await CommentSection.get_comment_section_from_export_json(
-                        **kwargs['spot_angler_comments']
-                    ) if kwargs['spot_angler_comments'] is not None else None,
-                    'spot_id': await SpotId.get_spot_id_from_export_json(**kwargs['spot_id'])
-                }
-            }
-        )
 
     async def update_spot_with_assume_is_fishing_spot(self):
         if angler_spot_name_corrections.get(self.spot_angler_name):

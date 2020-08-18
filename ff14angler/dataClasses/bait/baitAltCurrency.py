@@ -2,7 +2,10 @@
 
 from dataclasses import dataclass
 
+from dataclasses_json import dataclass_json
 
+
+@dataclass_json
 @dataclass
 class BaitAltCurrency:
     bait_alt_currency_id: int

@@ -7,6 +7,7 @@ from typing import Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 from ff14angler.constants.data_corrections import angler_bait_blacklisted_bait_id
 from ff14angler.constants.regex import angler_bait_metadata_catch_count_regex, non_number_replacement_regex
@@ -17,6 +18,7 @@ from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotBaitMetadata import SpotBaitMetadata
 
 
+@dataclass_json
 @dataclass
 class SpotCatchMetadata:
     spot_available_fish: List[FishId] = field(default_factory=list)
@@ -155,18 +157,6 @@ class SpotCatchMetadata:
                     )
 
         return await cls._parse_spot_bait_metadata_average_time_to_catch(spot_bait_metadata_map, soup)
-
-    @classmethod
-    async def get_spot_catch_metadata_from_export_json(cls, **kwargs) -> 'SpotCatchMetadata':
-        return cls(
-            spot_available_fish=[FishId(**fish_id) for fish_id in kwargs['spot_available_fish']],
-            spot_effective_bait=[BaitId(**bait_id) for bait_id in kwargs['spot_effective_bait']],
-            spot_fish_caught_per_bait=[
-                await SpotBaitMetadata.get_spot_bait_metadata_from_export_json(
-                    **caught
-                ) for caught in kwargs['spot_fish_caught_per_bait']
-            ]
-        )
 
     @classmethod
     async def get_spot_catch_metadata_from_spot_soup(cls, soup: BeautifulSoup):

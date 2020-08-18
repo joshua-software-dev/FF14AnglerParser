@@ -1,13 +1,15 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass
-
 from typing import Optional
+
+from dataclasses_json import dataclass_json
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_bait_name_corrections, angler_bait_name_do_not_search
 
 
+@dataclass_json
 @dataclass
 class BaitId:
     bait_angler_bait_id: int

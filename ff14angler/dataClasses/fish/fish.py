@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_fish_lodestone_url_corrections
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 
 
+@dataclass_json
 @dataclass
 class Fish:
     fish_id: FishId
@@ -237,40 +239,6 @@ class Fish:
                 return fish_lookup_response['Description_en']
             except KeyError:
                 return None
-
-    @classmethod
-    async def get_fish_from_export_json(cls, **kwargs) -> 'Fish':
-        return cls(
-            **{
-                **kwargs,
-                **{
-                    'fish_id': FishId(**kwargs['fish_id']),
-                    'fish_angler_bait_preferences': [
-                        await BaitPercentage.get_bait_percentage_from_export_json(
-                            **pref
-                        ) for pref in kwargs['fish_angler_bait_preferences']
-                    ],
-                    'fish_angler_comments': await CommentSection.get_comment_section_from_export_json(
-                        **kwargs['fish_angler_comments']
-                    ) if kwargs['fish_angler_comments'] is not None else None,
-                    'fish_angler_desynthesis_items': [
-                        FishDesynthesisChance(**item) for item in kwargs['fish_angler_desynthesis_items']
-                    ],
-                    'fish_angler_gathering_spots': [
-                        SpotId(**spot_id) for spot_id in kwargs['fish_angler_gathering_spots']
-                    ],
-                    'fish_angler_hour_preferences': FishHourPreferences(**kwargs['fish_angler_hour_preferences']),
-                    'fish_angler_involved_leves': [FishLeve(**leve) for leve in kwargs['fish_angler_involved_leves']],
-                    'fish_angler_involved_recipes': [
-                        FishRecipe(**recipe) for recipe in kwargs['fish_angler_involved_recipes']
-                    ],
-                    'fish_angler_tug_strength': [FishTugStrength(**tug) for tug in kwargs['fish_angler_tug_strength']],
-                    'fish_angler_weather_preferences': FishWeatherPreferences(
-                        **kwargs['fish_angler_weather_preferences']
-                    ) if kwargs['fish_angler_weather_preferences'] is not None else None
-                }
-            }
-        )
 
     @classmethod
     async def get_fish_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str) -> 'Fish':

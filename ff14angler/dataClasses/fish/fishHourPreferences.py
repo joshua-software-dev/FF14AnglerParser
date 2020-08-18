@@ -6,8 +6,10 @@ from typing import Dict, Optional
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 
+@dataclass_json
 @dataclass
 class FishHourPreferences:
     hours: Dict[int, int]

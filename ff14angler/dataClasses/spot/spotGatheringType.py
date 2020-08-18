@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass
-
 from typing import Optional
+
+from dataclasses_json import dataclass_json
 
 from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
 
 
+@dataclass_json
 @dataclass
 class SpotGatheringType:
     gathering_type: str

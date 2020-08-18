@@ -4,10 +4,13 @@ from dataclasses import dataclass
 
 from bs4.element import Tag  # type: ignore
 
+from dataclasses_json import dataclass_json
+
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.regex import non_number_replacement_regex
 
 
+@dataclass_json
 @dataclass
 class FishLeve:
     leve_angler_fish_id: int

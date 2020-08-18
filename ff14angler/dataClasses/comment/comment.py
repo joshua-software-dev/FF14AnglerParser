@@ -4,22 +4,31 @@ import copy
 
 import lxml  # type: ignore
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Set
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
+from dataclasses_json import dataclass_json
 
 from ff14angler.constants.regex import timestamp_matcher_regex
 
 
+@dataclass_json
 @dataclass(frozen=True)
 class Comment:
     comment_author: str
     comment_text_original: str
     comment_text_translated: str
-    comment_timestamp: datetime
+    comment_timestamp: datetime = field(
+        metadata={
+            'dataclasses_json': {
+                'decoder': datetime.fromisoformat,
+                'encoder': datetime.isoformat
+            }
+        }
+    )
 
     @staticmethod
     async def _parse_author(info: Tag) -> str:

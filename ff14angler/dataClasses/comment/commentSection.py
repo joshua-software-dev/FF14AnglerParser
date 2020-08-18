@@ -5,11 +5,12 @@ import urllib.parse
 
 import lxml  # type: ignore
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
+from dataclasses_json import dataclass_json
 from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
 from ff14angler.constants.javascript import comment_metadata_javascript
@@ -18,10 +19,19 @@ from ff14angler.constants.values import ANGLER_BASE_URL
 from ff14angler.dataClasses.comment.comment import Comment
 
 
+@dataclass_json
 @dataclass
 class CommentSection:
     comments: List[Comment]
-    comment_fetch_timestamp: datetime
+    comment_fetch_timestamp: datetime = field(
+        default_factory=lambda: datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc),
+        metadata={
+            'dataclasses_json': {
+                'decoder': datetime.fromisoformat,
+                'encoder': datetime.isoformat
+            }
+        }
+    )
 
     @classmethod
     async def _get_request_metadata_from_web_driver(cls, driver: WebDriver) -> Tuple[int, int, int, int]:
@@ -39,23 +49,7 @@ class CommentSection:
         for comment_json in comment_list:
             parsed_comment_list.append(await Comment.get_comment_from_angler_comment_json(comment_json))
 
-        return cls(parsed_comment_list, datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc))
-
-    @classmethod
-    async def get_comment_section_from_export_json(cls, **kwargs):
-        return cls(
-            comments=[
-                Comment(
-                    **{
-                        **c,
-                        **{
-                            'comment_timestamp': datetime.strptime(c['comment_timestamp'], '%Y-%m-%d %H:%M:%S')
-                        }
-                    }
-                ) for c in kwargs['comments']
-            ],
-            comment_fetch_timestamp=kwargs['comment_fetch_timestamp']
-        )
+        return cls(parsed_comment_list)
 
     @classmethod
     async def get_comment_section_from_web_driver(cls, driver: WebDriver) -> 'CommentSection':
