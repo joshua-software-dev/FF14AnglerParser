@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Set, Tuple
 
 from asyncio_throttle import Throttler
 
+from ff14angler.exceptions import NetworkException
 from ff14angler.xivapi import XivApi
 
 
@@ -20,28 +21,48 @@ class AiohttpWrapped:
     )
 
     @classmethod
+    async def get_bytes_at_url(cls, url: str) -> bytes:
+        async with cls._throttler:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    print(f'Downloading URL: {url}')
+                    async with session.get(url) as response:
+                        return await response.read()
+            except aiohttp.ClientError as e:
+                raise NetworkException(e)
+
+    @classmethod
     async def get_json_at_url(cls, url: str):
         async with cls._throttler:
-            async with aiohttp.ClientSession() as session:
-                print(f'Fetching URL: {url}')
-                async with session.get(url) as response:
-                    return await response.json()
+            try:
+                async with aiohttp.ClientSession() as session:
+                    print(f'Fetching URL: {url}')
+                    async with session.get(url) as response:
+                        return await response.json()
+            except aiohttp.ClientError as e:
+                raise NetworkException(e)
 
     @classmethod
     async def post_json_at_url(cls, url: str, item_name: str, json_obj: Dict[str, Any]):
         async with cls._throttler:
-            async with aiohttp.ClientSession() as session:
-                print(f'Fetching URL: {url} : {item_name}')
-                async with session.post(url, json=json_obj) as response:
-                    return await response.json()
+            try:
+                async with aiohttp.ClientSession() as session:
+                    print(f'Fetching URL: {url} : {item_name}')
+                    async with session.post(url, json=json_obj) as response:
+                        return await response.json()
+            except aiohttp.ClientError as e:
+                raise NetworkException(e)
 
     @classmethod
     async def get_text_at_url(cls, url: str) -> str:
         async with cls._throttler:
-            async with aiohttp.ClientSession() as session:
-                print(f'Fetching URL: {url}')
-                async with session.get(url) as response:
-                    return await response.text()
+            try:
+                async with aiohttp.ClientSession() as session:
+                    print(f'Fetching URL: {url}')
+                    async with session.get(url) as response:
+                        return await response.text()
+            except aiohttp.ClientError as e:
+                raise NetworkException(e)
 
     @classmethod
     async def xivapi_fish_parameter_lookup(cls, fish_param_id: int):

@@ -20,8 +20,9 @@ from ff14angler.constants.values import (
 from ff14angler.dataClasses.bait.bait import Bait
 from ff14angler.dataClasses.bait.baitProvider import BaitProvider
 from ff14angler.dataClasses.comment.commentSection import CommentSection
-from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
+from ff14angler.exceptions import NetworkException
 from ff14angler.fetch.lodestoneImageScraper import LodestoneImageScraper
+from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
 
 
 class BaitPage:
@@ -65,7 +66,7 @@ class BaitPage:
                             await CommentSection.get_comment_section_from_web_driver(driver)
                         )
                     break
-                except (TimeoutException, ValueError):
+                except (NetworkException, TimeoutException, ValueError,):
                     if attempt == 2:
                         raise
 

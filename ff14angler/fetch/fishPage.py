@@ -20,6 +20,7 @@ from ff14angler.constants.values import (
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fish import Fish
 from ff14angler.dataClasses.fish.fishProvider import FishProvider
+from ff14angler.exceptions import NetworkException
 from ff14angler.fetch.lodestoneImageScraper import LodestoneImageScraper
 from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
 
@@ -91,7 +92,7 @@ class FishPage:
                             await CommentSection.get_comment_section_from_web_driver(driver)
                         )
                     break
-                except (TimeoutException, ValueError):
+                except (NetworkException, TimeoutException, ValueError,):
                     if attempt == 2:
                         raise
 
