@@ -288,6 +288,12 @@ class TableExport:
         )
 
         for fish in scraping_data.fish.values():
+            hour_preferences = fish.fish_angler_hour_preferences
+            if hour_preferences:
+                hour_catch_count = hour_preferences.unique_catches_across_all_hours
+            else:
+                hour_catch_count = None
+
             weather_preferences = fish.fish_angler_weather_preferences
             if weather_preferences:
                 weather_catch_count = weather_preferences.unique_catches_across_all_weathers
@@ -297,7 +303,7 @@ class TableExport:
             export_data.data.append(
                 (
                     fish.fish_id.fish_angler_fish_id,
-                    fish.fish_angler_hour_preferences.unique_catches_across_all_hours,
+                    hour_catch_count,
                     weather_catch_count,
                 )
             )
@@ -317,14 +323,15 @@ class TableExport:
         )
 
         for fish in scraping_data.fish.values():
-            for hour_num, count in fish.fish_angler_hour_preferences.hours.items():
-                export_data.data.append(
-                    (
-                        fish.fish_id.fish_angler_fish_id,
-                        hour_num,
-                        count,
+            if fish.fish_angler_hour_preferences:
+                for hour_num, count in fish.fish_angler_hour_preferences.hours.items():
+                    export_data.data.append(
+                        (
+                            fish.fish_id.fish_angler_fish_id,
+                            hour_num,
+                            count,
+                        )
                     )
-                )
 
         with open('data/table_data/010_fish_caught_per_hour.json', 'w+') as fh:
             json.dump(export_data, fh, cls=DunderSerializer, indent=4)
