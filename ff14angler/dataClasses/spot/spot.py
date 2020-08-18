@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_spot_name_corrections
@@ -24,9 +24,8 @@ from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 from ff14angler.dataClasses.spot.spotId import SpotId
 
 
-@dataclass_json
 @dataclass
-class Spot:
+class Spot(DataClassJsonMixin):
     spot_angler_area_id: Optional[int] = None
     spot_angler_catch_metadata: Optional[SpotCatchMetadata] = None
     spot_angler_comments: Optional[CommentSection] = None

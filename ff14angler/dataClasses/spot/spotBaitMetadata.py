@@ -3,16 +3,15 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotBaitFishCatchInfo import SpotBaitFishCatchInfo
 
 
-@dataclass_json
 @dataclass
-class SpotBaitMetadata:
+class SpotBaitMetadata(DataClassJsonMixin):
     spot_bait_id: BaitId
 
     spot_angler_bait_fish_catch_info: List[SpotBaitFishCatchInfo] = field(default_factory=list)

@@ -3,14 +3,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
 
 
-@dataclass_json
 @dataclass
-class SpotGatheringType:
+class SpotGatheringType(DataClassJsonMixin):
     gathering_type: str
     gathering_type_unique_id: Optional[int] = None
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_desynthesis_item_name_corrections
@@ -14,9 +14,8 @@ from ff14angler.constants.regex import desynthesis_quantity_matcher_regex
 from ff14angler.constants.values import ANGLER_API_BASE_URL
 
 
-@dataclass_json
 @dataclass
-class FishDesynthesisChance:
+class FishDesynthesisChance(DataClassJsonMixin):
     desynthesis_angler_item_name: str
     desynthesis_angler_lodestone_url: Optional[str]
     desynthesis_angler_percentage: str

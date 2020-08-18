@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import (
@@ -30,9 +30,8 @@ if TYPE_CHECKING:
     from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
 
-@dataclass_json
 @dataclass
-class Bait:
+class Bait(DataClassJsonMixin):
     bait_id: BaitId
     bait_angler_name: str
 

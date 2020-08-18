@@ -3,15 +3,14 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_bait_name_corrections, angler_bait_name_do_not_search
 
 
-@dataclass_json
 @dataclass
-class BaitId:
+class BaitId(DataClassJsonMixin):
     bait_angler_bait_id: int
     bait_xivapi_item_id: Optional[int]
 

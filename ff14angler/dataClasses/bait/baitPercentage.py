@@ -2,13 +2,12 @@
 
 from dataclasses import dataclass
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.dataClasses.bait.baitId import BaitId
 
 
-@dataclass_json
 @dataclass
-class BaitPercentage:
+class BaitPercentage(DataClassJsonMixin):
     bait_id: BaitId
     bait_percentage: str

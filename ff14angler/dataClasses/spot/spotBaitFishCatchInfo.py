@@ -3,14 +3,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.dataClasses.fish.fishId import FishId
 
 
-@dataclass_json
 @dataclass
-class SpotBaitFishCatchInfo:
+class SpotBaitFishCatchInfo(DataClassJsonMixin):
     spot_angler_fish_caught_count: int
     spot_angler_fish_caught_percentage: str
     spot_fish_id: FishId

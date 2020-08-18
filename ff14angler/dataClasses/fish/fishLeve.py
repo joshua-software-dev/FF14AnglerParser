@@ -4,15 +4,14 @@ from dataclasses import dataclass
 
 from bs4.element import Tag  # type: ignore
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.regex import non_number_replacement_regex
 
 
-@dataclass_json
 @dataclass
-class FishLeve:
+class FishLeve(DataClassJsonMixin):
     leve_angler_fish_id: int
     leve_angler_fish_name: str
     leve_angler_name: str

@@ -10,14 +10,13 @@ from typing import Any, Dict, List, Set
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.constants.regex import timestamp_matcher_regex
 
 
-@dataclass_json
 @dataclass(frozen=True)
-class Comment:
+class Comment(DataClassJsonMixin):
     comment_author: str
     comment_text_original: str
     comment_text_translated: str

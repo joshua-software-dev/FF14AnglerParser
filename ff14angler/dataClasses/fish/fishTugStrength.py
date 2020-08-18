@@ -2,11 +2,10 @@
 
 from dataclasses import dataclass
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 
-@dataclass_json
 @dataclass
-class FishTugStrength:
+class FishTugStrength(DataClassJsonMixin):
     fish_tug_strength: int
     fish_tug_strength_percent: float

@@ -6,12 +6,11 @@ from typing import Dict, Optional
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 
-@dataclass_json
 @dataclass
-class FishWeatherPreferences:
+class FishWeatherPreferences(DataClassJsonMixin):
     weathers: Dict[str, int]
     unique_catches_across_all_weathers: int
 

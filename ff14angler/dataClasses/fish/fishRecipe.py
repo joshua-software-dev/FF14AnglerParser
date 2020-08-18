@@ -6,15 +6,14 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.values import ANGLER_API_BASE_URL
 
 
-@dataclass_json
 @dataclass
-class FishRecipe:
+class FishRecipe(DataClassJsonMixin):
     recipe_angler_crafting_class: str
     recipe_angler_lodestone_url: str
     recipe_angler_name: str

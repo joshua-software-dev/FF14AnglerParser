@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
 from ff14angler.constants.javascript import comment_metadata_javascript
@@ -19,9 +19,8 @@ from ff14angler.constants.values import ANGLER_BASE_URL
 from ff14angler.dataClasses.comment.comment import Comment
 
 
-@dataclass_json
 @dataclass
-class CommentSection:
+class CommentSection(DataClassJsonMixin):
     comments: List[Comment]
     comment_fetch_timestamp: datetime = field(
         default_factory=lambda: datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc),

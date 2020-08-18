@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.constants.data_corrections import angler_bait_blacklisted_bait_id
 from ff14angler.constants.regex import angler_bait_metadata_catch_count_regex, non_number_replacement_regex
@@ -18,9 +18,8 @@ from ff14angler.dataClasses.fish.fishId import FishId
 from ff14angler.dataClasses.spot.spotBaitMetadata import SpotBaitMetadata
 
 
-@dataclass_json
 @dataclass
-class SpotCatchMetadata:
+class SpotCatchMetadata(DataClassJsonMixin):
     spot_available_fish: List[FishId] = field(default_factory=list)
     spot_effective_bait: List[BaitId] = field(default_factory=list)
     spot_fish_caught_per_bait: List[SpotBaitMetadata] = field(default_factory=list)

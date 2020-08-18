@@ -2,14 +2,13 @@
 
 from dataclasses import dataclass
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import DataClassJsonMixin
 
 from ff14angler.aiohttpWrapped import AiohttpWrapped
 
 
-@dataclass_json
 @dataclass
-class FishId:
+class FishId(DataClassJsonMixin):
     fish_angler_fish_id: int
     fish_xivapi_item_id: int
 
