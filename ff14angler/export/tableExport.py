@@ -486,7 +486,8 @@ class TableExport:
                 'spot_angler_spot_id',
                 'fish_angler_fish_id',
             ),
-            insert_statement='INSERT INTO `spot_available_fish` VALUES (%s, %s);'
+            insert_statement='INSERT INTO `spot_available_fish` '
+                             '(spot_angler_spot_id, fish_angler_fish_id) VALUES (%s, %s);'
         )
 
         for spot in scraping_data.spot.values():
@@ -563,7 +564,8 @@ class TableExport:
                 'spot_angler_spot_id',
                 'bait_angler_bait_id',
             ),
-            insert_statement='INSERT INTO `spot_effective_bait` VALUES (%s, %s);'
+            insert_statement='INSERT INTO `spot_effective_bait` '
+                             '(spot_angler_spot_id, bait_angler_bait_id) VALUES (%s, %s);'
         )
 
         for spot in scraping_data.spot.values():
