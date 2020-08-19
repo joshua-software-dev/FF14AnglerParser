@@ -11,6 +11,7 @@ for (const small_tag of document.querySelectorAll('.small')) {
     }
 }"""
 
+# noinspection SpellCheckingInspection
 fetch_large_url_data_from_lodestone_page = """\
 function toDataURL(url, callback)
 {

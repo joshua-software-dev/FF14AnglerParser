@@ -53,6 +53,7 @@ class ChromeWrapper:
         options.add_argument('--disable-gpu')
         options.add_argument('--disable-web-security')
         options.add_argument('--allow-running-insecure-content')
+        # noinspection SpellCheckingInspection
         options.add_argument(
             '--user-agent={}'.format(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
