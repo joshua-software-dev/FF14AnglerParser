@@ -33,7 +33,7 @@ class FishPage:
             if fish.fish_icon_url is None:
                 raise ValueError(f'Missing icon url from xivapi: {fish}')
 
-            fish.fish_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+            fish.fish_large_icon_url = await LodestoneImageScraper.get_large_icon(
                 driver=driver,
                 short_icon_url=fish.fish_icon_url,
                 lodestone_url=fish.fish_angler_lodestone_url
@@ -46,7 +46,7 @@ class FishPage:
                 if desynthesis_item.desynthesis_icon_url is None:
                     raise ValueError(f'Missing icon url from xivapi: {desynthesis_item}')
 
-                desynthesis_item.desynthesis_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                desynthesis_item.desynthesis_large_icon_url = await LodestoneImageScraper.get_large_icon(
                     driver=driver,
                     short_icon_url=desynthesis_item.desynthesis_icon_url,
                     lodestone_url=desynthesis_item.desynthesis_angler_lodestone_url
@@ -59,7 +59,7 @@ class FishPage:
                 if recipe.recipe_icon_url is None:
                     raise ValueError(f'Missing icon url from xivapi: {recipe}')
 
-                recipe.recipe_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+                recipe.recipe_large_icon_url = await LodestoneImageScraper.get_large_icon(
                     driver=driver,
                     short_icon_url=recipe.recipe_icon_url,
                     lodestone_url=recipe.recipe_angler_lodestone_url

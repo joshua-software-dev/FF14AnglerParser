@@ -1,18 +1,18 @@
 #! /usr/bin/env python3
 
 import asyncio
-import pickle
 
+from ff14angler.dataClasses.cache.xivapiCache import XivapiCache
 from ff14angler.network.chromeWrapper import ChromeWrapper
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 from ff14angler.fetch.fetch import Fetch
-from ff14angler.xivapi import XivApi
 
 
 def main():
     try:
-        with open('data/xivapi_cache.pickle', 'rb') as fh:
+        with open('data/xivapi_cache.json') as fh:
             print('Reading API cache into memory...')
-            XivApi.cached_responses.update(pickle.load(fh))
+            XivapiWrapper.cache = XivapiCache.from_json(fh.read())
     except FileNotFoundError:
         print('No API cache found.')
 
@@ -23,6 +23,6 @@ def main():
             loop = asyncio.get_event_loop()
             loop.run_until_complete(Fetch.main(driver))
     finally:
-        print('Writing binary API cache to disk...')
-        with open('data/xivapi_cache.pickle', 'wb+') as fh:
-            pickle.dump(XivApi.cached_responses, fh)
+        print('Writing API cache to disk...')
+        with open('data/xivapi_cache.json', 'w+') as fh:
+            fh.write(XivapiWrapper.cache.to_json())

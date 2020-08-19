@@ -3,13 +3,12 @@
 import asyncio
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_spot_name_corrections
 from ff14angler.constants.regex import (
     angler_map_area_matcher_regex,
@@ -22,6 +21,7 @@ from ff14angler.dataClasses.spot.gatheringTypeEnum import GatheringTypeEnum
 from ff14angler.dataClasses.spot.spotCatchMetadata import SpotCatchMetadata
 from ff14angler.dataClasses.spot.spotGatheringType import SpotGatheringType
 from ff14angler.dataClasses.spot.spotId import SpotId
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 
 @dataclass
@@ -94,12 +94,12 @@ class Spot(DataClassJsonMixin):
         else:
             search_name: str = self.spot_angler_name
 
-        place_search_responses = await AiohttpWrapped.xivapi_place_name_search(search_name)
+        place_search_responses = await XivapiWrapper.xivapi_place_name_search(search_name)
         for place_search_response in place_search_responses:
-            place_lookup_response = await AiohttpWrapped.xivapi_place_name_lookup(place_search_response['ID'])
+            place_lookup_response = await XivapiWrapper.xivapi_place_name_lookup(place_search_response['ID'])
             fishing_spot = place_lookup_response['GameContentLinks'].get('FishingSpot')
             if fishing_spot and fishing_spot.get('PlaceName'):
-                spot_lookup_response = await AiohttpWrapped.xivapi_fishing_spot_lookup(
+                spot_lookup_response = await XivapiWrapper.xivapi_fishing_spot_lookup(
                     max(fishing_spot['PlaceName'])
                 )
 
@@ -119,7 +119,7 @@ class Spot(DataClassJsonMixin):
 
         item_lookups = await asyncio.gather(
             *(
-                AiohttpWrapped.xivapi_item_lookup(
+                XivapiWrapper.xivapi_item_lookup(
                     fish_id.fish_xivapi_item_id
                 ) for fish_id in self.spot_angler_catch_metadata.spot_available_fish
             )
@@ -135,18 +135,16 @@ class Spot(DataClassJsonMixin):
         return spearfishing_item_ids
 
     async def update_spot_with_assume_is_teeming_spot(self):
-        spearfishing_gpb: List[Tuple[Set[int], int, int]] = (
-            await AiohttpWrapped.xivapi_spearfishing_gathering_point_base_index()
-        )
-
+        spearfishing_gpb = await XivapiWrapper.xivapi_spearfishing_gathering_point_base_index()
         spearfishing_ids = await self._lookup_spearfishing_ids_for_available_fish()
-        for gpb_known_fish, gpb_id, gpb_level in spearfishing_gpb:
+
+        for gathering_point_base in spearfishing_gpb:
             # If a gathering point base and this spot share 2 or more fish as being known to be caught there...
-            if len(gpb_known_fish.intersection(spearfishing_ids)) >= 2:
-                self.spot_gathering_level = gpb_level
+            if len(gathering_point_base['spearfishing_ids'].intersection(spearfishing_ids)) >= 2:
+                self.spot_gathering_level = gathering_point_base['gathering_point_base_level']
                 self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
                     GatheringTypeEnum.TeemingSpearFishing,
-                    gpb_id
+                    gathering_point_base['gathering_point_base_id']
                 )
                 return
 
@@ -158,10 +156,10 @@ class Spot(DataClassJsonMixin):
         else:
             search_name: str = self.spot_angler_name
 
-        place_search_responses = await AiohttpWrapped.xivapi_place_name_search(search_name)
+        place_search_responses = await XivapiWrapper.xivapi_place_name_search(search_name)
 
         for place_search_response in place_search_responses:
-            place_lookup_response = await AiohttpWrapped.xivapi_place_name_lookup(place_search_response['ID'])
+            place_lookup_response = await XivapiWrapper.xivapi_place_name_lookup(place_search_response['ID'])
             notebook = place_lookup_response['GameContentLinks'].get('SpearfishingNotebook')
             if notebook:
                 spearfishing_ids: List[int] = notebook['PlaceName']
@@ -169,7 +167,7 @@ class Spot(DataClassJsonMixin):
                 if len(spearfishing_ids) != 1:
                     raise ValueError(f'Too many SpearfishingNotebook ids for spot! {self}')
 
-                notebook_lookup = await AiohttpWrapped.xivapi_spearfishing_notebook_lookup(max(spearfishing_ids))
+                notebook_lookup = await XivapiWrapper.xivapi_spearfishing_notebook_lookup(max(spearfishing_ids))
                 self.spot_gathering_level = notebook_lookup['GatheringLevel']
                 self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
                     GatheringTypeEnum.SpearFishing,

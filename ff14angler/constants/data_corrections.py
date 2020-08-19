@@ -1,13 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import urllib.parse
-
 from typing import Dict, Set
 
-from ff14angler.constants.values import ANGLER_API_BASE_URL
 
-
+# noinspection SpellCheckingInspection
 angler_bait_blacklisted_bait_id: Set[int] = {
     318  # Coerthan Crab is mislabelled as a bait
 }
@@ -17,9 +14,9 @@ angler_bait_lodestone_url_corrections: Dict[int, str] = {
 }
 
 angler_bait_missing_icon_urls: Dict[int, str] = {
-    2001: urllib.parse.urljoin(ANGLER_API_BASE_URL, 'i/060000/060671.png'),
-    2002: urllib.parse.urljoin(ANGLER_API_BASE_URL, 'i/060000/060672.png'),
-    2003: urllib.parse.urljoin(ANGLER_API_BASE_URL, 'i/060000/060673.png'),
+    2001: '/i/060000/060671.png',
+    2002: '/i/060000/060672.png',
+    2003: '/i/060000/060673.png',
 }
 
 # noinspection SpellCheckingInspection

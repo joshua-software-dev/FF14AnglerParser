@@ -33,7 +33,7 @@ class BaitPage:
             if bait.bait_icon_url is None:
                 raise ValueError(f'Missing icon url from xivapi: {bait}')
 
-            bait.bait_large_icon_url = await LodestoneImageScraper.get_large_icon_and_url(
+            bait.bait_large_icon_url = await LodestoneImageScraper.get_large_icon(
                 driver=driver,
                 short_icon_url=bait.bait_icon_url,
                 lodestone_url=bait.bait_angler_lodestone_url

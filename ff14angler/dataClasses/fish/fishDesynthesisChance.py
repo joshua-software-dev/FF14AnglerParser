@@ -1,17 +1,14 @@
 #! /usr/bin/env python3
 
-import urllib.parse
-
 from dataclasses import dataclass
 from typing import Optional
 
 from bs4.element import Tag  # type: ignore
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_desynthesis_item_name_corrections
 from ff14angler.constants.regex import desynthesis_quantity_matcher_regex
-from ff14angler.constants.values import ANGLER_API_BASE_URL
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 
 @dataclass
@@ -41,16 +38,18 @@ class FishDesynthesisChance(DataClassJsonMixin):
         td1, td2, td3 = soup.find_all('td')  # type: Tag, Tag, Tag
         angler_item_name: str = await cls._parse_angler_item_name(td2)
 
-        response = await AiohttpWrapped.xivapi_item_search(
+        response = await XivapiWrapper.xivapi_item_search(
             angler_desynthesis_item_name_corrections.get(angler_item_name) or angler_item_name
         )
+
+        await XivapiWrapper.xivapi_download_icon_image(response['Icon'])
 
         # noinspection SpellCheckingInspection
         return cls(
             desynthesis_angler_item_name=angler_item_name,
             desynthesis_angler_lodestone_url=await cls._parse_angler_lodestone_url(td3),
             desynthesis_angler_percentage=td1.text.strip(),
-            desynthesis_icon_url=urllib.parse.urljoin(ANGLER_API_BASE_URL, response["Icon"].lstrip('/')),
+            desynthesis_icon_url=response['Icon'],
             desynthesis_item_id=response['ID'],
             desynthesis_item_name=response['Name_en']
         )

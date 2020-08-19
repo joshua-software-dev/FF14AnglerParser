@@ -5,8 +5,8 @@ from typing import Optional
 
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_bait_name_corrections, angler_bait_name_do_not_search
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 
 @dataclass
@@ -19,7 +19,7 @@ class BaitId(DataClassJsonMixin):
         if bait_angler_name in angler_bait_name_do_not_search:
             search_response = {'ID': None}
         else:
-            search_response = await AiohttpWrapped.xivapi_item_search(
+            search_response = await XivapiWrapper.xivapi_item_search(
                 angler_bait_name_corrections.get(bait_angler_name) or bait_angler_name
             )
 

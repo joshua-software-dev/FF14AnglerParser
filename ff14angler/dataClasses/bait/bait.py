@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-import urllib.parse
-
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
@@ -9,21 +7,17 @@ from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import (
     angler_bait_lodestone_url_corrections,
     angler_bait_missing_icon_urls,
     angler_bait_name_corrections
 )
-from ff14angler.constants.values import (
-    ANGLER_API_BASE_URL,
-    ANGLER_SPEARFISHING_BAIT_ITEM_ID,
-    ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
-)
+from ff14angler.constants.values import ANGLER_SPEARFISHING_BAIT_ITEM_ID, ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
 from ff14angler.constants.regex import non_number_replacement_regex
 from ff14angler.dataClasses.bait.baitId import BaitId
 from ff14angler.dataClasses.bait.baitAltCurrency import BaitAltCurrency
 from ff14angler.dataClasses.comment.commentSection import CommentSection
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 if TYPE_CHECKING:
     # Avoiding circular imports
@@ -52,7 +46,7 @@ class Bait(DataClassJsonMixin):
 
         if special_shops is not None:
             for shop_item_label, shop_list in special_shops.items():
-                shop_response = await AiohttpWrapped.xivapi_special_shop_lookup(shop_list[0])
+                shop_response = await XivapiWrapper.xivapi_special_shop_lookup(shop_list[0])
                 shop_item_num: str = non_number_replacement_regex.sub(repl='', string=shop_item_label)
                 shop_holder.add(
                     (
@@ -97,14 +91,16 @@ class Bait(DataClassJsonMixin):
         self.bait_item_level = ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
         self.bait_id.bait_xivapi_item_id = ANGLER_SPEARFISHING_BAIT_ITEM_ID
 
+        await XivapiWrapper.xivapi_download_icon_image(self.bait_icon_url)
+
     async def update_bait_with_xivapi(self):
         if corrected_name := angler_bait_name_corrections.get(self.bait_angler_name):
             search_name: str = corrected_name
         else:
             search_name: str = self.bait_angler_name
 
-        search_response = await AiohttpWrapped.xivapi_item_search(search_name)
-        lookup_response = await AiohttpWrapped.xivapi_item_lookup(search_response['ID'])
+        search_response = await XivapiWrapper.xivapi_item_search(search_name)
+        lookup_response = await XivapiWrapper.xivapi_item_lookup(search_response['ID'])
 
         self.bait_alt_currency_prices += await self._get_alt_currency_prices(
             lookup_response['GameContentLinks'].get('SpecialShop')
@@ -112,9 +108,11 @@ class Bait(DataClassJsonMixin):
 
         self.bait_gil_cost = lookup_response['PriceMid']
         self.bait_gil_sell_price = lookup_response['PriceLow']
-        self.bait_icon_url = urllib.parse.urljoin(ANGLER_API_BASE_URL, lookup_response['Icon'].lstrip('/'))
+        self.bait_icon_url = lookup_response['Icon']
         self.bait_item_level = lookup_response['LevelItem']
         self.bait_item_name = lookup_response['Name_en']
+
+        await XivapiWrapper.xivapi_download_icon_image(self.bait_icon_url)
 
     async def update_bait_with_bait_soup(self, soup: BeautifulSoup):
         if self.bait_angler_name in {'Small', 'Normal', 'Large'}:

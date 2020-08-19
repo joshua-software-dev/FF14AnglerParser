@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-import urllib.parse
-
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
@@ -9,10 +7,8 @@ from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.data_corrections import angler_fish_lodestone_url_corrections
 from ff14angler.constants.regex import non_number_replacement_regex
-from ff14angler.constants.values import ANGLER_API_BASE_URL
 from ff14angler.dataClasses.bait.baitProvider import BaitPercentage, BaitProvider
 from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fishDesynthesisChance import FishDesynthesisChance
@@ -23,6 +19,7 @@ from ff14angler.dataClasses.fish.fishRecipe import FishRecipe
 from ff14angler.dataClasses.fish.fishTugStrength import FishTugStrength
 from ff14angler.dataClasses.fish.fishWeatherPreferences import FishWeatherPreferences
 from ff14angler.dataClasses.spot.spotId import SpotId
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 if TYPE_CHECKING:
     # Avoiding circular imports
@@ -226,13 +223,13 @@ class Fish(DataClassJsonMixin):
         game_content_links: Dict[str, Any] = item_lookup_response['GameContentLinks']
 
         try:
-            fish_lookup_response = await AiohttpWrapped.xivapi_fish_parameter_lookup(
+            fish_lookup_response = await XivapiWrapper.xivapi_fish_parameter_lookup(
                 game_content_links['FishParameter']['Item'][0]
             )
             return fish_lookup_response['Text_en']
         except KeyError:
             try:
-                fish_lookup_response = await AiohttpWrapped.xivapi_spearfishing_item_lookup(
+                fish_lookup_response = await XivapiWrapper.xivapi_spearfishing_item_lookup(
                     game_content_links['SpearfishingItem']['Item'][0]
                 )
                 return fish_lookup_response['Description_en']
@@ -249,8 +246,8 @@ class Fish(DataClassJsonMixin):
         return cls(fish_id, fish_angler_name)
 
     async def update_fish_with_fish_soup(self, soup: BeautifulSoup) -> 'Fish':
-        search_response = await AiohttpWrapped.xivapi_item_search(self.fish_angler_name)
-        item_lookup_response = await AiohttpWrapped.xivapi_item_lookup(search_response['ID'])
+        search_response = await XivapiWrapper.xivapi_item_search(self.fish_angler_name)
+        item_lookup_response = await XivapiWrapper.xivapi_item_lookup(search_response['ID'])
         fish_table: Tag = soup.find('table', {'class': 'fish_info'})
 
         # noinspection SpellCheckingInspection
@@ -272,12 +269,14 @@ class Fish(DataClassJsonMixin):
         self.fish_angler_lodestone_url = await self._parse_angler_lodestone_url(self.fish_id, data_row2)
         self.fish_angler_territory = await self._parse_angler_territory(data_row2)
         self.fish_angler_weather_preferences = await self._parse_angler_weather_preferences(soup)
-        self.fish_icon_url = urllib.parse.urljoin(ANGLER_API_BASE_URL, item_lookup_response["Icon"].lstrip('/'))
+        self.fish_icon_url = item_lookup_response["Icon"]
         self.fish_introduced_patch = await self._lookup_fish_introduced_patch(data_row2, item_lookup_response)
         self.fish_item_level = await self._parse_item_level(data_row2)
         self.fish_item_name = item_lookup_response['Name_en']
         self.fish_long_description = await self._lookup_fish_long_description(item_lookup_response)
         self.fish_short_description = item_lookup_response['Description_en']
+
+        await XivapiWrapper.xivapi_download_icon_image(self.fish_icon_url)
 
         return self
 

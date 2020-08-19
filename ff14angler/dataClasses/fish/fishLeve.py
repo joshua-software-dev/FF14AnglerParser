@@ -6,8 +6,8 @@ from bs4.element import Tag  # type: ignore
 
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.aiohttpWrapped import AiohttpWrapped
 from ff14angler.constants.regex import non_number_replacement_regex
+from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 
 @dataclass
@@ -39,9 +39,9 @@ class FishLeve(DataClassJsonMixin):
         angler_leve_name_jp: str = td1.find('font').text.strip()
         angler_leve_name: str = await cls._parse_leve_name(td1)
 
-        search_responses = await AiohttpWrapped.xivapi_leve_search(angler_leve_name)
+        search_responses = await XivapiWrapper.xivapi_leve_search(angler_leve_name)
         for search_response in search_responses:
-            lookup_response = await AiohttpWrapped.xivapi_leve_lookup(search_response['ID'])
+            lookup_response = await XivapiWrapper.xivapi_leve_lookup(search_response['ID'])
             if lookup_response['CraftLeve']:
                 return cls(
                     leve_angler_fish_id=int(td3.find('a').attrs['href'].split('/')[-1]),
