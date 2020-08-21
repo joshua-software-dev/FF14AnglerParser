@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from asyncio_throttle import Throttler
 
-from ff14angler.exceptions import NetworkException
+from ff14angler.exceptions.networkException import NetworkException
 
 
 class AiohttpWrapper:

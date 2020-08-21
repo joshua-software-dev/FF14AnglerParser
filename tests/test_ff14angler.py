@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Tests for `ff14angler` package."""
 
@@ -16,5 +16,5 @@ class TestFF14Angler(unittest.TestCase):
     def tearDown(self):
         """Tear down test fixtures, if any."""
 
-    def test_000_something(self):
-        """Test something."""
+    def test_import_succeeded(self):
+        assert ff14angler == ff14angler

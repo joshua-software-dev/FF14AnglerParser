@@ -12,7 +12,7 @@ requirements = [
     'aiosqlite',
     'beautifulsoup4',
     'dataclasses_json',
-    'falcon',
+    'falcon<2.0.0,>=1.0.0',
     'falcon-autocrud',
     'falcon-ratelimit',
     'gunicorn',

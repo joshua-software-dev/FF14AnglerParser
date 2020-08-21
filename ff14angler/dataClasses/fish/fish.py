@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
@@ -20,10 +20,6 @@ from ff14angler.dataClasses.fish.fishTugStrength import FishTugStrength
 from ff14angler.dataClasses.fish.fishWeatherPreferences import FishWeatherPreferences
 from ff14angler.dataClasses.spot.spotId import SpotId
 from ff14angler.network.xivapiWrapper import XivapiWrapper
-
-if TYPE_CHECKING:
-    # Avoiding circular imports
-    from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 
 
 @dataclass
