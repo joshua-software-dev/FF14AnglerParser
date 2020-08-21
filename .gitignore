@@ -112,6 +112,6 @@ ENV/
 # Static assets
 data/
 data/*
-i/
-i/*
+static/
+static/*
 *.db
