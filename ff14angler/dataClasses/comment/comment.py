@@ -1,11 +1,14 @@
 #! /usr/bin/env python3
 
 import copy
+import hashlib
+import uuid
 
 import lxml  # type: ignore
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from functools import cached_property
 from typing import Any, Dict, List, Set
 
 from bs4 import BeautifulSoup  # type: ignore
@@ -28,6 +31,12 @@ class Comment(DataClassJsonMixin):
             }
         }
     )
+
+    @cached_property
+    def unique_id(self) -> uuid.UUID:
+        temp_md5 = hashlib.md5()
+        temp_md5.update(f'{hash(self)}'.encode('utf-8'))
+        return uuid.UUID(temp_md5.hexdigest())
 
     @staticmethod
     async def _parse_author(info: Tag) -> str:
