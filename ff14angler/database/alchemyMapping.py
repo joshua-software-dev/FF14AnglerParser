@@ -2,7 +2,20 @@
 
 import uuid
 
-from sqlalchemy import BigInteger, Binary, Column, DECIMAL, DateTime, ForeignKey, Index, Integer, SmallInteger, String, Text, types
+from sqlalchemy import (
+    BigInteger,
+    Binary,
+    Column,
+    DECIMAL,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    types
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,6 +23,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
+# noinspection PyAbstractClass
 class UUID(types.TypeDecorator):
     impl = Binary
 
@@ -31,10 +45,12 @@ class UUID(types.TypeDecorator):
         else:
             return None
 
-    def is_mutable(self):
+    @staticmethod
+    def is_mutable():
         return False
 
 
+# noinspection SpellCheckingInspection
 class Bait(Base):
     __tablename__ = 'bait'
 
@@ -54,6 +70,7 @@ class Bait(Base):
     spot_angler_spots = relationship('Spot', secondary='spot_effective_bait')
 
 
+# noinspection SpellCheckingInspection
 class Fish(Base):
     __tablename__ = 'fish'
 
@@ -77,6 +94,7 @@ class Fish(Base):
     spot_angler_spots = relationship('Spot', secondary='spot_available_fish')
 
 
+# noinspection SpellCheckingInspection
 class Spot(Base):
     __tablename__ = 'spot'
     __table_args__ = (
@@ -95,6 +113,7 @@ class Spot(Base):
     spot_angler_fishers_intuition_comment = Column(String(512))
 
 
+# noinspection SpellCheckingInspection,SpellCheckingInspection
 class Comment(Base):
     __tablename__ = 'comment'
 
@@ -109,6 +128,7 @@ class Comment(Base):
     spot_angler_spots = relationship('Spot', secondary='spot_comment')
 
 
+# noinspection SpellCheckingInspection
 class BaitComment(Comment):
     __tablename__ = 'bait_comment'
 
@@ -116,6 +136,7 @@ class BaitComment(Comment):
     comment_uuid = Column(ForeignKey('comment.comment_uuid'), primary_key=True, nullable=False)
 
 
+# noinspection SpellCheckingInspection
 class FishComment(Comment):
     __tablename__ = 'fish_comment'
 
@@ -123,6 +144,7 @@ class FishComment(Comment):
     comment_uuid = Column(ForeignKey('comment.comment_uuid'), primary_key=True, nullable=False)
 
 
+# noinspection SpellCheckingInspection
 class SpotComment(Comment):
     __tablename__ = 'spot_comment'
 
@@ -130,6 +152,7 @@ class SpotComment(Comment):
     comment_uuid = Column(ForeignKey('comment.comment_uuid'), primary_key=True, nullable=False)
 
 
+# noinspection SpellCheckingInspection
 class BaitAltCurrencyPrice(Base):
     __tablename__ = 'bait_alt_currency_price'
 
@@ -141,6 +164,7 @@ class BaitAltCurrencyPrice(Base):
     bait_angler_bait = relationship('Bait')
 
 
+# noinspection SpellCheckingInspection
 class FishBaitPreference(Base):
     __tablename__ = 'fish_bait_preference'
 
@@ -149,6 +173,7 @@ class FishBaitPreference(Base):
     bait_percentage = Column(String(8), nullable=False)
 
 
+# noinspection SpellCheckingInspection
 class FishCaughtCount(Fish):
     __tablename__ = 'fish_caught_count'
 
@@ -157,6 +182,7 @@ class FishCaughtCount(Fish):
     fish_caught_all_weathers_count = Column(BigInteger)
 
 
+# noinspection SpellCheckingInspection
 class FishCaughtPerHour(Base):
     __tablename__ = 'fish_caught_per_hour'
 
@@ -167,6 +193,7 @@ class FishCaughtPerHour(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class FishCaughtPerWeather(Base):
     __tablename__ = 'fish_caught_per_weather'
 
@@ -177,6 +204,7 @@ class FishCaughtPerWeather(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class FishDesynthesisItem(Base):
     __tablename__ = 'fish_desynthesis_item'
 
@@ -192,6 +220,7 @@ class FishDesynthesisItem(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class FishInvolvedLeve(Base):
     __tablename__ = 'fish_involved_leve'
 
@@ -206,6 +235,7 @@ class FishInvolvedLeve(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class FishInvolvedRecipe(Base):
     __tablename__ = 'fish_involved_recipe'
 
@@ -221,6 +251,7 @@ class FishInvolvedRecipe(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class FishTugStrength(Base):
     __tablename__ = 'fish_tug_strength'
 
@@ -231,6 +262,7 @@ class FishTugStrength(Base):
     fish_angler_fish = relationship('Fish')
 
 
+# noinspection SpellCheckingInspection
 class SpotAvailableFish(Base):
     __tablename__ = 'spot_available_fish'
 
@@ -238,6 +270,7 @@ class SpotAvailableFish(Base):
     fish_angler_fish_id = Column(ForeignKey('fish.fish_angler_fish_id'), primary_key=True, nullable=False, index=True)
 
 
+# noinspection SpellCheckingInspection
 class SpotBaitFishCatchInfo(Base):
     __tablename__ = 'spot_bait_fish_catch_info'
 
@@ -253,6 +286,7 @@ class SpotBaitFishCatchInfo(Base):
     spot_angler_spot = relationship('Spot')
 
 
+# noinspection SpellCheckingInspection
 class SpotBaitTotalFishCaught(Base):
     __tablename__ = 'spot_bait_total_fish_caught'
 
@@ -264,6 +298,7 @@ class SpotBaitTotalFishCaught(Base):
     spot_angler_spot = relationship('Spot')
 
 
+# noinspection SpellCheckingInspection
 class SpotEffectiveBait(Base):
     __tablename__ = 'spot_effective_bait'
 

@@ -3,7 +3,7 @@
 import asyncio
 import os
 
-from typing import List, Set, TypedDict
+from typing import List, Set
 from urllib.parse import urljoin, quote as url_quote
 
 from ff14angler.constants.values import EXPORT_DIRECTORY, XIVAPI_BASE_URL

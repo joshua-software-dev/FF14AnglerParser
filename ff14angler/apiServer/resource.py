@@ -19,6 +19,7 @@ class RouteResource:
     def __init__(self, keys):
         self._keys = keys
 
+    # noinspection PyUnusedLocal
     def on_get(self, req: falcon.Request, resp: falcon.Response):
         resp.body = json.dumps({'error': False, 'routes': self._keys})
         resp.content_type = 'application/json'
@@ -27,7 +28,9 @@ class RouteResource:
 
 class DataResource:
 
-    def on_get(self, req: falcon.Request, resp: falcon.Response):
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def on_get(req: falcon.Request, resp: falcon.Response):
         resp.content_type = 'application/vnd.sqlite3'
         resp.stream = open(SQLITE_DATABASE, 'rb')
         resp.content_length = os.path.getsize(SQLITE_DATABASE)
@@ -36,6 +39,7 @@ class DataResource:
 
 class LimitedCollectionResource(CollectionResource):
 
+    # noinspection SpellCheckingInspection
     allow_subresource = False
 
     @falcon.before(rate_limit(per_second=20, window_size=1))
@@ -48,7 +52,9 @@ class LimitedCollectionResource(CollectionResource):
             req.params['__limit'] = 100
         return query.limit(limit)
 
-    def after_get(self, req: Request, resp: Response, item: Query, *args, **kwargs):
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def after_get(req: Request, resp: Response, item: Query, *args, **kwargs):
         req.context['result']['error'] = False
         req.context['result']['meta']['total'] = item.limit(None).offset(None).count()
         req.context['result']['meta']['offset'] = req.context['result']['meta'].get('offset') or 0
@@ -72,9 +78,11 @@ class SpotCollectionResource(LimitedCollectionResource):
 class CommentCollectionResource(LimitedCollectionResource):
     methods = ['GET']
     model = alchemyMapping.Comment
+    # noinspection SpellCheckingInspection
     naive_datetimes = ['comment_timestamp']
 
 
+# noinspection PyUnusedLocal
 def _lookup_bait_comments_by_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -86,9 +94,11 @@ class BaitCommentCollectionResource(LimitedCollectionResource):
     lookup_attr_map = {'bait_xivapi_item_id': _lookup_bait_comments_by_item_id}
     methods = ['GET']
     model = alchemyMapping.BaitComment
+    # noinspection SpellCheckingInspection
     naive_datetimes = ['comment_timestamp']
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_comments_by_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -100,10 +110,13 @@ class FishCommentCollectionResource(LimitedCollectionResource):
     lookup_attr_map = {'fish_xivapi_item_id': _lookup_fish_comments_by_item_id}
     methods = ['GET']
     model = alchemyMapping.FishComment
+    # noinspection SpellCheckingInspection
     naive_datetimes = ['comment_timestamp']
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_comment_by_spot_gathering_type(req: Request, resp: Response, query: Query, *args, **kwargs):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -112,7 +125,9 @@ def _lookup_spot_comment_by_spot_gathering_type(req: Request, resp: Response, qu
     return query.filter(alchemyMapping.Spot.spot_gathering_type == kwargs['spot_gathering_type'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_comment_by_spot_gathering_type_unique_id(req: Request, resp: Response, query: Query, *args, **kwargs):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -128,9 +143,11 @@ class SpotCommentCollectionResource(LimitedCollectionResource):
     }
     methods = ['GET']
     model = alchemyMapping.SpotComment
+    # noinspection SpellCheckingInspection
     naive_datetimes = ['comment_timestamp']
 
 
+# noinspection PyUnusedLocal
 def _lookup_bait_alt_currency_by_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -144,6 +161,7 @@ class BaitAltCurrencyPriceCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.BaitAltCurrencyPrice
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_bait_preference_by_bait_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -151,6 +169,7 @@ def _lookup_fish_bait_preference_by_bait_item_id(req: Request, resp: Response, q
     ).filter(alchemyMapping.Bait.bait_xivapi_item_id == kwargs['bait_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_bait_preference_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     query.join(
         alchemyMapping.Fish,
@@ -167,6 +186,7 @@ class FishBaitPreferenceCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishBaitPreference
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_caught_count_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -180,6 +200,7 @@ class FishCaughtCountCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishCaughtCount
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_caught_per_hour_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -193,6 +214,7 @@ class FishCaughtPerHourCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishCaughtPerHour
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_caught_per_weather_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -206,6 +228,7 @@ class FishCaughtPerWeatherCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishCaughtPerWeather
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_desynthesis_item_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -219,6 +242,7 @@ class FishDesynthesisItemCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishDesynthesisItem
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_involved_leve_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -232,6 +256,7 @@ class FishInvolvedLeveCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishInvolvedLeve
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_involved_recipe_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -245,6 +270,7 @@ class FishInvolvedRecipeCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishInvolvedRecipe
 
 
+# noinspection PyUnusedLocal
 def _lookup_fish_tug_strength_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -258,6 +284,7 @@ class FishTugStrengthCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.FishTugStrength
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_available_fish_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -265,7 +292,9 @@ def _lookup_spot_available_fish_by_fish_item_id(req: Request, resp: Response, qu
     ).filter(alchemyMapping.Fish.fish_xivapi_item_id == kwargs['fish_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_available_fish_by_spot_gathering_type(req: Request, resp: Response, query: Query, *args, **kwargs):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -274,7 +303,15 @@ def _lookup_spot_available_fish_by_spot_gathering_type(req: Request, resp: Respo
     return query.filter(alchemyMapping.Spot.spot_gathering_type == kwargs['spot_gathering_type'])
 
 
-def _lookup_spot_available_fish_by_spot_gathering_type_unique_id(req: Request, resp: Response, query: Query, *args, **kwargs):
+# noinspection PyUnusedLocal
+def _lookup_spot_available_fish_by_spot_gathering_type_unique_id(
+    req: Request,
+    resp: Response,
+    query: Query,
+    *args,
+    **kwargs
+):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -294,6 +331,7 @@ class SpotAvailableFishCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.SpotAvailableFish
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_fish_catch_info_by_bait_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -301,6 +339,7 @@ def _lookup_spot_bait_fish_catch_info_by_bait_item_id(req: Request, resp: Respon
     ).filter(alchemyMapping.Bait.bait_xivapi_item_id == kwargs['bait_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_fish_catch_info_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Fish,
@@ -308,6 +347,7 @@ def _lookup_spot_bait_fish_catch_info_by_fish_item_id(req: Request, resp: Respon
     ).filter(alchemyMapping.Fish.fish_xivapi_item_id == kwargs['fish_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_fish_catch_info_by_spot_gathering_type(
     req: Request,
     resp: Response,
@@ -315,6 +355,7 @@ def _lookup_spot_bait_fish_catch_info_by_spot_gathering_type(
     *args,
     **kwargs
 ):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -323,6 +364,7 @@ def _lookup_spot_bait_fish_catch_info_by_spot_gathering_type(
     return query.filter(alchemyMapping.Spot.spot_gathering_type == kwargs['spot_gathering_type'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_fish_catch_info_by_spot_gathering_type_unique_id(
     req: Request,
     resp: Response,
@@ -330,6 +372,7 @@ def _lookup_spot_bait_fish_catch_info_by_spot_gathering_type_unique_id(
     *args,
     **kwargs
 ):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -350,6 +393,7 @@ class SpotBaitFishCatchInfoCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.SpotBaitFishCatchInfo
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_total_fish_caught_by_bait_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -357,6 +401,7 @@ def _lookup_spot_bait_total_fish_caught_by_bait_item_id(req: Request, resp: Resp
     ).filter(alchemyMapping.Bait.bait_xivapi_item_id == kwargs['bait_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_total_fish_caught_by_spot_gathering_type(
     req: Request,
     resp: Response,
@@ -364,6 +409,7 @@ def _lookup_spot_bait_total_fish_caught_by_spot_gathering_type(
     *args,
     **kwargs
 ):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -372,6 +418,7 @@ def _lookup_spot_bait_total_fish_caught_by_spot_gathering_type(
     return query.filter(alchemyMapping.Spot.spot_gathering_type == kwargs['spot_gathering_type'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_bait_total_fish_caught_by_spot_gathering_type_unique_id(
     req: Request,
     resp: Response,
@@ -379,6 +426,7 @@ def _lookup_spot_bait_total_fish_caught_by_spot_gathering_type_unique_id(
     *args,
     **kwargs
 ):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -397,6 +445,7 @@ class SpotBaitTotalFishCaughtCollectionResource(LimitedCollectionResource):
     model = alchemyMapping.SpotBaitTotalFishCaught
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_effective_bait_by_bait_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.join(
         alchemyMapping.Bait,
@@ -404,7 +453,9 @@ def _lookup_spot_effective_bait_by_bait_item_id(req: Request, resp: Response, qu
     ).filter(alchemyMapping.Bait.bait_xivapi_item_id == kwargs['bait_xivapi_item_id'])
 
 
+# noinspection PyUnusedLocal
 def _lookup_spot_effective_bait_by_spot_gathering_type(req: Request, resp: Response, query: Query, *args, **kwargs):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,
@@ -413,7 +464,15 @@ def _lookup_spot_effective_bait_by_spot_gathering_type(req: Request, resp: Respo
     return query.filter(alchemyMapping.Spot.spot_gathering_type == kwargs['spot_gathering_type'])
 
 
-def _lookup_spot_effective_bait_by_spot_gathering_type_unique_id(req: Request, resp: Response, query: Query, *args, **kwargs):
+# noinspection PyUnusedLocal
+def _lookup_spot_effective_bait_by_spot_gathering_type_unique_id(
+    req: Request,
+    resp: Response,
+    query: Query,
+    *args,
+    **kwargs
+):
+    # noinspection PyProtectedMember
     if alchemyMapping.Spot not in [mapper.entity for mapper in query._join_entities]:
         query = query.join(
             alchemyMapping.Spot,

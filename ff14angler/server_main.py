@@ -5,9 +5,11 @@ from ff14angler.apiServer.application import application
 from gunicorn.app.base import BaseApplication
 
 
+# noinspection PyAbstractClass
 class GunicornWrapper(BaseApplication):
 
     def __init__(self, app):
+        # noinspection SpellCheckingInspection,SpellCheckingInspection
         self._gunicorn_config = {
             'accesslog': '-',
             'error-file': '-',

@@ -21,11 +21,11 @@ from ff14angler.dataClasses.comment.commentSection import CommentSection
 from ff14angler.dataClasses.fish.fish import Fish
 from ff14angler.dataClasses.fish.fishProvider import FishProvider
 from ff14angler.exceptions import NetworkException
-from ff14angler.fetch.lodestoneImageScraper import LodestoneImageScraper
+from ff14angler.scraper.lodestoneImageScraper import LodestoneImageScraper
 from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
 
 
-class FishPage:
+class FishScraper:
 
     @staticmethod
     async def update_fish_with_large_icon_url(driver: WebDriver, fish: Fish):

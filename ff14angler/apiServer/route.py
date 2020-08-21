@@ -11,6 +11,7 @@ from sqlalchemy.engine.base import Engine
 from ff14angler.apiServer import resource
 
 
+# noinspection PyUnusedLocal
 def handle_404(req: falcon.Request, resp: falcon.Response):
     resp.status = falcon.HTTP_404
     resp.body = json.dumps(
@@ -22,6 +23,7 @@ def handle_404(req: falcon.Request, resp: falcon.Response):
     )
 
 
+# noinspection PyUnusedLocal
 def json_error_serializer(req: falcon.Request, resp: falcon.Response, exception: falcon.HTTPError):
     resp.body = json.dumps({'error': True, 'message': exception.title, 'reason': exception.status})
     resp.content_type = 'application/json'

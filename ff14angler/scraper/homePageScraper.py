@@ -26,7 +26,7 @@ T1 = TypeVar('T1')
 T2 = TypeVar('T2')
 
 
-class HomePage:
+class HomePageScraper:
 
     # noinspection SpellCheckingInspection
     @staticmethod

@@ -22,7 +22,7 @@ from ff14angler.dataClasses.spot.spotProvider import SpotProvider
 from ff14angler.network.delayOnReleaseLock import DelayOnReleaseLock
 
 
-class SpotPage:
+class SpotScraper:
 
     @classmethod
     async def collect_spot_data(cls, driver: WebDriver):

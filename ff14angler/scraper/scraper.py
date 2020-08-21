@@ -7,21 +7,21 @@ from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore
 
 from ff14angler.constants.values import EXPORT_DIRECTORY
 from ff14angler.database.sqliteExport import SQLiteExport
-from ff14angler.fetch.baitPage import BaitPage
-from ff14angler.fetch.fishPage import FishPage
-from ff14angler.fetch.homePage import HomePage
-from ff14angler.fetch.spotPage import SpotPage
+from ff14angler.scraper.baitScraper import BaitScraper
+from ff14angler.scraper.fishScraper import FishScraper
+from ff14angler.scraper.homePageScraper import HomePageScraper
+from ff14angler.scraper.spotScraper import SpotScraper
 
 
-class Fetch:
+class Scraper:
 
     @staticmethod
     async def main(driver: WebDriver):
-        scraping_data = await HomePage.collect_homepage_data(driver)
+        scraping_data = await HomePageScraper.collect_homepage_data(driver)
 
-        await BaitPage.collect_bait_data(driver)
-        await FishPage.collect_fish_data(driver)
-        await SpotPage.collect_spot_data(driver)
+        await BaitScraper.collect_bait_data(driver)
+        await FishScraper.collect_fish_data(driver)
+        await SpotScraper.collect_spot_data(driver)
 
         print('Writing JSON dump form scraping results...')
         os.makedirs(EXPORT_DIRECTORY, exist_ok=True)

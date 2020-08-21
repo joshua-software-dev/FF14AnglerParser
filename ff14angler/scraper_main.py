@@ -5,7 +5,7 @@ import os
 
 from ff14angler.constants.values import EXPORT_DIRECTORY
 from ff14angler.dataClasses.cache.xivapiCache import XivapiCache
-from ff14angler.fetch.fetch import Fetch
+from ff14angler.scraper.scraper import Scraper
 from ff14angler.network.chromeWrapper import ChromeWrapper
 from ff14angler.network.xivapiWrapper import XivapiWrapper
 
@@ -25,7 +25,7 @@ def main():
         with ChromeWrapper() as driver:
             print('Beginning scraping...')
             loop = asyncio.get_event_loop()
-            loop.run_until_complete(Fetch.main(driver))
+            loop.run_until_complete(Scraper.main(driver))
     finally:
         print('Writing API cache to disk...')
         with open(cache_path, 'w+') as fh:

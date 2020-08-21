@@ -1,0 +1,11 @@
+aiohttp
+aiosqlite
+beautifulsoup4
+dataclasses_json
+falcon
+falcon-autocrud
+falcon-ratelimit
+gunicorn
+lxml
+selenium
+sqlalchemy
