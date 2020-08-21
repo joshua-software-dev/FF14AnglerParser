@@ -42,7 +42,7 @@ setup(
     description="Package for scraping and hosting ff14angler.com data in a useful manner.",
     entry_points={
         'console_scripts': [
-            'angler_scrape=ff14angler.scraper_main:main',
+            'angler_scraper=ff14angler.scraper_main:main',
             'angler_api_server=ff14angler.server_main:main'
         ],
     },
