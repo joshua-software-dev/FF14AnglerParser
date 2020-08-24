@@ -5,6 +5,7 @@ import uuid
 from sqlalchemy import (
     BigInteger,
     Binary,
+    Boolean,
     Column,
     DECIMAL,
     DateTime,
@@ -64,7 +65,7 @@ class Bait(Base):
     bait_item_level = Column(SmallInteger, nullable=False)
     bait_gil_cost = Column(Integer)
     bait_gil_sell_price = Column(Integer)
-    bait_is_mooch_fish = Column(Integer, nullable=False)
+    bait_is_mooch_fish = Column(Boolean, nullable=False)
 
     comment = relationship('Comment', secondary='bait_comment')
     spot_angler_spots = relationship('Spot', secondary='spot_effective_bait')

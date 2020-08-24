@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `bait` (
 	`bait_item_level` SMALLINT NOT NULL,
 	`bait_gil_cost` INTEGER NULL,
 	`bait_gil_sell_price` INTEGER NULL,
-	`bait_is_mooch_fish` TINYINT NOT NULL,
+	`bait_is_mooch_fish` BOOLEAN NOT NULL CHECK (`bait_is_mooch_fish` IN (0, 1)),
 	PRIMARY KEY (`bait_angler_bait_id`)
 );
 
