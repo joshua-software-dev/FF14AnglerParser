@@ -21,7 +21,13 @@ class RouteResource:
 
     # noinspection PyUnusedLocal
     def on_get(self, req: falcon.Request, resp: falcon.Response):
-        resp.body = json.dumps({'error': False, 'routes': self._keys})
+        url_prepend = req.relative_uri.replace('api.wsgi/', '')
+        resp.body = json.dumps(
+            {
+                'error': False,
+                'routes': [os.path.join(url_prepend, k.lstrip('/')) for k in self._keys]
+            }
+        )
         resp.content_type = 'application/json'
         resp.append_header('Vary', 'Accept')
 
@@ -60,17 +66,50 @@ class LimitedCollectionResource(CollectionResource):
         req.context['result']['meta']['offset'] = req.context['result']['meta'].get('offset') or 0
 
 
+# noinspection PyUnusedLocal
+def _lookup_bait_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
+    return query.filter(
+        (
+            alchemyMapping.Bait.bait_item_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Bait.bait_angler_name.like('%{}%'.format(kwargs['name']))
+        )
+    )
+
+
 class BaitCollectionResource(LimitedCollectionResource):
+    lookup_attr_map = {'name': _lookup_bait_by_name}
     methods = ['GET']
     model = alchemyMapping.Bait
 
 
+# noinspection PyUnusedLocal
+def _lookup_fish_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
+    return query.filter(
+        (
+            alchemyMapping.Fish.fish_item_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Fish.fish_angler_name.like('%{}%'.format(kwargs['name']))
+        )
+    )
+
+
 class FishCollectionResource(LimitedCollectionResource):
+    lookup_attr_map = {'name': _lookup_fish_by_name}
     methods = ['GET']
     model = alchemyMapping.Fish
 
 
+# noinspection PyUnusedLocal
+def _lookup_spot_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
+    return query.filter(
+        (
+            alchemyMapping.Spot.spot_angler_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_angler_zone_name.like('%{}%'.format(kwargs['name']))
+        )
+    )
+
+
 class SpotCollectionResource(LimitedCollectionResource):
+    lookup_attr_map = {'name': _lookup_spot_by_name}
     methods = ['GET']
     model = alchemyMapping.Spot
 
