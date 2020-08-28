@@ -70,8 +70,11 @@ class LimitedCollectionResource(CollectionResource):
 def _lookup_bait_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.filter(
         (
-            alchemyMapping.Bait.bait_item_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Bait.bait_angler_name.like('%{}%'.format(kwargs['name']))
+            alchemyMapping.Bait.bait_item_name_en.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Bait.bait_angler_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Bait.bait_item_name_de.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Bait.bait_item_name_fr.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Bait.bait_item_name_ja.like('%{}%'.format(kwargs['name']))
         )
     )
 
@@ -86,8 +89,11 @@ class BaitCollectionResource(LimitedCollectionResource):
 def _lookup_fish_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.filter(
         (
-            alchemyMapping.Fish.fish_item_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Fish.fish_angler_name.like('%{}%'.format(kwargs['name']))
+            alchemyMapping.Fish.fish_item_name_en.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Fish.fish_angler_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Fish.fish_item_name_de.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Fish.fish_item_name_fr.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Fish.fish_item_name_ja.like('%{}%'.format(kwargs['name']))
         )
     )
 

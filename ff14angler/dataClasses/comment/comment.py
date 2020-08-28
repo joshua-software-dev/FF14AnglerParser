@@ -9,7 +9,7 @@ import lxml  # type: ignore
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import cached_property
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
@@ -21,6 +21,7 @@ from ff14angler.constants.regex import timestamp_matcher_regex
 @dataclass(frozen=True)
 class Comment(DataClassJsonMixin):
     comment_author: str
+    comment_html: str
     comment_text_original: str
     comment_text_translated: str
     comment_timestamp: datetime = field(
@@ -34,8 +35,15 @@ class Comment(DataClassJsonMixin):
 
     @cached_property
     def unique_id(self) -> uuid.UUID:
+        comment_tuple: Tuple[str, str, str, str, str] = (
+            self.comment_timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            self.comment_author,
+            self.comment_html,
+            self.comment_text_original,
+            self.comment_text_translated,
+        )
         temp_md5 = hashlib.md5()
-        temp_md5.update(f'{hash(self)}'.encode('utf-8'))
+        temp_md5.update(f'{hash(comment_tuple)}'.encode('utf-8'))
         return uuid.UUID(temp_md5.hexdigest())
 
     @staticmethod
@@ -76,6 +84,7 @@ class Comment(DataClassJsonMixin):
                 f'<html><div class="escape_name">{comment_json["nickname"]}</div></html>',
                 lxml.__name__
             ).find('div', {'class': 'escape_name'}).text.strip(),
+            comment_html=comment_json['comment'],
             comment_text_original=await cls._parse_text_original(copy.copy(comment_soup)),
             comment_text_translated=await cls._parse_text_translated(comment_soup),
             comment_timestamp=datetime.strptime(comment_json['date'], '%Y-%m-%d %H:%M:%S')
@@ -91,6 +100,7 @@ class Comment(DataClassJsonMixin):
 
         return cls(
             comment_author=comment_author,
+            comment_html=str(extracted),
             comment_text_original=await cls._parse_text_original(copy.copy(extracted)),
             comment_text_translated=await cls._parse_text_translated(soup),
             comment_timestamp=comment_timestamp

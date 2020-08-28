@@ -4,7 +4,7 @@ import asyncio
 import os
 import sqlite3
 
-from ff14angler.constants.values import ANGLER_API_BASE_URL, SQLITE_DIRECTORY, SQLITE_DATABASE
+from ff14angler.constants.values import SQLITE_DIRECTORY, SQLITE_DATABASE
 from ff14angler.dataClasses.scrapingData import ScrapingData
 
 
@@ -46,16 +46,23 @@ class SQLiteExport:
     async def export_bait_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for bait in scraping_data.bait.values():
             cursor.execute(
-                'INSERT INTO `bait` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `bait` VALUES ({});'.format(','.join(['?'] * 18)),
                 (
                     bait.bait_id.bait_angler_bait_id,
                     bait.bait_id.bait_xivapi_item_id,
                     bait.bait_angler_name,
-                    bait.bait_item_name,
+                    bait.bait_item_name_de,
+                    bait.bait_item_name_en,
+                    bait.bait_item_name_fr,
+                    bait.bait_item_name_ja,
                     bait.bait_icon_url,
                     bait.bait_large_icon_url,
                     bait.bait_angler_lodestone_url,
                     bait.bait_item_level,
+                    bait.bait_item_description_de,
+                    bait.bait_item_description_en,
+                    bait.bait_item_description_fr,
+                    bait.bait_item_description_ja,
                     bait.bait_gil_cost,
                     bait.bait_gil_sell_price,
                     bait.bait_angler_is_mooch_fish,
@@ -66,18 +73,27 @@ class SQLiteExport:
     async def export_fish_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             cursor.execute(
-                'INSERT INTO `fish` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `fish` VALUES ({});'.format(','.join(['?'] * 25)),
                 (
                     fish.fish_id.fish_angler_fish_id,
                     fish.fish_id.fish_xivapi_item_id,
                     fish.fish_angler_name,
-                    fish.fish_item_name,
+                    fish.fish_item_name_de,
+                    fish.fish_item_name_en,
+                    fish.fish_item_name_fr,
+                    fish.fish_item_name_ja,
                     fish.fish_icon_url,
                     fish.fish_large_icon_url,
                     fish.fish_angler_lodestone_url,
                     fish.fish_item_level,
-                    fish.fish_short_description,
-                    fish.fish_long_description,
+                    fish.fish_item_description_de,
+                    fish.fish_item_description_en,
+                    fish.fish_item_description_fr,
+                    fish.fish_item_description_ja,
+                    fish.fish_fishing_log_description_de,
+                    fish.fish_fishing_log_description_en,
+                    fish.fish_fishing_log_description_fr,
+                    fish.fish_fishing_log_description_ja,
                     fish.fish_introduced_patch,
                     fish.fish_angler_territory,
                     fish.fish_angler_item_category,
@@ -116,12 +132,13 @@ class SQLiteExport:
                     if comment not in comment_set:
                         comment_set.add(comment)
                         cursor.execute(
-                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?);',
+                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?, ?);',
                             (
                                 comment.unique_id.bytes,
                                 bait.bait_angler_comments.comment_fetch_timestamp,
                                 comment.comment_timestamp,
                                 comment.comment_author,
+                                comment.comment_html,
                                 comment.comment_text_original,
                                 comment.comment_text_translated,
                             )
@@ -133,12 +150,13 @@ class SQLiteExport:
                     if comment not in comment_set:
                         comment_set.add(comment)
                         cursor.execute(
-                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?);',
+                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?, ?);',
                             (
                                 comment.unique_id.bytes,
                                 fish.fish_angler_comments.comment_fetch_timestamp,
                                 comment.comment_timestamp,
                                 comment.comment_author,
+                                comment.comment_html,
                                 comment.comment_text_original,
                                 comment.comment_text_translated,
                             )
@@ -150,12 +168,13 @@ class SQLiteExport:
                     if comment not in comment_set:
                         comment_set.add(comment)
                         cursor.execute(
-                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?);',
+                            'INSERT INTO `comment` VALUES (?, ?, ?, ?, ?, ?, ?);',
                             (
                                 comment.unique_id.bytes,
                                 spot.spot_angler_comments.comment_fetch_timestamp,
                                 comment.comment_timestamp,
                                 comment.comment_author,
+                                comment.comment_html,
                                 comment.comment_text_original,
                                 comment.comment_text_translated,
                             )

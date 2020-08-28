@@ -33,7 +33,14 @@ class Bait(DataClassJsonMixin):
     bait_gil_sell_price: Optional[int] = None
     bait_icon_url: Optional[str] = None
     bait_item_level: Optional[int] = None
-    bait_item_name: Optional[str] = None
+    bait_item_description_de: Optional[str] = None
+    bait_item_description_en: Optional[str] = None
+    bait_item_description_fr: Optional[str] = None
+    bait_item_description_ja: Optional[str] = None
+    bait_item_name_de: Optional[str] = None
+    bait_item_name_en: Optional[str] = None
+    bait_item_name_fr: Optional[str] = None
+    bait_item_name_ja: Optional[str] = None
     bait_large_icon_url: Optional[str] = None
 
     @staticmethod
@@ -83,8 +90,21 @@ class Bait(DataClassJsonMixin):
 
     async def update_bait_with_assume_is_spearfishing_head(self):
         self.bait_icon_url = angler_bait_missing_icon_urls[self.bait_id.bait_angler_bait_id]
-        self.bait_item_name = f'{self.bait_angler_name} Gig Head'
+
+        # TODO: Put something here?
+        self.bait_item_description_de = ''
+        self.bait_item_description_en = ''
+        self.bait_item_description_fr = ''
+        self.bait_item_description_ja = ''
+
         self.bait_item_level = ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL
+
+        item_name = f'{self.bait_angler_name} Gig Head'
+        self.bait_item_name_de = item_name
+        self.bait_item_name_en = item_name
+        self.bait_item_name_fr = item_name
+        self.bait_item_name_ja = item_name
+
         self.bait_id.bait_xivapi_item_id = ANGLER_SPEARFISHING_BAIT_ITEM_ID
 
         await XivapiWrapper.xivapi_download_icon_image(self.bait_icon_url)
@@ -105,8 +125,15 @@ class Bait(DataClassJsonMixin):
         self.bait_gil_cost = lookup_response['PriceMid']
         self.bait_gil_sell_price = lookup_response['PriceLow']
         self.bait_icon_url = lookup_response['Icon']
+        self.bait_item_description_de = lookup_response['Description_de']
+        self.bait_item_description_en = lookup_response['Description_en']
+        self.bait_item_description_fr = lookup_response['Description_fr']
+        self.bait_item_description_ja = lookup_response['Description_ja']
         self.bait_item_level = lookup_response['LevelItem']
-        self.bait_item_name = lookup_response['Name_en']
+        self.bait_item_name_de = lookup_response['Name_de']
+        self.bait_item_name_en = lookup_response['Name_en']
+        self.bait_item_name_fr = lookup_response['Name_fr']
+        self.bait_item_name_ja = lookup_response['Name_ja']
 
         await XivapiWrapper.xivapi_download_icon_image(self.bait_icon_url)
 

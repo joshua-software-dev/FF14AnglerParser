@@ -42,13 +42,22 @@ class Fish(DataClassJsonMixin):
     fish_angler_territory: Optional[str] = None
     fish_angler_tug_strength: List[FishTugStrength] = field(default_factory=list)
     fish_angler_weather_preferences: Optional[FishWeatherPreferences] = None
+    fish_fishing_log_description_de: Optional[str] = None
+    fish_fishing_log_description_en: Optional[str] = None
+    fish_fishing_log_description_fr: Optional[str] = None
+    fish_fishing_log_description_ja: Optional[str] = None
     fish_icon_url: Optional[str] = None
     fish_introduced_patch: Optional[str] = None
+    fish_item_description_de: Optional[str] = None
+    fish_item_description_en: Optional[str] = None
+    fish_item_description_fr: Optional[str] = None
+    fish_item_description_ja: Optional[str] = None
     fish_item_level: Optional[int] = None
-    fish_item_name: Optional[str] = None
+    fish_item_name_de: Optional[str] = None
+    fish_item_name_en: Optional[str] = None
+    fish_item_name_fr: Optional[str] = None
+    fish_item_name_ja: Optional[str] = None
     fish_large_icon_url: Optional[str] = None
-    fish_long_description: Optional[str] = None
-    fish_short_description: Optional[str] = None
 
     @staticmethod
     async def _parse_angler_aquarium_size(data_row3: Tag) -> Optional[str]:
@@ -215,22 +224,34 @@ class Fish(DataClassJsonMixin):
         return int(span2.text.strip().split()[0])
 
     @staticmethod
-    async def _lookup_fish_long_description(item_lookup_response: Dict[str, Any]) -> Optional[str]:
+    async def _lookup_fish_long_description(item_lookup_response: Dict[str, Any]) -> Optional[Dict[str, str]]:
         game_content_links: Dict[str, Any] = item_lookup_response['GameContentLinks']
 
         try:
             fish_lookup_response = await XivapiWrapper.xivapi_fish_parameter_lookup(
                 game_content_links['FishParameter']['Item'][0]
             )
-            return fish_lookup_response['Text_en']
+
+            return {
+                'de': fish_lookup_response['Text_de'],
+                'en': fish_lookup_response['Text_en'],
+                'fr': fish_lookup_response['Text_fr'],
+                'ja': fish_lookup_response['Text_ja'],
+            }
         except KeyError:
             try:
                 fish_lookup_response = await XivapiWrapper.xivapi_spearfishing_item_lookup(
                     game_content_links['SpearfishingItem']['Item'][0]
                 )
-                return fish_lookup_response['Description_en']
+
+                return {
+                    'de': fish_lookup_response['Description_de'],
+                    'en': fish_lookup_response['Description_en'],
+                    'fr': fish_lookup_response['Description_fr'],
+                    'ja': fish_lookup_response['Description_ja'],
+                }
             except KeyError:
-                return None
+                return dict()
 
     @classmethod
     async def get_fish_from_angler_fish(cls, fish_angler_id: int, fish_angler_name: str) -> 'Fish':
@@ -267,10 +288,21 @@ class Fish(DataClassJsonMixin):
         self.fish_angler_weather_preferences = await self._parse_angler_weather_preferences(soup)
         self.fish_icon_url = item_lookup_response["Icon"]
         self.fish_introduced_patch = await self._lookup_fish_introduced_patch(data_row2, item_lookup_response)
+        self.fish_item_description_de = item_lookup_response['Description_de']
+        self.fish_item_description_en = item_lookup_response['Description_en']
+        self.fish_item_description_fr = item_lookup_response['Description_fr']
+        self.fish_item_description_ja = item_lookup_response['Description_ja']
         self.fish_item_level = await self._parse_item_level(data_row2)
-        self.fish_item_name = item_lookup_response['Name_en']
-        self.fish_long_description = await self._lookup_fish_long_description(item_lookup_response)
-        self.fish_short_description = item_lookup_response['Description_en']
+        self.fish_item_name_de = item_lookup_response['Name_de']
+        self.fish_item_name_en = item_lookup_response['Name_en']
+        self.fish_item_name_fr = item_lookup_response['Name_fr']
+        self.fish_item_name_ja = item_lookup_response['Name_ja']
+
+        fishing_log_descriptions = await self._lookup_fish_long_description(item_lookup_response)
+        self.fish_fishing_log_description_de = fishing_log_descriptions.get('de')
+        self.fish_fishing_log_description_en = fishing_log_descriptions.get('en')
+        self.fish_fishing_log_description_fr = fishing_log_descriptions.get('fr')
+        self.fish_fishing_log_description_ja = fishing_log_descriptions.get('ja')
 
         await XivapiWrapper.xivapi_download_icon_image(self.fish_icon_url)
 
