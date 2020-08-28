@@ -54,7 +54,7 @@ class Fish(DataClassJsonMixin):
     async def _parse_angler_aquarium_size(data_row3: Tag) -> Optional[str]:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
         if div_tag:
-            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+            for tag in div_tag.select('.clear_icon.icon_with_text'):  # type: Tag
                 img_tag = tag.find('img')
                 if img_tag and 'aquarium' in img_tag.attrs.get('src', ''):
                     return tag.attrs['data-text']
@@ -68,7 +68,7 @@ class Fish(DataClassJsonMixin):
     async def _parse_angler_canvas_size(data_row3: Tag) -> Optional[str]:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
         if div_tag:
-            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+            for tag in div_tag.select('.clear_icon.icon_with_text'):  # type: Tag
                 img_tag = tag.find('img')
                 # noinspection SpellCheckingInspection
                 if img_tag and 'gyotaku' in img_tag.attrs.get('src', ''):
@@ -94,7 +94,7 @@ class Fish(DataClassJsonMixin):
     async def _parse_angler_double_hooking_count(data_row3: Tag) -> str:
         div_tag = data_row3.find('div', {'class': 'fancy info_icon_area'})
         if div_tag:
-            for tag in div_tag.select('.clear_icon icon_with_text'):  # type: Tag
+            for tag in div_tag.select('.clear_icon.icon_with_text'):  # type: Tag
                 img_tag = tag.find('img')
                 if img_tag and 'double_hooking' in img_tag.attrs.get('src', ''):
                     return tag.attrs['data-text']
