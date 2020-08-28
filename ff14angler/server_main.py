@@ -1,5 +1,9 @@
 #! /usr/bin/env python3
 
+from ff14angler.constants import values
+
+values.DEBUG_SERVER = True
+
 from ff14angler.apiServer.application import application
 
 from gunicorn.app.base import BaseApplication

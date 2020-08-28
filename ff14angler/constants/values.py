@@ -11,6 +11,7 @@ ANGLER_DELAY_BETWEEN_REQUESTS_DURATION = 3
 ANGLER_PAGE_LOAD_WAIT_DURATION = 180
 ANGLER_SPEARFISHING_BAIT_ITEM_ID = 17726  # Spearfishing Gig Offhand Item
 ANGLER_SPEARFISHING_BAIT_ITEM_LEVEL = 61
+DEBUG_SERVER = False
 MODULE_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 EXPORT_DIRECTORY = os.path.join(os.path.abspath(os.path.join(MODULE_DIRECTORY, '..')), 'static')
 SQLITE_DIRECTORY = os.path.join(MODULE_DIRECTORY, 'sqlite_db')
