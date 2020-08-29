@@ -54,8 +54,11 @@ class LimitedCollectionResource(CollectionResource):
 
     def get_filter(self, req: Request, resp: Response, query: Query, *args, **kwargs):
         limit = req.get_param_as_int('__limit')
-        if not isinstance(limit, int) or limit > 100:
-            req.params['__limit'] = 100
+        if not isinstance(limit, int):
+            limit = 10
+            req.params['__limit'] = limit
+        if limit > 1000:
+            req.params['__limit'] = 1000
         return query.limit(limit)
 
     # noinspection PyUnusedLocal
