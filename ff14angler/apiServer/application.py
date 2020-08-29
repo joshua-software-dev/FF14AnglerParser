@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import sqlite3
+
 import falcon
 
 from falcon_autocrud.middleware import Middleware
@@ -16,6 +18,9 @@ if DEBUG_SERVER:
 else:
     middleware = [FalconSSLify(), CorsMiddleware(), Middleware()]
 
-db_engine = create_engine('sqlite:///{}'.format(SQLITE_DATABASE))
+db_engine = create_engine(
+    'sqlite://',
+    creator=lambda: sqlite3.connect("file:{}?mode=ro".format(SQLITE_DATABASE), uri=True)
+)
 application = falcon.API(middleware=middleware)
 register_routes(application, db_engine)
