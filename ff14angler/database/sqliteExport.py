@@ -215,7 +215,7 @@ class SQLiteExport:
                         'INSERT INTO `spot_comment` VALUES (?, ?);',
                         (
                             spot.spot_id.spot_angler_spot_id,
-                            str(comment.unique_id),
+                            comment.unique_id.bytes,
                         )
                     )
 
