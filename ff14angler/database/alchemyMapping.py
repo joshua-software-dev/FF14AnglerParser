@@ -331,3 +331,10 @@ class SpotEffectiveBait(Base):
 
     spot_angler_spot_id = Column(ForeignKey('spot.spot_angler_spot_id'), primary_key=True, nullable=False, index=True)
     bait_angler_bait_id = Column(ForeignKey('bait.bait_angler_bait_id'), primary_key=True, nullable=False, index=True)
+
+
+# noinspection SpellCheckingInspection
+class LastUpdated(Base):
+    __tablename__ = 'last_updated'
+
+    last_updated_timestamp = Column(DateTime, primary_key=True, nullable=False)

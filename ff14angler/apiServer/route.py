@@ -137,7 +137,8 @@ def register_routes(app: falcon.API, db_engine: Engine):
         ),
         '/spot_effective_bait/spot/{spot_gathering_type}/{spot_gathering_type_unique_id}': (
             resource.SpotEffectiveBaitCollectionResource
-        )
+        ),
+        '/last_updated': resource.LastUpdatedCollectionResource
     }
 
     app.add_route('/', resource.RouteResource(list(routes.keys())))

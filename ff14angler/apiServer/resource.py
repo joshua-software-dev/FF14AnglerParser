@@ -546,3 +546,8 @@ class SpotEffectiveBaitCollectionResource(LimitedCollectionResource):
 
     methods = ['GET']
     model = alchemyMapping.SpotEffectiveBait
+
+
+class LastUpdatedCollectionResource(LimitedCollectionResource):
+    methods = ['GET']
+    model = alchemyMapping.LastUpdated

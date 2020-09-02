@@ -4,6 +4,8 @@ import os
 import sqlite3
 import tempfile
 
+from datetime import datetime, timezone
+
 from ff14angler.constants.values import SQLITE_DIRECTORY, SQLITE_DATABASE
 from ff14angler.dataClasses.scrapingData import ScrapingData
 
@@ -413,6 +415,15 @@ class SQLiteExport:
                     )
                 )
 
+    @staticmethod
+    def input_timestamp_into_last_updated_table(cursor: sqlite3.Cursor):
+        cursor.execute(
+            'INSERT INTO last_updated VALUES (?);',
+            (
+                datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc),
+            )
+        )
+
     @classmethod
     def output_data_as_database(cls, scraping_data: ScrapingData):
         with tempfile.NamedTemporaryFile('wb+') as temp:
@@ -440,6 +451,7 @@ class SQLiteExport:
                 cls.export_spot_bait_fish_catch_info_table(cursor, scraping_data)
                 cls.export_spot_bait_total_fish_caught_table(cursor, scraping_data)
                 cls.export_spot_effective_bait_table(cursor, scraping_data)
+                cls.input_timestamp_into_last_updated_table(cursor)
                 conn.commit()
             finally:
                 cursor.close()
