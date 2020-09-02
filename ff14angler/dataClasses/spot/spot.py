@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup  # type: ignore
 from bs4.element import Tag  # type: ignore
 from dataclasses_json import DataClassJsonMixin
 
-from ff14angler.constants.data_corrections import angler_spot_name_corrections
+from ff14angler.constants.data_corrections import angler_spot_name_corrections, spot_territory_correction
 from ff14angler.constants.regex import (
     angler_map_area_matcher_regex,
     angler_map_x_coord_matcher_regex,
@@ -42,6 +42,16 @@ class Spot(DataClassJsonMixin):
     spot_angler_y_coord: Optional[int] = None
     spot_angler_zone_name: Optional[str] = None
     spot_gathering_level: Optional[int] = None
+
+    spot_place_name_de: Optional[str] = None
+    spot_place_name_en: Optional[str] = None
+    spot_place_name_fr: Optional[str] = None
+    spot_place_name_ja: Optional[str] = None
+    spot_zone_name_de: Optional[str] = None
+    spot_zone_name_en: Optional[str] = None
+    spot_zone_name_fr: Optional[str] = None
+    spot_zone_name_ja: Optional[str] = None
+    spot_is_teeming_waters: bool = False
 
     @staticmethod
     async def _parse_angler_area_id(spot_info: Tag) -> int:
@@ -109,6 +119,22 @@ class Spot(DataClassJsonMixin):
                     spot_lookup_response['ID']
                 )
 
+                self.spot_place_name_de = spot_lookup_response['PlaceName']['Name_de']
+                self.spot_place_name_en = spot_lookup_response['PlaceName']['Name_en']
+                self.spot_place_name_fr = spot_lookup_response['PlaceName']['Name_fr']
+                self.spot_place_name_ja = spot_lookup_response['PlaceName']['Name_ja']
+
+                if spot_lookup_response.get('TerritoryType'):
+                    self.spot_zone_name_de = spot_lookup_response['TerritoryType']['PlaceName']['Name_de']
+                    self.spot_zone_name_en = spot_lookup_response['TerritoryType']['PlaceName']['Name_en']
+                    self.spot_zone_name_fr = spot_lookup_response['TerritoryType']['PlaceName']['Name_fr']
+                    self.spot_zone_name_ja = spot_lookup_response['TerritoryType']['PlaceName']['Name_ja']
+                else:
+                    self.spot_zone_name_de = spot_territory_correction[self.spot_place_name_de]
+                    self.spot_zone_name_en = spot_territory_correction[self.spot_place_name_en]
+                    self.spot_zone_name_fr = spot_territory_correction[self.spot_place_name_fr]
+                    self.spot_zone_name_ja = spot_territory_correction[self.spot_place_name_ja]
+
                 return
 
         raise ValueError(f'Could not find fishing spot for spot: {self}')
@@ -153,10 +179,34 @@ class Spot(DataClassJsonMixin):
             raise ValueError(f'Could not find GatheringPointBase for spot: {self}')
 
         self.spot_gathering_level = most_likely_gpb[1]['gathering_point_base_level']
+        self.spot_is_teeming_waters = True
         self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
             GatheringTypeEnum.TeemingSpearFishing,
             most_likely_gpb[1]['gathering_point_base_id']
         )
+
+        for gathering_point in most_likely_gpb[1]['game_content_links']['GatheringPoint'][
+            'GatheringPointBase'
+        ]:  # type: int
+            gathering_point_lookup = await XivapiWrapper.xivapi_gathering_point_lookup(gathering_point)
+            self.spot_zone_name_de = gathering_point_lookup['TerritoryType']['PlaceName']['Name_de']
+            self.spot_zone_name_en = gathering_point_lookup['TerritoryType']['PlaceName']['Name_en']
+            self.spot_zone_name_fr = gathering_point_lookup['TerritoryType']['PlaceName']['Name_fr']
+            self.spot_zone_name_ja = gathering_point_lookup['TerritoryType']['PlaceName']['Name_ja']
+
+            if gathering_point_lookup.get('PlaceName'):
+                self.spot_place_name_de = gathering_point_lookup['PlaceName']['Name_de']
+                self.spot_place_name_en = gathering_point_lookup['PlaceName']['Name_en']
+                self.spot_place_name_fr = gathering_point_lookup['PlaceName']['Name_fr']
+                self.spot_place_name_ja = gathering_point_lookup['PlaceName']['Name_ja']
+            else:
+                # TODO: Replace this with some real values eventually.
+                self.spot_place_name_de = '???'
+                self.spot_place_name_en = '???'
+                self.spot_place_name_fr = '???'
+                self.spot_place_name_ja = '???'
+
+            return
 
     async def update_spot_with_assume_is_spearfishing_spot(self):
         if angler_spot_name_corrections.get(self.spot_angler_name):
@@ -181,6 +231,17 @@ class Spot(DataClassJsonMixin):
                     GatheringTypeEnum.SpearFishing,
                     notebook_lookup['ID']
                 )
+
+                self.spot_place_name_de = notebook_lookup['PlaceName']['Name_de']
+                self.spot_place_name_en = notebook_lookup['PlaceName']['Name_en']
+                self.spot_place_name_fr = notebook_lookup['PlaceName']['Name_fr']
+                self.spot_place_name_ja = notebook_lookup['PlaceName']['Name_ja']
+
+                self.spot_zone_name_de = notebook_lookup['TerritoryType']['PlaceName']['Name_de']
+                self.spot_zone_name_en = notebook_lookup['TerritoryType']['PlaceName']['Name_en']
+                self.spot_zone_name_fr = notebook_lookup['TerritoryType']['PlaceName']['Name_fr']
+                self.spot_zone_name_ja = notebook_lookup['TerritoryType']['PlaceName']['Name_ja']
+
                 return
 
         return await self.update_spot_with_assume_is_teeming_spot()

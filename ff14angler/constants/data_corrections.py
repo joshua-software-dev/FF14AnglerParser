@@ -41,3 +41,45 @@ angler_fish_lodestone_url_corrections: Dict[int, str] = {
 
 # noinspection SpellCheckingInspection
 angler_spot_name_corrections: Dict[str, str] = {'SuinoSato': 'Sui–no–Sato'}
+
+spot_territory_correction: Dict[str, str] = {
+    'Domanische Enklave': 'Yanxia',
+    'The Doman Enclave': 'Yanxia',
+    'Quartier enclavé de Doma': 'Yanxia',
+    'ドマ町人地': 'ヤンサ',
+
+    'Diadem-Grotte': 'Das Diadem',
+    'Diadem Grotto': 'The Diadem',
+    'Grotte du Diadème': 'Le Diadème',
+    'ディアデム諸島の洞穴': 'ディアデム諸島',
+
+    'Südlicher Diademteich': 'Das Diadem',
+    'Southern Diadem Lake': 'The Diadem',
+    'Mares du quadrant sud-ouest': 'Le Diadème',
+    'ディアデム諸島の南西池': 'ディアデム諸島',
+
+    'Nördlicher Diademteich': 'Das Diadem',
+    'Northern Diadem Lake': 'The Diadem',
+    'Étang du quadrant nord-ouest': 'Le Diadème',
+    'ディアデム諸島の北西池': 'ディアデム諸島',
+
+    'Tosende Wolken': 'Das Diadem',
+    'Blustery Cloudtop': 'The Diadem',
+    'Cimes venteuses': 'Le Diadème',
+    '風吹き抜ける雲海': 'ディアデム諸島',
+
+    'Sanfte Wolken': 'Das Diadem',
+    'Calm Cloudtop': 'The Diadem',
+    'Cimes calmes': 'Le Diadème',
+    '風穏やかな雲海': 'ディアデム諸島',
+
+    'Wirbelnde Wolken': 'Das Diadem',
+    'Swirling Cloudtop': 'The Diadem',
+    'Cimes tumultueuses': 'Le Diadème',
+    '風渦巻く雲海': 'ディアデム諸島',
+
+    'Sturmumtostes Wolkenmeer': 'Das Diadem',
+    'Windswept Cloudtop': 'The Diadem',
+    'Cimes éventées': 'Le Diadème',
+    '風吹き上がる雲海': 'ディアデム諸島',
+}

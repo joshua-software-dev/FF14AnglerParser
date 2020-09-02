@@ -111,8 +111,16 @@ class FishCollectionResource(LimitedCollectionResource):
 def _lookup_spot_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
     return query.filter(
         (
-            alchemyMapping.Spot.spot_angler_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_angler_zone_name.like('%{}%'.format(kwargs['name']))
+            alchemyMapping.Spot.spot_place_name_en.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_angler_place_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_place_name_de.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_place_name_fr.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_place_name_ja.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_zone_name_en.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_angler_zone_name.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_zone_name_de.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_zone_name_fr.like('%{}%'.format(kwargs['name'])) |
+            alchemyMapping.Spot.spot_zone_name_ja.like('%{}%'.format(kwargs['name']))
         )
     )
 

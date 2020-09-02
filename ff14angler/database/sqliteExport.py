@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
-import asyncio
 import os
 import sqlite3
+import tempfile
 
 from ff14angler.constants.values import SQLITE_DIRECTORY, SQLITE_DATABASE
 from ff14angler.dataClasses.scrapingData import ScrapingData
@@ -11,13 +11,8 @@ from ff14angler.dataClasses.scrapingData import ScrapingData
 class SQLiteExport:
 
     @staticmethod
-    async def create_database_from_schema() -> sqlite3.Connection:
-        try:
-            os.remove(SQLITE_DATABASE)
-        except FileNotFoundError:
-            pass
-
-        conn = sqlite3.connect(SQLITE_DATABASE)
+    def create_database_from_schema(temp_path: str) -> sqlite3.Connection:
+        conn = sqlite3.connect(temp_path)
         cursor = conn.cursor()
 
         for file in sorted(filter(lambda x: x.endswith('.sql'), os.listdir(SQLITE_DIRECTORY))):
@@ -25,25 +20,14 @@ class SQLiteExport:
                 statements = fh.read().strip()
 
             for statement in statements.split('\n\n'):
-                success = False
-                while not success:
-                    for attempt in range(3):
-                        try:
-                            cursor.execute(statement)
-                            success = True
-                            break
-                        except sqlite3.OperationalError:  # Database is locked
-                            if attempt < 2:
-                                await asyncio.sleep(1)
-                            else:
-                                raise
+                cursor.execute(statement)
 
         conn.commit()
         cursor.close()
         return conn
 
     @staticmethod
-    async def export_bait_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_bait_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for bait in scraping_data.bait.values():
             cursor.execute(
                 'INSERT INTO `bait` VALUES ({});'.format(','.join(['?'] * 18)),
@@ -70,7 +54,7 @@ class SQLiteExport:
             )
 
     @staticmethod
-    async def export_fish_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             cursor.execute(
                 'INSERT INTO `fish` VALUES ({});'.format(','.join(['?'] * 25)),
@@ -104,17 +88,26 @@ class SQLiteExport:
             )
 
     @staticmethod
-    async def export_spot_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             cursor.execute(
-                'INSERT INTO `spot` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO `spot` VALUES ({});'.format(','.join(['?'] * 19)),
                 (
                     spot.spot_id.spot_angler_spot_id,
                     spot.spot_id.spot_gathering_type.gathering_type,
                     spot.spot_id.spot_gathering_type.gathering_type_unique_id,
                     spot.spot_angler_area_id,
                     spot.spot_angler_name,
+                    spot.spot_place_name_de,
+                    spot.spot_place_name_en,
+                    spot.spot_place_name_fr,
+                    spot.spot_place_name_ja,
                     spot.spot_angler_zone_name,
+                    spot.spot_zone_name_de,
+                    spot.spot_zone_name_en,
+                    spot.spot_zone_name_fr,
+                    spot.spot_zone_name_ja,
+                    spot.spot_is_teeming_waters,
                     spot.spot_gathering_level,
                     spot.spot_angler_x_coord,
                     spot.spot_angler_y_coord,
@@ -123,7 +116,7 @@ class SQLiteExport:
             )
 
     @staticmethod
-    async def export_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         comment_set = set()
 
         for bait in scraping_data.bait.values():
@@ -181,7 +174,7 @@ class SQLiteExport:
                         )
 
     @staticmethod
-    async def export_bait_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_bait_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for bait in scraping_data.bait.values():
             if bait.bait_angler_comments:
                 for comment in bait.bait_angler_comments.comments:
@@ -194,7 +187,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_fish_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             if fish.fish_angler_comments:
                 for comment in fish.fish_angler_comments.comments:
@@ -207,7 +200,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_spot_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_comment_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             if spot.spot_angler_comments:
                 for comment in spot.spot_angler_comments.comments:
@@ -220,7 +213,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_bait_alt_currency_price_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_bait_alt_currency_price_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for bait in scraping_data.bait.values():
             for alt_currency in bait.bait_alt_currency_prices:
                 cursor.execute(
@@ -234,7 +227,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_fish_bait_preference_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_bait_preference_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             for bait_pref in fish.fish_angler_bait_preferences:
                 cursor.execute(
@@ -247,7 +240,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_fish_caught_count(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_caught_count(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             hour_preferences = fish.fish_angler_hour_preferences
             if hour_preferences:
@@ -271,7 +264,7 @@ class SQLiteExport:
             )
 
     @staticmethod
-    async def export_fish_caught_per_hour_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_caught_per_hour_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             if fish.fish_angler_hour_preferences:
                 for hour_num, count in fish.fish_angler_hour_preferences.hours.items():
@@ -285,7 +278,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_fish_caught_per_weather_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_caught_per_weather_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             weather_preferences = fish.fish_angler_weather_preferences
             if weather_preferences:
@@ -300,7 +293,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_fish_desynthesis_item_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_desynthesis_item_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             for item in fish.fish_angler_desynthesis_items:
                 cursor.execute(
@@ -318,7 +311,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_fish_involved_leve_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_involved_leve_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             for leve in fish.fish_angler_involved_leves:
                 cursor.execute(
@@ -335,7 +328,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_fish_involved_recipe_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_involved_recipe_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             for recipe in fish.fish_angler_involved_recipes:
                 cursor.execute(
@@ -353,7 +346,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_fish_tug_strength_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_fish_tug_strength_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for fish in scraping_data.fish.values():
             for tug_strength in fish.fish_angler_tug_strength:
                 cursor.execute(
@@ -366,7 +359,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_spot_available_fish_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_available_fish_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             for fish_id in spot.spot_angler_catch_metadata.spot_available_fish:
                 cursor.execute(
@@ -378,7 +371,7 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    async def export_spot_bait_fish_catch_info_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_bait_fish_catch_info_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             for metadata in spot.spot_angler_catch_metadata.spot_fish_caught_per_bait:
                 for fish in metadata.spot_angler_bait_fish_catch_info:
@@ -395,7 +388,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_spot_bait_total_fish_caught_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_bait_total_fish_caught_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             for metadata in spot.spot_angler_catch_metadata.spot_fish_caught_per_bait:
                 if metadata.spot_angler_bait_total_fish_caught is not None:
@@ -409,7 +402,7 @@ class SQLiteExport:
                     )
 
     @staticmethod
-    async def export_spot_effective_bait_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
+    def export_spot_effective_bait_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         for spot in scraping_data.spot.values():
             for bait_id in spot.spot_angler_catch_metadata.spot_effective_bait:
                 cursor.execute(
@@ -421,32 +414,37 @@ class SQLiteExport:
                 )
 
     @classmethod
-    async def output_data_as_database(cls, scraping_data: ScrapingData):
-        conn = await cls.create_database_from_schema()
-        cursor = conn.cursor()
+    def output_data_as_database(cls, scraping_data: ScrapingData):
+        with tempfile.NamedTemporaryFile('wb+') as temp:
+            conn = cls.create_database_from_schema(temp.name)
+            cursor = conn.cursor()
 
-        try:
-            await cls.export_bait_table(cursor, scraping_data)
-            await cls.export_fish_table(cursor, scraping_data)
-            await cls.export_spot_table(cursor, scraping_data)
-            await cls.export_comment_table(cursor, scraping_data)
-            await cls.export_bait_comment_table(cursor, scraping_data)
-            await cls.export_fish_comment_table(cursor, scraping_data)
-            await cls.export_spot_comment_table(cursor, scraping_data)
-            await cls.export_bait_alt_currency_price_table(cursor, scraping_data)
-            await cls.export_fish_bait_preference_table(cursor, scraping_data)
-            await cls.export_fish_caught_count(cursor, scraping_data)
-            await cls.export_fish_caught_per_hour_table(cursor, scraping_data)
-            await cls.export_fish_caught_per_weather_table(cursor, scraping_data)
-            await cls.export_fish_desynthesis_item_table(cursor, scraping_data)
-            await cls.export_fish_involved_leve_table(cursor, scraping_data)
-            await cls.export_fish_involved_recipe_table(cursor, scraping_data)
-            await cls.export_fish_tug_strength_table(cursor, scraping_data)
-            await cls.export_spot_available_fish_table(cursor, scraping_data)
-            await cls.export_spot_bait_fish_catch_info_table(cursor, scraping_data)
-            await cls.export_spot_bait_total_fish_caught_table(cursor, scraping_data)
-            await cls.export_spot_effective_bait_table(cursor, scraping_data)
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
+            try:
+                cls.export_bait_table(cursor, scraping_data)
+                cls.export_fish_table(cursor, scraping_data)
+                cls.export_spot_table(cursor, scraping_data)
+                cls.export_comment_table(cursor, scraping_data)
+                cls.export_bait_comment_table(cursor, scraping_data)
+                cls.export_fish_comment_table(cursor, scraping_data)
+                cls.export_spot_comment_table(cursor, scraping_data)
+                cls.export_bait_alt_currency_price_table(cursor, scraping_data)
+                cls.export_fish_bait_preference_table(cursor, scraping_data)
+                cls.export_fish_caught_count(cursor, scraping_data)
+                cls.export_fish_caught_per_hour_table(cursor, scraping_data)
+                cls.export_fish_caught_per_weather_table(cursor, scraping_data)
+                cls.export_fish_desynthesis_item_table(cursor, scraping_data)
+                cls.export_fish_involved_leve_table(cursor, scraping_data)
+                cls.export_fish_involved_recipe_table(cursor, scraping_data)
+                cls.export_fish_tug_strength_table(cursor, scraping_data)
+                cls.export_spot_available_fish_table(cursor, scraping_data)
+                cls.export_spot_bait_fish_catch_info_table(cursor, scraping_data)
+                cls.export_spot_bait_total_fish_caught_table(cursor, scraping_data)
+                cls.export_spot_effective_bait_table(cursor, scraping_data)
+                conn.commit()
+            finally:
+                cursor.close()
+                conn.close()
+
+                with open(SQLITE_DATABASE, 'wb+') as fh:
+                    temp.seek(0)
+                    fh.write(temp.read())

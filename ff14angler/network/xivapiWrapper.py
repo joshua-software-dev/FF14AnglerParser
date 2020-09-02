@@ -50,6 +50,20 @@ class XivapiWrapper:
         return data
 
     @classmethod
+    async def xivapi_gathering_point_lookup(cls, gathering_point_id: int):
+        if result := cls.cache.GatheringPoint.get(gathering_point_id):
+            return result
+
+        data = await cls.connection.get_json_at_url(
+            urljoin(
+                XIVAPI_BASE_URL,
+                f'GatheringPoint/{gathering_point_id}'
+            )
+        )
+        cls.cache.GatheringPoint[gathering_point_id] = data
+        return data
+
+    @classmethod
     async def xivapi_gathering_point_base_index(cls):
         if result := cls.cache.IdIndex.GatheringPointBaseIndex:
             return result
@@ -211,6 +225,7 @@ class XivapiWrapper:
                 if spearfishing_ids:
                     gathering_point_base_spearfishing_spots.append(
                         {
+                            'game_content_links': gpb_result['GameContentLinks'],
                             'gathering_point_base_id': gpb_result['ID'],
                             'gathering_point_base_level': gpb_result['GatheringLevel'],
                             'spearfishing_ids': spearfishing_ids,

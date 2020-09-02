@@ -13,6 +13,7 @@ from ff14angler.dataClasses.cache.idIndexCache import IdIndexCache
 class XivapiCache(DataClassJsonMixin):
     FishParameter: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     FishingSpot: Dict[int, Dict[str, Any]] = field(default_factory=dict)
+    GatheringPoint: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     GatheringPointBase: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     IdIndex: IdIndexCache = field(default_factory=IdIndexCache)
     Item: Dict[int, Dict[str, Any]] = field(default_factory=dict)

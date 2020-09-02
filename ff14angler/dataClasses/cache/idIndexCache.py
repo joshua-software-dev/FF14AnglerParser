@@ -9,6 +9,7 @@ from dataclasses_json import DataClassJsonMixin
 GatheringPointBaseSpearfishingIds = TypedDict(
     'GatheringPointBaseSpearfishingIds',
     {
+        'game_content_links': List[int],
         'gathering_point_base_id': int,
         'gathering_point_base_level': int,
         'spearfishing_ids': Set[int],

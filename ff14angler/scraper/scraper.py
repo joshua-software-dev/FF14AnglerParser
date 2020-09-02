@@ -29,4 +29,4 @@ class Scraper:
             json.dump(scraping_data.to_dict(), fh, indent=4, sort_keys=True)
 
         print('Writing database form scraping results...')
-        await SQLiteExport.output_data_as_database(scraping_data)
+        SQLiteExport.output_data_as_database(scraping_data)
