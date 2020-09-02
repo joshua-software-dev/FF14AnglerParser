@@ -135,20 +135,28 @@ class Spot(DataClassJsonMixin):
         return spearfishing_item_ids
 
     async def update_spot_with_assume_is_teeming_spot(self):
-        spearfishing_gpb = await XivapiWrapper.xivapi_spearfishing_gathering_point_base_index()
-        spearfishing_ids = await self._lookup_spearfishing_ids_for_available_fish()
+        spearfishing_all_gpb = await XivapiWrapper.xivapi_spearfishing_gathering_point_base_index()
+        current_spot_spearfishing_ids = await self._lookup_spearfishing_ids_for_available_fish()
 
-        for gathering_point_base in spearfishing_gpb:
-            # If a gathering point base and this spot share 2 or more fish as being known to be caught there...
-            if len(gathering_point_base['spearfishing_ids'].intersection(spearfishing_ids)) >= 2:
-                self.spot_gathering_level = gathering_point_base['gathering_point_base_level']
-                self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
-                    GatheringTypeEnum.TeemingSpearFishing,
-                    gathering_point_base['gathering_point_base_id']
-                )
-                return
+        gpb_chance_assessment = []
+        for gathering_point_base in spearfishing_all_gpb:
+            gpb_chance_assessment.append(
+                [
+                    len(gathering_point_base['spearfishing_ids'].intersection(current_spot_spearfishing_ids)),
+                    gathering_point_base
+                ]
+            )
 
-        raise ValueError(f'Could not find GatheringPointBase for spot: {self}')
+        most_likely_gpb = max(gpb_chance_assessment, key=lambda x: x[0])
+        if most_likely_gpb[0] == 0:
+            # Filter out complete non matches
+            raise ValueError(f'Could not find GatheringPointBase for spot: {self}')
+
+        self.spot_gathering_level = most_likely_gpb[1]['gathering_point_base_level']
+        self.spot_id.spot_gathering_type = SpotGatheringType.get_spot_gathering_type(
+            GatheringTypeEnum.TeemingSpearFishing,
+            most_likely_gpb[1]['gathering_point_base_id']
+        )
 
     async def update_spot_with_assume_is_spearfishing_spot(self):
         if angler_spot_name_corrections.get(self.spot_angler_name):
