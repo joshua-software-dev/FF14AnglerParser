@@ -69,64 +69,84 @@ class LimitedCollectionResource(CollectionResource):
         req.context['result']['meta']['offset'] = req.context['result']['meta'].get('offset') or 0
 
 
+def _filter_search_by_language(req: Request, resp: Response, query: Query, *args, **kwargs):
+    req._language_setting = kwargs['language']
+    return query
+
+
 # noinspection PyUnusedLocal
 def _lookup_bait_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
-    return query.filter(
-        (
-            alchemyMapping.Bait.bait_item_name_en.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Bait.bait_angler_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Bait.bait_item_name_de.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Bait.bait_item_name_fr.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Bait.bait_item_name_ja.like('%{}%'.format(kwargs['name']))
-        )
-    )
+    language_setting = getattr(req, '_language_setting')
+    if language_setting == 'de':
+        return query.filter(alchemyMapping.Bait.bait_item_name_de.like('%{}%'.format(kwargs['name'])))
+    elif language_setting == 'fr':
+        return query.filter(alchemyMapping.Bait.bait_item_name_fr.like('%{}%'.format(kwargs['name'])))
+    elif language_setting == 'ja':
+        return query.filter(alchemyMapping.Bait.bait_item_name_ja.like('%{}%'.format(kwargs['name'])))
+
+    return query.filter(alchemyMapping.Bait.bait_item_name_en.like('%{}%'.format(kwargs['name'])))
 
 
 class BaitCollectionResource(LimitedCollectionResource):
-    lookup_attr_map = {'name': _lookup_bait_by_name}
+    lookup_attr_map = {'language': _filter_search_by_language, 'name': _lookup_bait_by_name}
     methods = ['GET']
     model = alchemyMapping.Bait
 
 
 # noinspection PyUnusedLocal
 def _lookup_fish_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
-    return query.filter(
-        (
-            alchemyMapping.Fish.fish_item_name_en.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Fish.fish_angler_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Fish.fish_item_name_de.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Fish.fish_item_name_fr.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Fish.fish_item_name_ja.like('%{}%'.format(kwargs['name']))
-        )
-    )
+    language_setting = getattr(req, '_language_setting')
+    if language_setting == 'de':
+        return query.filter(alchemyMapping.Fish.fish_item_name_de.like('%{}%'.format(kwargs['name'])))
+    elif language_setting == 'fr':
+        return query.filter(alchemyMapping.Fish.fish_item_name_fr.like('%{}%'.format(kwargs['name'])))
+    elif language_setting == 'ja':
+        return query.filter(alchemyMapping.Fish.fish_item_name_ja.like('%{}%'.format(kwargs['name'])))
+
+    return query.filter(alchemyMapping.Fish.fish_item_name_en.like('%{}%'.format(kwargs['name'])))
 
 
 class FishCollectionResource(LimitedCollectionResource):
-    lookup_attr_map = {'name': _lookup_fish_by_name}
+    lookup_attr_map = {'language': _filter_search_by_language, 'name': _lookup_fish_by_name}
     methods = ['GET']
     model = alchemyMapping.Fish
 
 
 # noinspection PyUnusedLocal
 def _lookup_spot_by_name(req: Request, resp: Response, query: Query, *args, **kwargs):
+    language_setting = getattr(req, '_language_setting')
+    if language_setting == 'de':
+        return query.filter(
+            (
+                alchemyMapping.Spot.spot_place_name_de.like('%{}%'.format(kwargs['name'])) |
+                alchemyMapping.Spot.spot_zone_name_de.like('%{}%'.format(kwargs['name']))
+            )
+        )
+    elif language_setting == 'fr':
+        return query.filter(
+            (
+                alchemyMapping.Spot.spot_place_name_fr.like('%{}%'.format(kwargs['name'])) |
+                alchemyMapping.Spot.spot_zone_name_fr.like('%{}%'.format(kwargs['name']))
+            )
+        )
+    elif language_setting == 'ja':
+        return query.filter(
+            (
+                alchemyMapping.Spot.spot_place_name_ja.like('%{}%'.format(kwargs['name'])) |
+                alchemyMapping.Spot.spot_zone_name_ja.like('%{}%'.format(kwargs['name']))
+            )
+        )
+
     return query.filter(
         (
             alchemyMapping.Spot.spot_place_name_en.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_angler_place_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_place_name_de.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_place_name_fr.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_place_name_ja.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_zone_name_en.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_angler_zone_name.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_zone_name_de.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_zone_name_fr.like('%{}%'.format(kwargs['name'])) |
-            alchemyMapping.Spot.spot_zone_name_ja.like('%{}%'.format(kwargs['name']))
+            alchemyMapping.Spot.spot_zone_name_en.like('%{}%'.format(kwargs['name']))
         )
     )
 
 
 class SpotCollectionResource(LimitedCollectionResource):
-    lookup_attr_map = {'name': _lookup_spot_by_name}
+    lookup_attr_map = {'language': _filter_search_by_language, 'name': _lookup_spot_by_name}
     methods = ['GET']
     model = alchemyMapping.Spot
 
