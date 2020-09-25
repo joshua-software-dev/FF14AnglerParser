@@ -118,7 +118,7 @@ class XivapiWrapper:
             return result
 
         query = {
-            "columns": "ID,Name_en,Name_ja,Icon",
+            "columns": "Icon,ID,Name_de,Name_en,Name_fr,Name_ja",
             "indexes": "item",
             "body": {
                 "query": {

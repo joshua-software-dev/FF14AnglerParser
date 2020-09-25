@@ -2,7 +2,10 @@
 CREATE TABLE IF NOT EXISTS `fish_desynthesis_item` (
 	`fish_angler_fish_id` BIGINT NOT NULL,
 	`desynthesis_item_id` BIGINT NOT NULL,
-	`desynthesis_item_name` VARCHAR(4096) NOT NULL,
+	`desynthesis_item_name_de` VARCHAR(4096) NOT NULL,
+	`desynthesis_item_name_en` VARCHAR(4096) NOT NULL,
+	`desynthesis_item_name_fr` VARCHAR(4096) NOT NULL,
+	`desynthesis_item_name_ja` VARCHAR(4096) NOT NULL,
 	`desynthesis_icon_url` VARCHAR(2083) NOT NULL,
 	`desynthesis_large_icon_url` VARCHAR(2083) NULL,
 	`desynthesis_angler_item_name` VARCHAR(4096) NOT NULL,

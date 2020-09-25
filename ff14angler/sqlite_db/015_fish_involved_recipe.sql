@@ -2,7 +2,10 @@
 CREATE TABLE IF NOT EXISTS `fish_involved_recipe` (
 	`fish_angler_fish_id` BIGINT NOT NULL,
 	`recipe_item_id` BIGINT NOT NULL,
-	`recipe_item_name` VARCHAR(4096) NOT NULL,
+	`recipe_item_name_de` VARCHAR(4096) NOT NULL,
+	`recipe_item_name_en` VARCHAR(4096) NOT NULL,
+	`recipe_item_name_fr` VARCHAR(4096) NOT NULL,
+	`recipe_item_name_ja` VARCHAR(4096) NOT NULL,
 	`recipe_angler_name` VARCHAR(4096) NOT NULL,
 	`recipe_icon_url` VARCHAR(2083) NOT NULL,
 	`recipe_large_icon_url` VARCHAR(2083) NULL,

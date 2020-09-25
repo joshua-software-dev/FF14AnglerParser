@@ -299,11 +299,14 @@ class SQLiteExport:
         for fish in scraping_data.fish.values():
             for item in fish.fish_angler_desynthesis_items:
                 cursor.execute(
-                    'INSERT INTO `fish_desynthesis_item` VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+                    'INSERT INTO `fish_desynthesis_item` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
                     (
                         fish.fish_id.fish_angler_fish_id,
                         item.desynthesis_item_id,
-                        item.desynthesis_item_name,
+                        item.desynthesis_item_name_de,
+                        item.desynthesis_item_name_en,
+                        item.desynthesis_item_name_fr,
+                        item.desynthesis_item_name_ja,
                         item.desynthesis_icon_url,
                         item.desynthesis_large_icon_url,
                         item.desynthesis_angler_item_name,
@@ -317,11 +320,14 @@ class SQLiteExport:
         for fish in scraping_data.fish.values():
             for leve in fish.fish_angler_involved_leves:
                 cursor.execute(
-                    'INSERT INTO `fish_involved_leve` VALUES (?, ?, ?, ?, ?, ?, ?);',
+                    'INSERT INTO `fish_involved_leve` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
                     (
                         fish.fish_id.fish_angler_fish_id,
                         leve.leve_id,
-                        leve.leve_name,
+                        leve.leve_name_de,
+                        leve.leve_name_en,
+                        leve.leve_name_fr,
+                        leve.leve_name_ja,
                         leve.leve_angler_name,
                         leve.leve_angler_name_jp,
                         leve.leve_level,
@@ -334,11 +340,14 @@ class SQLiteExport:
         for fish in scraping_data.fish.values():
             for recipe in fish.fish_angler_involved_recipes:
                 cursor.execute(
-                    'INSERT INTO `fish_involved_recipe` VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+                    'INSERT INTO `fish_involved_recipe` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
                     (
                         fish.fish_id.fish_angler_fish_id,
                         recipe.recipe_item_id,
-                        recipe.recipe_name,
+                        recipe.recipe_item_name_de,
+                        recipe.recipe_item_name_en,
+                        recipe.recipe_item_name_fr,
+                        recipe.recipe_item_name_ja,
                         recipe.recipe_angler_name,
                         recipe.recipe_icon_url,
                         recipe.recipe_large_icon_url,

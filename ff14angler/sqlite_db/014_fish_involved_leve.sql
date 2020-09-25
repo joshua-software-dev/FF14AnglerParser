@@ -2,7 +2,10 @@
 CREATE TABLE IF NOT EXISTS `fish_involved_leve` (
 	`fish_angler_fish_id` BIGINT NOT NULL,
 	`leve_id` BIGINT NOT NULL,
-	`leve_name` VARCHAR(4096) NOT NULL,
+	`leve_name_de` VARCHAR(4096) NOT NULL,
+	`leve_name_en` VARCHAR(4096) NOT NULL,
+	`leve_name_fr` VARCHAR(4096) NOT NULL,
+	`leve_name_ja` VARCHAR(4096) NOT NULL,
 	`leve_angler_name` VARCHAR(4096) NOT NULL,
 	`leve_angler_name_jp` VARCHAR(4096) NOT NULL,
 	`leve_level` SMALLINT NOT NULL,

@@ -17,7 +17,10 @@ class FishLeve(DataClassJsonMixin):
     leve_angler_name: str
     leve_angler_name_jp: str
     leve_angler_turn_in_count: int
-    leve_name: str
+    leve_name_de: str
+    leve_name_en: str
+    leve_name_fr: str
+    leve_name_ja: str
     leve_id: int
     leve_item_id: int
     leve_item_name: str
@@ -49,7 +52,10 @@ class FishLeve(DataClassJsonMixin):
                     leve_angler_name=angler_leve_name,
                     leve_angler_name_jp=angler_leve_name_jp,
                     leve_angler_turn_in_count=int(non_number_replacement_regex.sub(repl='', string=td4.text)),
-                    leve_name=lookup_response['Name_en'],
+                    leve_name_de=lookup_response['Name_de'],
+                    leve_name_en=lookup_response['Name_en'],
+                    leve_name_fr=lookup_response['Name_fr'],
+                    leve_name_ja=lookup_response['Name_ja'],
                     leve_id=lookup_response['ID'],
                     leve_item_id=lookup_response['CraftLeve']['Item0']['ID'],
                     leve_item_name=lookup_response['CraftLeve']['Item0']['Name_en'],

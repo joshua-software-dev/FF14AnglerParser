@@ -16,7 +16,10 @@ class FishRecipe(DataClassJsonMixin):
     recipe_angler_name: str
     recipe_icon_url: str
     recipe_item_id: int
-    recipe_name: str
+    recipe_item_name_de: str
+    recipe_item_name_en: str
+    recipe_item_name_fr: str
+    recipe_item_name_ja: str
     recipe_large_icon_url: Optional[str] = None
 
     @staticmethod
@@ -50,5 +53,8 @@ class FishRecipe(DataClassJsonMixin):
             recipe_angler_name=angler_item_name,
             recipe_icon_url=response['Icon'],
             recipe_item_id=response['ID'],
-            recipe_name=response['Name_en']
+            recipe_item_name_de=response['Name_de'],
+            recipe_item_name_en=response['Name_en'],
+            recipe_item_name_fr=response['Name_fr'],
+            recipe_item_name_ja=response['Name_ja'],
         )

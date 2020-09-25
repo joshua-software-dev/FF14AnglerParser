@@ -18,7 +18,10 @@ class FishDesynthesisChance(DataClassJsonMixin):
     desynthesis_angler_percentage: str
     desynthesis_icon_url: str
     desynthesis_item_id: int
-    desynthesis_item_name: str
+    desynthesis_item_name_de: str
+    desynthesis_item_name_en: str
+    desynthesis_item_name_fr: str
+    desynthesis_item_name_ja: str
     desynthesis_large_icon_url: Optional[str] = None
 
     @staticmethod
@@ -51,5 +54,8 @@ class FishDesynthesisChance(DataClassJsonMixin):
             desynthesis_angler_percentage=td1.text.strip(),
             desynthesis_icon_url=response['Icon'],
             desynthesis_item_id=response['ID'],
-            desynthesis_item_name=response['Name_en']
+            desynthesis_item_name_de=response['Name_de'],
+            desynthesis_item_name_en=response['Name_en'],
+            desynthesis_item_name_fr=response['Name_fr'],
+            desynthesis_item_name_ja=response['Name_ja']
         )
