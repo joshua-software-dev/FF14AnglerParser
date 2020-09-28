@@ -247,16 +247,16 @@ def _lookup_fish_bait_preference_by_bait_item_id(req: Request, resp: Response, q
 
 # noinspection PyUnusedLocal
 def _lookup_fish_bait_preference_by_fish_item_id(req: Request, resp: Response, query: Query, *args, **kwargs):
-    query.join(
+    return query.join(
         alchemyMapping.Fish,
         alchemyMapping.FishBaitPreference.fish_angler_fish_id == alchemyMapping.Fish.fish_angler_fish_id
-    ).filter(alchemyMapping.Fish.fish_angler_fish_id == kwargs['fish_xivapi_item_id'])
+    ).filter(alchemyMapping.Fish.fish_xivapi_item_id == kwargs['fish_xivapi_item_id'])
 
 
 class FishBaitPreferenceCollectionResource(LimitedCollectionResource):
     lookup_attr_map = {
-        'bait_xivapi_item_id': _lookup_fish_bait_preference_by_fish_item_id,
-        'fish_angler_fish_id': _lookup_fish_bait_preference_by_bait_item_id
+        'bait_xivapi_item_id': _lookup_fish_bait_preference_by_bait_item_id,
+        'fish_xivapi_item_id': _lookup_fish_bait_preference_by_fish_item_id
     }
     methods = ['GET']
     model = alchemyMapping.FishBaitPreference
