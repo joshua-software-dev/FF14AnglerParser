@@ -201,7 +201,7 @@ class FishBaitPreference(Base):
 
 
 # noinspection SpellCheckingInspection
-class FishCaughtCount(Fish):
+class FishCaughtCount(Base):
     __tablename__ = 'fish_caught_count'
 
     fish_angler_fish_id = Column(ForeignKey('fish.fish_angler_fish_id'), primary_key=True)
