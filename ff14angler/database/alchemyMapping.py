@@ -347,3 +347,6 @@ class LastUpdated(Base):
     __tablename__ = 'last_updated'
 
     last_updated_timestamp = Column(DateTime, primary_key=True, nullable=False)
+    bait_count = Column(BigInteger, nullable=False)
+    fish_count = Column(BigInteger, nullable=False)
+    spot_count = Column(BigInteger, nullable=False)

@@ -425,11 +425,14 @@ class SQLiteExport:
                 )
 
     @staticmethod
-    def input_timestamp_into_last_updated_table(cursor: sqlite3.Cursor):
+    def input_timestamp_into_last_updated_table(cursor: sqlite3.Cursor, scraping_data: ScrapingData):
         cursor.execute(
-            'INSERT INTO last_updated VALUES (?);',
+            'INSERT INTO last_updated VALUES (?, ?, ?, ?);',
             (
                 datetime.utcnow().replace(microsecond=0, tzinfo=timezone.utc),
+                len(scraping_data.bait),
+                len(scraping_data.fish),
+                len(scraping_data.spot),
             )
         )
 
@@ -460,7 +463,7 @@ class SQLiteExport:
                 cls.export_spot_bait_fish_catch_info_table(cursor, scraping_data)
                 cls.export_spot_bait_total_fish_caught_table(cursor, scraping_data)
                 cls.export_spot_effective_bait_table(cursor, scraping_data)
-                cls.input_timestamp_into_last_updated_table(cursor)
+                cls.input_timestamp_into_last_updated_table(cursor, scraping_data)
                 conn.commit()
             finally:
                 cursor.close()
