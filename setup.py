@@ -14,6 +14,7 @@ requirements = [
     'falcon<2.0.0,>=1.0.0',
     'falcon-autocrud',
     'falcon-ratelimit',
+    'falcon_sslify',
     'gunicorn',
     'lxml',
     'selenium',
