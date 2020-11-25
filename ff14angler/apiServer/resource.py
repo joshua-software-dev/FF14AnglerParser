@@ -60,7 +60,7 @@ class LimitedCollectionResource(CollectionResource):
             req.params['__limit'] = limit
         if limit > 1000:
             req.params['__limit'] = 1000
-        return query.limit(limit)
+        return query
 
     # noinspection PyUnusedLocal
     @staticmethod
