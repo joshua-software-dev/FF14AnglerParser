@@ -38,9 +38,10 @@ class DataResource:
     @staticmethod
     def on_get(req: falcon.Request, resp: falcon.Response):
         resp.content_type = 'application/vnd.sqlite3'
-        resp.stream = open(SQLITE_DATABASE, 'rb')
         resp.content_length = os.path.getsize(SQLITE_DATABASE)
         resp.downloadable_as = os.path.basename(SQLITE_DATABASE)
+        with open(SQLITE_DATABASE, 'rb') as file_handler:
+            resp.stream = file_handler.read()
 
 
 class LimitedCollectionResource(CollectionResource):
