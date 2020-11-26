@@ -40,10 +40,10 @@ class BaitScraper:
             )
 
     @staticmethod
-    async def update_all_bait_mooch_fish_with_large_icon_url():
+    async def ensure_all_bait_mooch_fish_up_to_date():
         for bait_id, bait in BaitProvider.bait_holder.items():
             if bait.bait_angler_is_mooch_fish:
-                await bait.update_bait_mooch_fish_with_large_icon()
+                await bait.update_bait_with_assume_is_mooch_fish(False)
 
     @classmethod
     async def collect_bait_data(cls, driver: WebDriver):

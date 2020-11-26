@@ -147,7 +147,8 @@ class Bait(DataClassJsonMixin):
     async def update_bait_with_comment_section(self, comment_section: CommentSection):
         self.bait_angler_comments = comment_section
 
-    async def update_bait_with_assume_is_mooch_fish(self):
+    async def update_bait_with_assume_is_mooch_fish(self, update_with_xivapi: bool = True):
+        """Bait and Fish share an id pool on angler... for some awful reason."""
         # Avoiding circular imports
         from ff14angler.dataClasses.fish.fishProvider import FishProvider
 
@@ -162,11 +163,5 @@ class Bait(DataClassJsonMixin):
         self.bait_large_icon_url = fish.fish_large_icon_url
         self.bait_angler_lodestone_url = fish.fish_angler_lodestone_url
 
-        await self.update_bait_with_xivapi()
-
-    async def update_bait_mooch_fish_with_large_icon(self):
-        """Bait and Fish share an id pool on angler... for some awful reason."""
-        # Avoiding circular imports
-        from ff14angler.dataClasses.fish.fishProvider import FishProvider
-
-        self.bait_large_icon_url = FishProvider.fish_holder[self.bait_id.bait_angler_bait_id].fish_large_icon_url
+        if update_with_xivapi:
+            await self.update_bait_with_xivapi()
