@@ -22,7 +22,7 @@ def main():
 
     try:
         print('Starting Chrome...')
-        with ChromeWrapper() as driver:
+        with ChromeWrapper(headless=True) as driver:
             print('Beginning scraping...')
             loop = asyncio.get_event_loop()
             loop.run_until_complete(Scraper.main(driver))
