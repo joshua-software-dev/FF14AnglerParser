@@ -39,6 +39,12 @@ class BaitScraper:
                 lodestone_url=bait.bait_angler_lodestone_url
             )
 
+    @staticmethod
+    async def update_all_bait_mooch_fish_with_large_icon_url():
+        for bait_id, bait in BaitProvider.bait_holder.items():
+            if bait.bait_angler_is_mooch_fish:
+                await bait.update_bait_mooch_fish_with_large_icon()
+
     @classmethod
     async def collect_bait_data(cls, driver: WebDriver):
         bait_url_template = urllib.parse.urljoin(ANGLER_BASE_URL, '/bait/')

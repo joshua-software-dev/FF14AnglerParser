@@ -21,6 +21,7 @@ class Scraper:
 
         await BaitScraper.collect_bait_data(driver)
         await FishScraper.collect_fish_data(driver)
+        await BaitScraper.update_all_bait_mooch_fish_with_large_icon_url()
         await SpotScraper.collect_spot_data(driver)
 
         print('Writing JSON dump form scraping results...')

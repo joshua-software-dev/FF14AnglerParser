@@ -153,16 +153,20 @@ class Bait(DataClassJsonMixin):
 
         self.bait_angler_is_mooch_fish = True
 
-        success: bool = False
-        for fish_id, fish in FishProvider.fish_holder.items():
-            if fish.fish_angler_name == self.bait_angler_name:
-                self.bait_angler_comments = await self.update_bait_with_comment_section(fish.fish_angler_comments)
-                self.bait_large_icon_url = fish.fish_large_icon_url
-                self.bait_angler_lodestone_url = fish.fish_angler_lodestone_url
-                success = True
-                break
-
-        if not success:
+        try:
+            fish = FishProvider.fish_holder[self.bait_id.bait_angler_bait_id]
+        except KeyError:
             raise ValueError(f'Could not find fish with name: {self.bait_angler_name}')
 
+        self.bait_angler_comments = await self.update_bait_with_comment_section(fish.fish_angler_comments)
+        self.bait_large_icon_url = fish.fish_large_icon_url
+        self.bait_angler_lodestone_url = fish.fish_angler_lodestone_url
+
         await self.update_bait_with_xivapi()
+
+    async def update_bait_mooch_fish_with_large_icon(self):
+        """Bait and Fish share an id pool on angler... for some awful reason."""
+        # Avoiding circular imports
+        from ff14angler.dataClasses.fish.fishProvider import FishProvider
+
+        self.bait_large_icon_url = FishProvider.fish_holder[self.bait_id.bait_angler_bait_id].fish_large_icon_url
