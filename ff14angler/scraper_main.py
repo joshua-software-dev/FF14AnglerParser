@@ -4,7 +4,7 @@ import argparse
 import asyncio
 import os
 
-from ff14angler.constants import values
+from ff14angler.constants.values import config_settings
 from ff14angler.dataClasses.cache.xivapiCache import XivapiCache
 from ff14angler.scraper.scraper import Scraper
 from ff14angler.network.chromeWrapper import ChromeWrapper
@@ -21,9 +21,11 @@ def main():
         default=None,
         help='Directory to place API cache, and game icon images.'
     )
-    values.EXPORT_DIRECTORY = arg_parser.parse_args().export_directory or values.EXPORT_DIRECTORY
+    config_settings['EXPORT_DIRECTORY'] = (
+        arg_parser.parse_args().export_directory or config_settings['EXPORT_DIRECTORY']
+    )
 
-    cache_path = os.path.join(values.EXPORT_DIRECTORY, 'xivapi_cache.json')
+    cache_path = os.path.join(config_settings['EXPORT_DIRECTORY'], 'xivapi_cache.json')
 
     try:
         with open(cache_path) as fh:

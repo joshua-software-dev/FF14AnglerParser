@@ -6,7 +6,7 @@ import os
 from typing import List, Set
 from urllib.parse import urljoin, quote as url_quote
 
-from ff14angler.constants.values import EXPORT_DIRECTORY, XIVAPI_BASE_URL
+from ff14angler.constants.values import config_settings, XIVAPI_BASE_URL
 from ff14angler.dataClasses.cache.xivapiCache import XivapiCache
 from ff14angler.dataClasses.cache.idIndexCache import GatheringPointBaseSpearfishingIds
 from ff14angler.network.aiohttpWrapper import AiohttpWrapper
@@ -18,7 +18,7 @@ class XivapiWrapper:
 
     @classmethod
     async def xivapi_download_icon_image(cls, icon_fragment: str):
-        output_path: str = os.path.join(EXPORT_DIRECTORY, icon_fragment.lstrip('/'))
+        output_path: str = os.path.join(config_settings['EXPORT_DIRECTORY'], icon_fragment.lstrip('/'))
         if not os.path.isfile(output_path):
             img_bytes: bytes = await cls.connection.get_bytes_at_url(
                 urljoin(

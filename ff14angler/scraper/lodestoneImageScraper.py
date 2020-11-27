@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions  # type: ignore
 from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
 
 from ff14angler.constants.javascript import fetch_large_url_data_from_lodestone_page
-from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION, EXPORT_DIRECTORY
+from ff14angler.constants.values import ANGLER_PAGE_LOAD_WAIT_DURATION, config_settings
 
 
 class LodestoneImageScraper:
@@ -40,7 +40,7 @@ class LodestoneImageScraper:
 
         # i/006000/010110l.png -> (EXPORT_DIR)/i/006000/010110l.png
         large_icon_path: str = os.path.join(
-            EXPORT_DIRECTORY,
+            config_settings['EXPORT_DIRECTORY'],
             # /i/006000/010110l.png -> i/006000/010110l.png
             large_icon_url.lstrip('/')
         )
