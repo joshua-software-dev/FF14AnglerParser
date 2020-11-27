@@ -9,6 +9,7 @@ with open('README.rst') as readme_file:
 # noinspection SpellCheckingInspection
 requirements = [
     'aiohttp',
+    'asyncio-throttle',
     'beautifulsoup4',
     'dataclasses_json',
     'falcon<2.0.0,>=1.0.0',
