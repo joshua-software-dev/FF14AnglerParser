@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 
+import argparse
 import asyncio
 import os
 
-from ff14angler.constants.values import EXPORT_DIRECTORY
+from ff14angler.constants import values
 from ff14angler.dataClasses.cache.xivapiCache import XivapiCache
 from ff14angler.scraper.scraper import Scraper
 from ff14angler.network.chromeWrapper import ChromeWrapper
@@ -11,7 +12,18 @@ from ff14angler.network.xivapiWrapper import XivapiWrapper
 
 
 def main():
-    cache_path = os.path.join(EXPORT_DIRECTORY, 'xivapi_cache.json')
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        '-e',
+        '--export-directory',
+        action='store',
+        dest='export_directory',
+        default=None,
+        help='Directory to place API cache, and game icon images.'
+    )
+    values.EXPORT_DIRECTORY = arg_parser.parse_args().export_directory or values.EXPORT_DIRECTORY
+
+    cache_path = os.path.join(values.EXPORT_DIRECTORY, 'xivapi_cache.json')
 
     try:
         with open(cache_path) as fh:
@@ -22,7 +34,7 @@ def main():
 
     try:
         print('Starting Chrome...')
-        with ChromeWrapper(headless=True) as driver:
+        with ChromeWrapper() as driver:
             print('Beginning scraping...')
             loop = asyncio.get_event_loop()
             loop.run_until_complete(Scraper.main(driver))
