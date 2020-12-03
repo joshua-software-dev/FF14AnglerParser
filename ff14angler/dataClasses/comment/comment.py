@@ -66,11 +66,25 @@ class Comment(DataClassJsonMixin):
         for tag in soup.find_all('span', {'class': 'comment_translate'}):  # type: Tag
             tag.decompose()
 
+        # Remove iframe and script tags just in case
+        for tag in soup.find_all('iframe'):  # type: Tag
+            tag.decompose()
+
+        for tag in soup.find_all('script'):  # type: Tag
+            tag.decompose()
+
         return soup.text.strip()
 
     @staticmethod
     async def _parse_text_translated(soup: Tag) -> str:
         for tag in soup.find_all('span', {'class': 'comment_origin'}):  # type: Tag
+            tag.decompose()
+
+        # Remove iframe and script tags just in case
+        for tag in soup.find_all('iframe'):  # type: Tag
+            tag.decompose()
+
+        for tag in soup.find_all('script'):  # type: Tag
             tag.decompose()
 
         return soup.text.strip()
