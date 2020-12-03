@@ -66,13 +66,6 @@ class Comment(DataClassJsonMixin):
         for tag in soup.find_all('span', {'class': 'comment_translate'}):  # type: Tag
             tag.decompose()
 
-        # Remove iframe and script tags just in case
-        for tag in soup.find_all('iframe'):  # type: Tag
-            tag.decompose()
-
-        for tag in soup.find_all('script'):  # type: Tag
-            tag.decompose()
-
         return soup.text.strip()
 
     @staticmethod
@@ -80,25 +73,28 @@ class Comment(DataClassJsonMixin):
         for tag in soup.find_all('span', {'class': 'comment_origin'}):  # type: Tag
             tag.decompose()
 
-        # Remove iframe and script tags just in case
-        for tag in soup.find_all('iframe'):  # type: Tag
-            tag.decompose()
-
-        for tag in soup.find_all('script'):  # type: Tag
-            tag.decompose()
-
         return soup.text.strip()
 
     @classmethod
     async def get_comment_from_angler_comment_json(cls, comment_json: Dict[str, Any]):
-        comment_soup = BeautifulSoup(f'<html><div>{comment_json["comment"]}</div></html>', lxml.__name__)
+        comment_soup = BeautifulSoup(
+            f'<html><div class="angler_parser">{comment_json["comment"]}</div></html>',
+            lxml.__name__
+        )
+
+        # Remove iframe and script tags just in case
+        for tag in comment_soup.find_all('iframe'):  # type: Tag
+            tag.decompose()
+
+        for tag in comment_soup.find_all('script'):  # type: Tag
+            tag.decompose()
 
         return cls(
             comment_author=BeautifulSoup(
                 f'<html><div class="escape_name">{comment_json["nickname"]}</div></html>',
                 lxml.__name__
             ).find('div', {'class': 'escape_name'}).text.strip(),
-            comment_html=comment_json['comment'],
+            comment_html=comment_soup.find('div', {'class': 'angler_parser'}).decode_contents(),
             comment_text_original=await cls._parse_text_original(copy.copy(comment_soup)),
             comment_text_translated=await cls._parse_text_translated(comment_soup),
             comment_timestamp=datetime.strptime(comment_json['date'], '%Y-%m-%d %H:%M:%S')
